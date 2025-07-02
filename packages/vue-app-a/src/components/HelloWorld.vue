@@ -2,7 +2,7 @@
   <div class="hello">
     <h1>{{ msg }}</h1>
     <p>
-      这是一个简单的 Vue 3 + TypeScript + Vite 项目
+      这是一个简单的 Vue 3 + TypeScript + Vite + Vant 项目
     </p>
     <p>
       <button @click="count++" type="button">
@@ -24,12 +24,24 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { showToast, showDialog } from 'vant'
 
 defineProps<{
   msg: string
 }>()
 
 const count = ref(0)
+
+const showToast2 = () => {
+  showToast('这是一个提示消息')
+}
+
+const showDialog2 = () => {
+  showDialog({
+    title: '提示',
+    message: '这是一个对话框示例',
+  })
+}
 </script>
 
 <style scoped>

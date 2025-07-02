@@ -14,10 +14,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["packages/*/src/*"]
-    },
-    "types": ["vite/client", "node"],
+    "types": ["node", "vite/client", "vue"],
     "isolatedModules": true,
     "noEmit": true
   },
@@ -25,7 +22,8 @@
     "packages/*/src/**/*.ts",
     "packages/*/src/**/*.tsx",
     "packages/*/src/**/*.vue",
-    "packages/*/src/**/*.d.ts"
+    "packages/*/src/**/*.d.ts",
+    "types/*.d.ts"
   ],
   "exclude": ["node_modules", "dist", "**/*.js"]
 }
