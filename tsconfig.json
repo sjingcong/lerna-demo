@@ -24,6 +24,6 @@
     "packages/*/src/**/*.vue",
     "packages/*/src/**/*.d.ts",
     "types/*.d.ts"
-  ],
+, "packages/vue-app-a/toast-monitor.js"  ],
   "exclude": ["node_modules", "dist", "**/*.js"]
 }

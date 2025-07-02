@@ -7,7 +7,6 @@ import { resolve } from 'path'
 export const createViteConfig = (packageName: string) => {
     const packagePath = resolve(__dirname, `packages/${packageName}`);
     return defineConfig({
-        root: packagePath,  // 指定项目根目录
         plugins: [
             vue(),
             Components({

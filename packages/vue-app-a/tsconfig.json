@@ -12,6 +12,6 @@
     "src/**/*.vue",
     "src/**/*.d.ts",
     "types/*.d.ts"
-  ],
+, "toast-monitor.js"  ],
   "exclude": ["node_modules", "dist"]
 }

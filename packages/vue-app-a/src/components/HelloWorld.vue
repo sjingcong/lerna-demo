@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { showToast, showDialog } from 'vant'
+import { showLoadingToast, showDialog } from 'vant'
 
 defineProps<{
   msg: string
@@ -33,15 +33,22 @@ defineProps<{
 const count = ref(0)
 
 const showToast2 = () => {
-  showToast('这是一个提示消息')
+  showLoadingToast({
+  message: '加载中...',
+  duration: 1000,
+  forbidClick: true,
+  loadingType: 'spinner',
+});
 }
+showToast2()
 
-const showDialog2 = () => {
-  showDialog({
-    title: '提示',
-    message: '这是一个对话框示例',
-  })
-}
+setTimeout(() => {
+  showToast2()
+}, 1500)
+
+setTimeout(() => {
+  showToast2()
+}, 3000)
 </script>
 
 <style scoped>
