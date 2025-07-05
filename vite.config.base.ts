@@ -32,7 +32,7 @@ export const createViteConfig = (packageName: string) => {
                 }
             }),
             legacy({
-                targets: ['> 0.5%', 'Chrome < 64'],
+                targets: ['> 0.5%', 'Chrome < 64', 'not dead', 'ie >= 11'],
                 additionalLegacyPolyfills: ['regenerator-runtime/runtime'],
                 modernPolyfills: true,
                 renderLegacyChunks: true,
@@ -67,22 +67,23 @@ export const createViteConfig = (packageName: string) => {
                         const info = name.split('.')
                         const extType = info?.[info.length - 1]
                         if (/\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/i.test(name)) {
-                          return 'media/[name]-[hash].[ext]'
+                            return 'media/[name]-[hash].[ext]'
                         }
                         if (/\.(png|jpe?g|gif|svg|webp|avif)(\?.*)?$/i.test(name)) {
-                          return 'assets/images/[name]-[hash].[ext]'
+                            return 'assets/images/[name]-[hash].[ext]'
                         }
                         if (extType === 'css') {
-                          return 'css/[name]-[hash].[ext]'
+                            return 'css/[name]-[hash].[ext]'
                         }
                         return 'assets/[name]-[hash].[ext]'
                     },
                     // 手动分割代码块
                     manualChunks: (id) => {
                         console.log('Processing module:', id) // 调试用，可以看到处理的模块
-                        
+
                         // 只处理 node_modules 中的第三方库
                         if (id.includes('node_modules')) {
+
                             // Vue 生态系统
                             if (id.includes('vue') || id.includes('vue-router') || id.includes('pinia')) {
                                 return 'vue-vendor'
@@ -91,19 +92,10 @@ export const createViteConfig = (packageName: string) => {
                             if (id.includes('lodash') || id.includes('dayjs') || id.includes('axios')) {
                                 return 'utils-vendor'
                             }
-                            
+
                             // 其他第三方库统一放到 vendor
                             return 'vendor'
                         }
-                        
-                        // 对于项目自己的代码，不进行分割（返回 undefined）
-                        // 或者可以根据路径进行分割
-                        // if (id.includes('/src/components/')) {
-                        //     return 'components'
-                        // }
-                        // if (id.includes('/src/utils/')) {
-                        //     return 'utils'
-                        // }
                     }
                 }
             },

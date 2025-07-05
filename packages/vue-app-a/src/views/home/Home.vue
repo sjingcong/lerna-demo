@@ -45,7 +45,32 @@ defineProps<{
 // 使用store
 const counterStore = useCounterStore()
 const newName = ref('')
+const fetchUserData = async (): Promise<any> => {
+  try {
+    // 模拟API调用
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    const mockUsers: any[] = [
+      { id: 1, name: 'Alice', email: 'alice@example.com', roles: ['user', 'admin'] },
+      { id: 2, name: 'Bob', roles: ['user'] },
+      { id: 3, name: 'Charlie', email: 'charlie@example.com', roles: ['user', 'moderator'] }
+    ]
+    
+    return {
+      data: mockUsers,
+      status: 'success',
+      message: 'Data fetched successfully'
+    }
+  } catch (error) {
+    return {
+      data: [],
+      status: 'error',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    }
+  }
+}
 
+fetchUserData()
 function updateStoreName() {
   if (newName.value.trim()) {
     counterStore.updateName(newName.value)
