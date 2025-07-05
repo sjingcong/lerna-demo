@@ -30,7 +30,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useCounterStore } from '@/stores/counter'
-
+import { usePreload } from '@/composables/usePreload'
+usePreload([
+  {
+    name: 'About页面',
+    importer: () => import('@/views/about/About.vue'),
+    delay: 1000
+  }
+])
 defineProps<{
   msg?: string
 }>()
