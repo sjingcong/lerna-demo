@@ -1,0 +1,2 @@
+import{d as s,c as n,a as e,b as r,w as a,e as _,r as i,o as p}from"./vendor-B5hwoWe_.js";import{_ as u}from"./index-fcX9F2Hy.js";const l={class:"about"},d={class:"navigation"},c=s({__name:"About",setup(m){return(f,t)=>{const o=i("router-link");return p(),n("div",l,[t[1]||(t[1]=e("h1",null,"关于页面",-1)),t[2]||(t[2]=e("p",null,"这是一个使用Vue 3 + TypeScript + Vite + Vue Router的示例应用。",-1)),e("div",d,[r(o,{to:"/"},{default:a(()=>t[0]||(t[0]=[_("返回首页")])),_:1,__:[0]})])])}}}),x=u(c,[["__scopeId","data-v-c6852063"]]);export{x as default};
+//# sourceMappingURL=About-BDtsznFa.js.map

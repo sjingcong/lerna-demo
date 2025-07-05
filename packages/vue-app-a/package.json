@@ -5,9 +5,13 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
+    "build-only": "vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext .vue,.ts,.tsx,.js,.jsx",
     "lint:fix": "eslint src --ext .vue,.ts,.tsx,.js,.jsx --fix",
     "type-check": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "vue-router": "^4.5.1"
   }
 }
