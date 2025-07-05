@@ -47,20 +47,30 @@ export const createViteConfig = (packageName: string) => {
                     entryFileNames: 'js/[name]-[hash].js',
                     chunkFileNames: 'js/[name]-[hash].js',
                     assetFileNames: (assetInfo) => {
-                        // 根据文件类型分配到不同文件夹
-                        if (assetInfo.name?.endsWith('.css')) {
-                            return 'css/[name]-[hash][extname]';
+                        const name = assetInfo.name || ''
+                        const info = name.split('.')
+                        const extType = info?.[info.length - 1]
+                        if (/\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/i.test(name)) {
+                          return 'media/[name]-[hash][extType]'
                         }
-                        // 其他资源文件（图片、字体等）
-                        return 'assets/[name]-[hash][extname]';
+                        if (/\.(png|jpe?g|gif|svg|webp|avif)(\?.*)?$/i.test(name)) {
+                          return 'assets/images/[name]-[hash][extType]'
+                        }
+                        if (extType === 'css') {
+                          return 'css/[name]-[hash][extType]'
+                        }
+                        return 'assets/[name]-[hash][extType]'
                     },
                     // 手动分割代码块
                     manualChunks: {
                         // 将Vue相关的核心库打包成vendor
-                        vendor: ['vue', 'vue-router', 'pinia'],
+                        'vue-vendor': ['vue', 'vue-router', 'pinia'],
+                        'utils-vendor': ['lodash', 'dayjs', 'axios']
                     }
                 }
-            }
+            },
+            // 设置 chunk 大小警告阈值
+            chunkSizeWarningLimit: 1000
         },
         css: {
             postcss: {
