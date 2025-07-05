@@ -12,6 +12,6 @@
     "src/**/*.vue",
     "src/**/*.d.ts",
     "types/*.d.ts"
-, "toast-monitor.js"  ],
+, "toast-monitor.js", "../shared/src/hooks/usePreload.ts", "../shared/src/hooks/useWebVitals.ts"  ],
   "exclude": ["node_modules", "dist"]
 }

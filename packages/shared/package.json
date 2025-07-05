@@ -1,0 +1,12 @@
+{
+    "name": "@giom/shared",
+    "version": "1.0.0",
+    "main": "index.ts",
+    "module": "index.ts",
+    "types": "index.ts",
+    "files": ["index.ts", "src"],
+    "scripts": {
+      "build": "vite build",
+      "dev": "vite build --watch"
+    }
+  }
