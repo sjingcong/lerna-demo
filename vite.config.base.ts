@@ -2,25 +2,57 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import Components from 'unplugin-vue-components/vite'
 import { VantResolver } from 'unplugin-vue-components/resolvers'
+import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers'
 import { resolve } from 'path'
 import legacy from '@vitejs/plugin-legacy'
 import compression from 'vite-plugin-compression'
 import autoprefixer from 'autoprefixer'
 import { createHtmlPlugin } from 'vite-plugin-html'
 import { readFileSync } from 'fs'
+import postcssPxToRem from 'postcss-pxtorem'
 
-export const createViteConfig = (packageName: string) => {
+export const createViteConfig = (packageName: string, isH5?: boolean) => {
     const packagePath = resolve(__dirname, `packages/${packageName}`);
     // 读取 normalize.css 内容
     const normalizeCss = readFileSync(
         resolve(__dirname, 'node_modules/normalize.css/normalize.css'),
         'utf-8'
     );
+
+    const cssPlugins: any[] = [autoprefixer({
+        overrideBrowserslist: [
+            '> 0.5%',
+            'last 2 versions',
+            'ie >= 10',        // 添加这行来支持 IE 10+
+            'Chrome >= 21',
+            'Safari >= 6.1',
+            'Firefox >= 28'
+        ],
+        remove: false,
+        supports: false,
+        flexbox: 'no-2009'
+    })]
+    if (isH5) {
+        cssPlugins.push(
+            postcssPxToRem({
+                rootValue: 37.5, // 设计稿宽度的1/10，如设计稿为375px，则rootValue为37.5
+                unitPrecision: 5, // rem的小数点位数
+                propList: ['*'], // 需要转换的属性，*表示所有属性
+                selectorBlackList: ['.ignore', '.hairlines'], // 忽略转换的选择器
+                replace: true, // 是否替换属性值
+                mediaQuery: false, // 是否在媒体查询中转换px
+                minPixelValue: 2, // 小于2px的不转换
+                exclude: /node_modules/i // 排除node_modules文件夹
+            })
+        )
+    }
     return defineConfig({
         plugins: [
             vue(),
             Components({
-                resolvers: [VantResolver()],
+                resolvers: [VantResolver(), AntDesignVueResolver({
+                    importStyle: false, // css in js
+                }),],
             }),
             // 添加 HTML 插件用于内联 CSS
             createHtmlPlugin({
@@ -104,21 +136,7 @@ export const createViteConfig = (packageName: string) => {
         },
         css: {
             postcss: {
-                plugins: [
-                    autoprefixer({
-                        overrideBrowserslist: [
-                            '> 0.5%',
-                            'last 2 versions',
-                            'ie >= 10',        // 添加这行来支持 IE 10+
-                            'Chrome >= 21',
-                            'Safari >= 6.1',
-                            'Firefox >= 28'
-                        ],
-                        remove: false,
-                        supports: false,
-                        flexbox: 'no-2009'
-                    })
-                ]
+                plugins: cssPlugins
             }
         },
         server: {
