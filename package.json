@@ -16,7 +16,9 @@
     "vue-mobile": "lerna run dev --scope=vue-mobile"
   },
   "dependencies": {
+    "@ant-design/icons-vue": "^7.0.1",
     "@giom/shared": "*",
+    "ant-design-vue": "^4.2.6",
     "autoprefixer": "^10.4.21",
     "normalize.css": "^8.0.1",
     "pinia": "^3.0.3",

@@ -7,8 +7,31 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    ABadge: typeof import('ant-design-vue/es')['Badge']
+    AButton: typeof import('ant-design-vue/es')['Button']
+    ADatePicker: typeof import('ant-design-vue/es')['DatePicker']
+    AddMaterialModal: typeof import('./src/components/AddMaterialModal.vue')['default']
+    AForm: typeof import('ant-design-vue/es')['Form']
+    AFormItem: typeof import('ant-design-vue/es')['FormItem']
+    AInput: typeof import('ant-design-vue/es')['Input']
+    AModal: typeof import('ant-design-vue/es')['Modal']
+    APagination: typeof import('ant-design-vue/es')['Pagination']
+    APopconfirm: typeof import('ant-design-vue/es')['Popconfirm']
+    ARangePicker: typeof import('ant-design-vue/es')['RangePicker']
+    ASelect: typeof import('ant-design-vue/es')['Select']
+    ASelectOption: typeof import('ant-design-vue/es')['SelectOption']
+    ASpace: typeof import('ant-design-vue/es')['Space']
+    ASwitch: typeof import('ant-design-vue/es')['Switch']
+    ATable: typeof import('ant-design-vue/es')['Table']
+    ATag: typeof import('ant-design-vue/es')['Tag']
+    AUpload: typeof import('ant-design-vue/es')['Upload']
+    DataTable: typeof import('./src/components/DataTable.vue')['default']
+    FileUpload: typeof import('./src/components/FileUpload.vue')['default']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
+    ListHeader: typeof import('./src/components/ListHeader.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SearchForm: typeof import('./src/components/SearchForm.vue')['default']
+    TablePagination: typeof import('./src/components/TablePagination.vue')['default']
   }
 }
