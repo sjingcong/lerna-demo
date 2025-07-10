@@ -1,9 +1,5 @@
 <template>
   <div id="app">
-    <nav class="navbar">
-      <router-link to="/" class="nav-link">首页</router-link>
-      <router-link to="/about" class="nav-link">关于</router-link>
-    </nav>
     <router-view />
   </div>
 </template>

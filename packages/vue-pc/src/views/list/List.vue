@@ -78,11 +78,11 @@
 import { ref, reactive, onMounted } from 'vue';
 import { message } from 'ant-design-vue';
 import { ExportOutlined, PlusOutlined } from '@ant-design/icons-vue';
-import ListHeader from '@/components/ListHeader.vue';
-import SearchForm from '@/components/SearchForm.vue';
-import DataTable from '@/components/DataTable.vue';
-import TablePagination from '@/components/TablePagination.vue';
-import AddMaterialModal from '@/components/AddMaterialModal.vue';
+import ListHeader from './components/ListHeader.vue';
+import SearchForm from './components/SearchForm.vue';
+import DataTable from './components/DataTable.vue';
+import TablePagination from './components/TablePagination.vue';
+import AddMaterialModal from './components/AddMaterialModal.vue';
 
 interface MaterialRecord {
   id: string;
