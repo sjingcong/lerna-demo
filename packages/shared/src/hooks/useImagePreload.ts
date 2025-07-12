@@ -10,12 +10,26 @@ export interface ImagePreloadOptions {
     onError?: (error: Error) => void // 加载失败回调
 }
 
+// 预加载图片
+const preloadImage = (url: string, onLoad?: () => void, onError?: (error: Error) => void): void => {
+    const img = new Image()
+
+    img.onload = () => {
+        onLoad?.()
+    }
+
+    img.onerror = () => {
+        const err = new Error(`Failed to load image: ${url}`)
+        onError?.(err)
+    }
+    img.src = url
+}
+
 export function useImagePreload(
-    baseUrl: string,
+    url: string,
     options: ImagePreloadOptions = {}
 ): void {
     const {
-        priority = 'low',
         delay = 0,
         onLoad,
         onError
@@ -23,33 +37,12 @@ export function useImagePreload(
 
     let timeoutId: number | null = null
 
-    // 预加载图片
-    const preloadImage = (): void => {
-        const img = new Image()
-
-        img.onload = () => {
-            onLoad?.()
-        }
-
-        img.onerror = () => {
-            const err = new Error(`Failed to load image: ${baseUrl}`)
-            onError?.(err)
-        }
-
-        // 设置优先级
-        if ('fetchPriority' in img) {
-            (img as any).fetchPriority = priority
-        }
-
-        img.src = baseUrl
-    }
-
     // 延迟加载
     const loadWithDelay = (): void => {
         if (delay > 0) {
-            timeoutId = window.setTimeout(preloadImage, delay)
+            timeoutId = window.setTimeout(preloadImage, delay, url, onLoad, onError)
         } else {
-            preloadImage()
+            preloadImage(url, onLoad, onError)
         }
     }
 

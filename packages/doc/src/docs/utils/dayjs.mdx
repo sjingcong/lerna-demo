@@ -1,0 +1,345 @@
+---
+title: "Day.js"
+description: "轻量级的日期时间处理库，Moment.js 的替代方案"
+icon: "mdi:calendar-clock"
+version: "1.11.10"
+tags: ["日期", "时间", "格式化", "工具库"]
+---
+
+# Day.js
+
+Day.js 是一个轻量级的 JavaScript 日期库，解析、验证、操作和显示日期和时间。它是 Moment.js 的 2kB 轻量化方案，拥有同样强大的 API。
+
+## 安装
+
+```bash
+npm install dayjs
+```
+
+## 基本用法
+
+### 创建日期对象
+
+```javascript
+import dayjs from 'dayjs'
+
+// 当前时间
+const now = dayjs()
+
+// 从字符串创建
+const date1 = dayjs('2023-12-25')
+const date2 = dayjs('2023-12-25 14:30:00')
+
+// 从时间戳创建
+const date3 = dayjs(1640419200000)
+
+// 从 Date 对象创建
+const date4 = dayjs(new Date())
+```
+
+### 格式化日期
+
+```javascript
+const date = dayjs('2023-12-25 14:30:00')
+
+// 常用格式
+date.format() // 2023-12-25T14:30:00+08:00
+date.format('YYYY-MM-DD') // 2023-12-25
+date.format('YYYY年MM月DD日') // 2023年12月25日
+date.format('HH:mm:ss') // 14:30:00
+date.format('YYYY-MM-DD HH:mm:ss') // 2023-12-25 14:30:00
+
+// 更多格式选项
+date.format('dddd, MMMM Do YYYY') // Monday, December 25th 2023
+date.format('MMM DD, YYYY') // Dec 25, 2023
+date.format('h:mm A') // 2:30 PM
+```
+
+### 获取日期信息
+
+```javascript
+const date = dayjs('2023-12-25 14:30:00')
+
+// 获取年月日时分秒
+date.year() // 2023
+date.month() // 11 (0-11，0表示1月)
+date.date() // 25
+date.day() // 1 (0-6，0表示周日)
+date.hour() // 14
+date.minute() // 30
+date.second() // 0
+
+// 获取时间戳
+date.valueOf() // 1703487000000
+date.unix() // 1703487000
+
+// 获取月份天数
+date.daysInMonth() // 31
+```
+
+### 设置日期
+
+```javascript
+const date = dayjs('2023-12-25')
+
+// 设置年月日时分秒
+date.year(2024) // 设置年份
+date.month(0) // 设置月份 (0-11)
+date.date(1) // 设置日期
+date.hour(10) // 设置小时
+date.minute(30) // 设置分钟
+date.second(45) // 设置秒
+
+// 链式调用
+const newDate = date
+  .year(2024)
+  .month(0)
+  .date(1)
+  .hour(10)
+  .minute(30)
+  .second(0)
+```
+
+### 日期运算
+
+```javascript
+const date = dayjs('2023-12-25')
+
+// 加法
+date.add(1, 'day') // 加1天
+date.add(1, 'week') // 加1周
+date.add(1, 'month') // 加1月
+date.add(1, 'year') // 加1年
+date.add(2, 'hour') // 加2小时
+
+// 减法
+date.subtract(1, 'day') // 减1天
+date.subtract(1, 'week') // 减1周
+date.subtract(1, 'month') // 减1月
+date.subtract(1, 'year') // 减1年
+
+// 开始和结束
+date.startOf('day') // 当天开始 00:00:00
+date.startOf('week') // 本周开始
+date.startOf('month') // 本月开始
+date.startOf('year') // 本年开始
+
+date.endOf('day') // 当天结束 23:59:59
+date.endOf('week') // 本周结束
+date.endOf('month') // 本月结束
+date.endOf('year') // 本年结束
+```
+
+### 日期比较
+
+```javascript
+const date1 = dayjs('2023-12-25')
+const date2 = dayjs('2023-12-26')
+
+// 比较
+date1.isBefore(date2) // true
+date1.isAfter(date2) // false
+date1.isSame(date2) // false
+date1.isSame(date1) // true
+
+// 指定精度比较
+date1.isSame(date2, 'month') // true (同一个月)
+date1.isSame(date2, 'year') // true (同一年)
+
+// 范围比较
+const start = dayjs('2023-12-20')
+const end = dayjs('2023-12-30')
+date1.isBetween(start, end) // true
+```
+
+### 相对时间
+
+```javascript
+// 需要安装 relativeTime 插件
+import relativeTime from 'dayjs/plugin/relativeTime'
+import 'dayjs/locale/zh-cn' // 中文语言包
+dayjs.extend(relativeTime)
+dayjs.locale('zh-cn')
+
+const now = dayjs()
+const past = dayjs().subtract(2, 'hour')
+const future = dayjs().add(3, 'day')
+
+past.fromNow() // 2小时前
+future.fromNow() // 3天后
+now.to(future) // 3天后
+past.from(now) // 2小时前
+```
+
+### 时区处理
+
+```javascript
+// 需要安装 timezone 插件
+import timezone from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
+// UTC 时间
+const utcTime = dayjs.utc()
+
+// 转换时区
+const tokyoTime = dayjs().tz('Asia/Tokyo')
+const newYorkTime = dayjs().tz('America/New_York')
+const shanghaiTime = dayjs().tz('Asia/Shanghai')
+
+// 获取时区偏移
+dayjs().utcOffset() // +480 (分钟)
+```
+
+### 常用插件
+
+```javascript
+// 1. 自定义解析格式
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+dayjs.extend(customParseFormat)
+dayjs('12-25-2023', 'MM-DD-YYYY')
+
+// 2. 星期几
+import weekday from 'dayjs/plugin/weekday'
+dayjs.extend(weekday)
+dayjs().weekday() // 0-6
+
+// 3. 季度
+import quarterOfYear from 'dayjs/plugin/quarterOfYear'
+dayjs.extend(quarterOfYear)
+dayjs().quarter() // 1-4
+
+// 4. 星期
+import weekOfYear from 'dayjs/plugin/weekOfYear'
+dayjs.extend(weekOfYear)
+dayjs().week() // 1-53
+
+// 5. 日历时间
+import calendar from 'dayjs/plugin/calendar'
+dayjs.extend(calendar)
+dayjs().calendar() // 今天 下午2:30
+```
+
+## 实际应用示例
+
+### 1. 日期范围选择器
+
+```javascript
+// 获取本周范围
+const getThisWeek = () => {
+  const start = dayjs().startOf('week')
+  const end = dayjs().endOf('week')
+  return { start, end }
+}
+
+// 获取本月范围
+const getThisMonth = () => {
+  const start = dayjs().startOf('month')
+  const end = dayjs().endOf('month')
+  return { start, end }
+}
+
+// 获取最近7天
+const getLast7Days = () => {
+  const end = dayjs()
+  const start = dayjs().subtract(6, 'day')
+  return { start, end }
+}
+```
+
+### 2. 倒计时功能
+
+```javascript
+const getCountdown = (targetDate) => {
+  const now = dayjs()
+  const target = dayjs(targetDate)
+  const diff = target.diff(now)
+  
+  if (diff <= 0) {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0 }
+  }
+  
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+  
+  return { days, hours, minutes, seconds }
+}
+```
+
+### 3. 工作日计算
+
+```javascript
+// 计算两个日期之间的工作日
+const getWorkdays = (startDate, endDate) => {
+  let current = dayjs(startDate)
+  const end = dayjs(endDate)
+  let workdays = 0
+  
+  while (current.isBefore(end) || current.isSame(end, 'day')) {
+    // 1-5 表示周一到周五
+    if (current.day() >= 1 && current.day() <= 5) {
+      workdays++
+    }
+    current = current.add(1, 'day')
+  }
+  
+  return workdays
+}
+```
+
+### 4. 年龄计算
+
+```javascript
+const calculateAge = (birthDate) => {
+  const birth = dayjs(birthDate)
+  const now = dayjs()
+  
+  let years = now.year() - birth.year()
+  
+  // 如果还没到生日，年龄减1
+  if (now.month() < birth.month() || 
+      (now.month() === birth.month() && now.date() < birth.date())) {
+    years--
+  }
+  
+  return years
+}
+```
+
+## 常用格式化模板
+
+| 格式 | 输出 | 说明 |
+|------|------|------|
+| `YYYY` | 2023 | 4位年份 |
+| `YY` | 23 | 2位年份 |
+| `MM` | 01-12 | 月份 |
+| `MMM` | Jan-Dec | 月份简写 |
+| `MMMM` | January-December | 月份全称 |
+| `DD` | 01-31 | 日期 |
+| `HH` | 00-23 | 24小时制小时 |
+| `hh` | 01-12 | 12小时制小时 |
+| `mm` | 00-59 | 分钟 |
+| `ss` | 00-59 | 秒 |
+| `A` | AM/PM | 上午/下午 |
+| `dddd` | Monday-Sunday | 星期全称 |
+| `ddd` | Mon-Sun | 星期简写 |
+
+## 最佳实践
+
+1. **插件按需加载**: 只加载需要的插件，保持包体积最小
+2. **时区处理**: 处理跨时区应用时注意时区转换
+3. **国际化**: 根据用户地区加载对应的语言包
+4. **性能优化**: 避免在循环中重复创建 dayjs 对象
+5. **类型安全**: 在 TypeScript 项目中使用类型定义
+
+## 与 Moment.js 的区别
+
+- **体积**: Day.js 仅 2kB，Moment.js 约 67kB
+- **不可变**: Day.js 对象是不可变的，操作返回新对象
+- **插件系统**: Day.js 采用插件架构，按需加载功能
+- **API 兼容**: 大部分 API 与 Moment.js 兼容
+- **现代化**: 支持 ES6 模块，更好的 Tree Shaking
