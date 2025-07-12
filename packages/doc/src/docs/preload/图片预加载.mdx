@@ -1,6 +1,6 @@
 ---
 title: "useImagePreload"
-description: "图片预加载专用 Hook，提供延迟加载和回调功能"
+description: "图片预加载专用，提供延迟加载和回调功能"
 icon: "mdi:image-multiple"
 version: "1.0.0"
 tags: ["图片", "预加载", "性能优化"]
@@ -8,12 +8,12 @@ tags: ["图片", "预加载", "性能优化"]
 
 # useImagePreload
 
-图片预加载专用 Hook，极简版本 - 自动触发加载，无返回值。适用于需要提前加载图片资源的场景，提升用户体验。
+图片预加载专用，极简版本 - 自动触发加载，无返回值。适用于需要提前加载图片资源的场景，提升用户体验。
 
 ## 安装
 
 ```bash
-npm install @lerna-demo/shared
+npm install @giom/shared
 ```
 
 ## 基本用法
@@ -26,7 +26,7 @@ npm install @lerna-demo/shared
 </template>
 
 <script setup>
-import { useImagePreload } from '@lerna-demo/shared'
+import { useImagePreload } from '@giom/shared'
 
 const imageUrl = 'https://example.com/large-image.jpg'
 
@@ -39,7 +39,7 @@ useImagePreload(imageUrl)
 
 ```vue
 <script setup>
-import { useImagePreload } from '@lerna-demo/shared'
+import { useImagePreload } from '@giom/shared'
 
 const imageUrl = 'https://example.com/hero-image.jpg'
 
@@ -63,7 +63,7 @@ useImagePreload(imageUrl, {
 
 <script setup>
 import { ref } from 'vue'
-import { useImagePreload } from '@lerna-demo/shared'
+import { useImagePreload } from '@giom/shared'
 
 const imageUrl = 'https://example.com/image.jpg'
 const loading = ref(true)
@@ -89,7 +89,7 @@ useImagePreload(imageUrl, {
 
 ```vue
 <script setup>
-import { useImagePreload } from '@lerna-demo/shared'
+import { useImagePreload } from '@giom/shared'
 
 const imageUrls = [
   'https://example.com/image1.jpg',
@@ -145,7 +145,7 @@ imageUrls.forEach((url, index) => {
 
 ```vue
 <script setup>
-import { useImagePreload } from '@lerna-demo/shared'
+import { useImagePreload } from '@giom/shared'
 
 // 预加载首屏轮播图
 const bannerImages = [
@@ -167,7 +167,7 @@ bannerImages.forEach(url => {
 ```vue
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useImagePreload } from '@lerna-demo/shared'
+import { useImagePreload } from '@giom/shared'
 
 const nextImages = ref([])
 
@@ -196,7 +196,7 @@ onMounted(() => {
 
 <script setup>
 import { ref, watch } from 'vue'
-import { useImagePreload } from '@lerna-demo/shared'
+import { useImagePreload } from '@giom/shared'
 
 const images = [
   '/images/1.jpg',

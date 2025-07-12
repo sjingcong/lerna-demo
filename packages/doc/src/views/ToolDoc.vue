@@ -8,70 +8,54 @@
           <span>首页</span>
         </router-link>
       </div>
-      
+
       <div class="menu-tree">
         <div v-for="(category, categoryKey) in toolsData" :key="categoryKey" class="menu-category">
           <!-- 分类头部 -->
-          <div 
-            class="menu-category-header"
-            :class="{ expanded: expandedCategories[categoryKey] }"
-            @click="toggleCategory(categoryKey)"
-          >
-            <Icon 
-              :icon="expandedCategories[categoryKey] ? 'mdi:chevron-down' : 'mdi:chevron-right'" 
-              class="expand-icon"
-              :style="{ transform: expandedCategories[categoryKey] ? 'rotate(0deg)' : 'rotate(0deg)' }"
-            />
+          <div class="menu-category-header" :class="{ expanded: expandedCategories[categoryKey] }"
+            @click="toggleCategory(categoryKey)">
+            <Icon :icon="expandedCategories[categoryKey] ? 'mdi:chevron-down' : 'mdi:chevron-right'" class="expand-icon"
+              :style="{ transform: expandedCategories[categoryKey] ? 'rotate(0deg)' : 'rotate(0deg)' }" />
             <Icon :icon="getCategoryIcon(categoryKey)" class="category-icon" />
             <span class="category-name">{{ getCategoryLabel(categoryKey) }}</span>
           </div>
-          
+
           <!-- 分类内容 -->
           <div v-if="expandedCategories[categoryKey]" class="menu-category-content">
             <!-- 主分类下的直接工具 -->
-             <div v-if="category.tools && category.tools.length > 0" class="menu-tools">
-               <router-link 
-                 v-for="tool in category.tools" 
-                 :key="tool.name"
-                 :to="`/tools/${categoryKey}/${tool.name}`" 
-                 class="menu-tool-item"
-                 :class="{ active: currentCategory === categoryKey && currentToolName === tool.name && !currentSubCategory }"
-               >
-                 <Icon :icon="tool.icon || 'mdi:file-document'" class="tool-icon" />
-                 <span class="tool-name">{{ tool.title }}</span>
-               </router-link>
-             </div>
-            
+            <div v-if="category.tools && category.tools.length > 0" class="menu-tools">
+              <router-link v-for="tool in category.tools" :key="tool.name" :to="`/tools/${categoryKey}/${tool.name}`"
+                class="menu-tool-item"
+                :class="{ active: currentCategory === categoryKey && currentToolName === tool.name && !currentSubCategory }">
+                <Icon :icon="tool.icon || 'mdi:file-document'" class="tool-icon" />
+                <span class="tool-name">{{ tool.title }}</span>
+              </router-link>
+            </div>
+
             <!-- 子分类 -->
             <div v-if="category.subCategories">
-              <div v-for="(subCategory, subCategoryKey) in category.subCategories" :key="subCategoryKey" class="menu-subcategory">
+              <div v-for="(subCategory, subCategoryKey) in category.subCategories" :key="subCategoryKey"
+                class="menu-subcategory">
                 <!-- 子分类头部 -->
-                <div 
-                  class="menu-subcategory-header"
+                <div class="menu-subcategory-header"
                   :class="{ expanded: expandedSubCategories[`${categoryKey}-${subCategoryKey}`] }"
-                  @click="toggleSubCategory(categoryKey, subCategoryKey)"
-                >
-                  <Icon 
-                    :icon="expandedSubCategories[`${categoryKey}-${subCategoryKey}`] ? 'mdi:chevron-down' : 'mdi:chevron-right'" 
-                    class="expand-icon"
-                  />
+                  @click="toggleSubCategory(categoryKey, subCategoryKey)">
+                  <Icon
+                    :icon="expandedSubCategories[`${categoryKey}-${subCategoryKey}`] ? 'mdi:chevron-down' : 'mdi:chevron-right'"
+                    class="expand-icon" />
                   <Icon :icon="subCategory.icon || 'mdi:folder-outline'" class="subcategory-icon" />
                   <span class="subcategory-name">{{ subCategory.title }}</span>
                 </div>
-                
+
                 <!-- 子分类内容 -->
-                 <div v-if="expandedSubCategories[`${categoryKey}-${subCategoryKey}`]" class="menu-subcategory-content">
-                   <router-link 
-                     v-for="tool in subCategory.tools" 
-                     :key="tool.name"
-                     :to="`/tools/${categoryKey}/${subCategoryKey}/${tool.name}`" 
-                     class="menu-tool-item subcategory-tool"
-                     :class="{ active: currentCategory === categoryKey && currentSubCategory === subCategoryKey && currentToolName === tool.name }"
-                   >
-                     <Icon :icon="tool.icon || 'mdi:file-document'" class="tool-icon" />
-                     <span class="tool-name">{{ tool.title }}</span>
-                   </router-link>
-                 </div>
+                <div v-if="expandedSubCategories[`${categoryKey}-${subCategoryKey}`]" class="menu-subcategory-content">
+                  <router-link v-for="tool in subCategory.tools" :key="tool.name"
+                    :to="`/tools/${categoryKey}/${subCategoryKey}/${tool.name}`" class="menu-tool-item subcategory-tool"
+                    :class="{ active: currentCategory === categoryKey && currentSubCategory === subCategoryKey && currentToolName === tool.name }">
+                    <Icon :icon="tool.icon || 'mdi:file-document'" class="tool-icon" />
+                    <span class="tool-name">{{ tool.title }}</span>
+                  </router-link>
+                </div>
               </div>
             </div>
           </div>
@@ -99,7 +83,7 @@
             <Icon icon="mdi:chevron-right" class="breadcrumb-separator" />
             <span class="breadcrumb-item current">{{ currentTool.title }}</span>
           </div>
-          
+
           <div class="doc-title">
             <Icon :icon="currentTool.icon || 'mdi:file-document'" class="title-icon" />
             <h1>{{ currentTool.title }}</h1>
@@ -107,11 +91,11 @@
               v{{ currentTool.version }}
             </div>
           </div>
-          
+
           <p v-if="currentTool.description" class="doc-description">
             {{ currentTool.description }}
           </p>
-          
+
           <div v-if="currentTool.tags" class="doc-tags">
             <span v-for="tag in currentTool.tags" :key="tag" class="tag">
               {{ tag }}
@@ -132,7 +116,7 @@
               </div>
             </template>
           </Suspense>
-          
+
           <!-- 如果没有MDX文档，显示默认内容 -->
           <div v-if="!mdxComponent && !loading" class="no-content">
             <Icon icon="mdi:file-document-plus" class="no-content-icon" />
@@ -198,23 +182,28 @@ type ToolsData = Record<string, Category>
 const mdxFiles = import.meta.glob('../docs/**/*.mdx', { eager: true })
 const descFiles = import.meta.glob('../docs/**/desc.json', { eager: true })
 
-
+// 获取分类的desc.json数据
+const getCategoryDesc = (categoryPath: string) => {
+  const descPath = `../docs/${categoryPath}/desc.json`
+  const descModule = descFiles[descPath] as any
+  return descModule ? (descModule.default || descModule) : null
+}
 
 // 从MDX文件和desc.json动态生成工具数据
 const generateToolsData = (): ToolsData => {
   const toolsData: ToolsData = {}
-  
+
   // 首先处理desc.json文件，建立分类结构
   Object.keys(descFiles).forEach(filePath => {
     const descModule = descFiles[filePath] as any
     const descData = descModule.default || descModule
-    
+
     // 解析路径: ../docs/category/desc.json 或 ../docs/category/subcategory/desc.json
     const pathMatch = filePath.match(/\.\.\/docs\/(.+)\/desc\.json$/)
     if (!pathMatch) return
-    
+
     const pathParts = pathMatch[1].split('/')
-    
+
     if (pathParts.length === 1) {
       // 主分类
       const category = pathParts[0]
@@ -231,10 +220,11 @@ const generateToolsData = (): ToolsData => {
       // 子分类
       const [category, subCategory] = pathParts
       if (!toolsData[category]) {
+        const categoryDesc = getCategoryDesc(category)
         toolsData[category] = {
-          title: category,
-          description: '',
-          icon: 'mdi:folder',
+          title: categoryDesc?.title || category,
+          description: categoryDesc?.description || '',
+          icon: categoryDesc?.icon || 'mdi:folder',
           tools: [],
           subCategories: {}
         }
@@ -250,33 +240,33 @@ const generateToolsData = (): ToolsData => {
       }
     }
   })
-  
+
   // 然后处理MDX文件
   Object.keys(mdxFiles).forEach(filePath => {
     // 解析文件路径: ../docs/category/toolName.mdx 或 ../docs/category/subcategory/toolName.mdx
     const pathMatch = filePath.match(/\.\.\/docs\/(.+)\.mdx$/)
     if (!pathMatch) return
-    
+
     const pathParts = pathMatch[1].split('/')
     const mdxModule = mdxFiles[filePath] as any
     const metadata = mdxModule.frontmatter || {}
-    
+
     // 生成工具名称
     const generateTitle = (name: string) => {
-      // 将文件名转换为标题格式
-      return name.charAt(0).toUpperCase() + name.slice(1)
+      // 直接返回文件名，支持中文
+      return name
     }
-    
+
     // 生成描述
     const generateDescription = (name: string) => {
-      return `${generateTitle(name)}的详细文档`
+      return `${name}的详细文档`
     }
-    
+
     // 生成图标
     const generateIcon = (name: string) => {
       return 'mdi:file-document'
     }
-    
+
     const toolName = pathParts[pathParts.length - 1]
     const tool: Tool = {
       name: toolName,
@@ -286,15 +276,18 @@ const generateToolsData = (): ToolsData => {
       version: metadata.version || '1.0.0',
       tags: metadata.tags || []
     }
-    
+
+
+
     if (pathParts.length === 2) {
       // 直接在主分类下的工具
       const category = pathParts[0]
       if (!toolsData[category]) {
+        const categoryDesc = getCategoryDesc(category)
         toolsData[category] = {
-          title: category,
-          description: '',
-          icon: 'mdi:folder',
+          title: categoryDesc?.title || category,
+          description: categoryDesc?.description || '',
+          icon: categoryDesc?.icon || 'mdi:folder',
           tools: [],
           subCategories: {}
         }
@@ -304,10 +297,11 @@ const generateToolsData = (): ToolsData => {
       // 在子分类下的工具
       const [category, subCategory] = pathParts
       if (!toolsData[category]) {
+        const categoryDesc = getCategoryDesc(category)
         toolsData[category] = {
-          title: category,
-          description: '',
-          icon: 'mdi:folder',
+          title: categoryDesc?.title || category,
+          description: categoryDesc?.description || '',
+          icon: categoryDesc?.icon || 'mdi:folder',
           tools: [],
           subCategories: {}
         }
@@ -316,17 +310,18 @@ const generateToolsData = (): ToolsData => {
         toolsData[category].subCategories = {}
       }
       if (!toolsData[category].subCategories![subCategory]) {
+        const subCategoryDesc = getCategoryDesc(`${category}/${subCategory}`)
         toolsData[category].subCategories![subCategory] = {
-          title: subCategory,
-          description: '',
-          icon: 'mdi:folder-outline',
+          title: subCategoryDesc?.title || subCategory,
+          description: subCategoryDesc?.description || '',
+          icon: subCategoryDesc?.icon || 'mdi:folder-outline',
           tools: []
         }
       }
       toolsData[category].subCategories![subCategory].tools.push(tool)
     }
   })
-  
+
   return toolsData
 }
 
@@ -340,12 +335,12 @@ const currentToolName = computed(() => route.params.tool as string)
 const currentTool = computed(() => {
   const category = toolsData.value[currentCategory.value]
   if (!category) return null
-  
+
   // 如果有子分类，从子分类中查找工具
   if (currentSubCategory.value && category.subCategories?.[currentSubCategory.value]) {
     return category.subCategories[currentSubCategory.value].tools.find(tool => tool.name === currentToolName.value) || null
   }
-  
+
   // 否则从主分类中查找工具
   return category.tools.find(tool => tool.name === currentToolName.value) || null
 })
@@ -372,10 +367,10 @@ const toggleSubCategory = (categoryKey: string, subCategoryKey: string) => {
 // 动态加载MDX文档
 const loadMdxDoc = async () => {
   if (!currentCategory.value || !currentToolName.value) return
-  
+
   loading.value = true
   mdxComponent.value = null
-  
+
   try {
     let mdxPath = ''
     if (currentSubCategory.value) {
@@ -385,11 +380,11 @@ const loadMdxDoc = async () => {
       // 主分类下的工具
       mdxPath = `../docs/${currentCategory.value}/${currentToolName.value}.mdx`
     }
-    
+
     const mdxModule = await import(mdxPath)
     mdxComponent.value = mdxModule.default
   } catch (error) {
-    const path = currentSubCategory.value 
+    const path = currentSubCategory.value
       ? `${currentCategory.value}/${currentSubCategory.value}/${currentToolName.value}.mdx`
       : `${currentCategory.value}/${currentToolName.value}.mdx`
     console.warn(`MDX文档未找到: ${path}`)
@@ -748,8 +743,13 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .no-content {
@@ -807,45 +807,45 @@ onMounted(() => {
     flex-direction: column;
     height: auto;
   }
-  
+
   .tool-sidebar {
     width: 100%;
     height: auto;
     max-height: 40vh;
     order: 2;
   }
-  
+
   .doc-main {
     order: 1;
     height: auto;
   }
-  
+
   .doc-content {
     padding: 1rem;
   }
-  
+
   .doc-title {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
   }
-  
+
   .doc-title h1 {
     font-size: 2rem;
   }
-  
+
   .breadcrumb {
     flex-wrap: wrap;
   }
-  
+
   .tool-link {
     padding: 0.5rem 1rem;
   }
-  
+
   .tool-name {
     font-size: 0.8rem;
   }
-  
+
   .tool-desc {
     font-size: 0.7rem;
     -webkit-line-clamp: 1;

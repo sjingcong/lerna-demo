@@ -1,0 +1,260 @@
+---
+title: "页面预加载Hook"
+description: "用于预加载Vue组件和模块的自定义Hook，提升用户体验"
+icon: "mdi:rocket-launch"
+version: "1.0.0"
+tags: ["Hook", "性能优化", "预加载", "用户体验"]
+---
+
+# usePreload - 页面预加载Hook
+
+一个用于预加载Vue组件和模块的自定义Hook，通过在后台预先加载可能需要的资源来提升用户体验。
+
+## 🎯 功能特性
+
+- ✅ **自动预加载** - 组件挂载后自动开始预加载指定模块
+- ✅ **延迟控制** - 支持自定义延迟时间，避免影响当前页面性能
+- ✅ **状态追踪** - 提供加载状态和已加载模块的响应式数据
+- ✅ **错误处理** - 自动处理加载失败，不影响主流程
+- ✅ **日志记录** - 详细的加载日志，便于开发调试
+- ✅ **性能友好** - 异步加载，不阻塞当前页面渲染
+
+## 📦 安装使用
+
+```typescript
+import { usePreload } from '@giom/shared/hooks/usePreload'
+```
+
+## 🔧 API 参考
+
+### 类型定义
+
+```typescript
+interface PreloadModule {
+  /** 模块名称，用于日志显示和状态追踪 */
+  name: string
+  /** 模块导入函数，返回 Promise 的动态导入 */
+  importer: () => Promise<any>
+  /** 延迟加载时间（毫秒），默认 0ms */
+  delay?: number
+}
+
+function usePreload(modules: PreloadModule[]): {
+  /** 当前是否有模块正在加载 */
+  isLoading: Ref<boolean>
+  /** 已成功加载的模块名称列表 */
+  loadedModules: Ref<string[]>
+}
+```
+
+### 参数说明
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|---------|
+| modules | `PreloadModule[]` | ✅ | - | 需要预加载的模块配置数组 |
+| modules[].name | `string` | ✅ | - | 模块名称，用于日志和追踪 |
+| modules[].importer | `() => Promise<any>` | ✅ | - | 动态导入函数 |
+| modules[].delay | `number` | ❌ | 0 | 延迟加载时间（毫秒） |
+
+### 返回值
+
+| 属性 | 类型 | 说明 |
+|------|------|---------|
+| isLoading | `Ref<boolean>` | 当前是否有模块正在加载 |
+| loadedModules | `Ref<string[]>` | 已成功加载的模块名称列表 |
+
+## 💡 使用示例
+
+### 基础用法
+
+```vue
+<template>
+  <div>
+    <h1>首页</h1>
+    <p v-if="isLoading">正在预加载资源...</p>
+    <p>已加载模块：{{ loadedModules.join(', ') }}</p>
+  </div>
+</template>
+
+<script setup>
+import { usePreload } from '@giom/shared/hooks/usePreload'
+
+// 预加载常用页面组件
+const { isLoading, loadedModules } = usePreload([
+  {
+    name: '关于页面',
+    importer: () => import('@/views/About.vue')
+  },
+  {
+    name: '用户中心',
+    importer: () => import('@/views/UserCenter.vue'),
+    delay: 1000 // 1秒后开始加载
+  }
+])
+</script>
+```
+
+### 高级用法 - 条件预加载
+
+```vue
+<script setup>
+import { usePreload } from '@giom/shared/hooks/usePreload'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
+
+// 根据用户角色预加载不同模块
+const preloadModules = []
+
+if (userStore.isAdmin) {
+  preloadModules.push({
+    name: '管理后台',
+    importer: () => import('@/views/admin/Dashboard.vue'),
+    delay: 2000
+  })
+}
+
+if (userStore.isVip) {
+  preloadModules.push({
+    name: 'VIP功能',
+    importer: () => import('@/views/vip/VipFeatures.vue'),
+    delay: 1500
+  })
+}
+
+const { isLoading, loadedModules } = usePreload(preloadModules)
+</script>
+```
+
+### 预加载工具库
+
+```vue
+<script setup>
+import { usePreload } from '@giom/shared/hooks/usePreload'
+
+// 预加载第三方库和工具
+const { isLoading, loadedModules } = usePreload([
+  {
+    name: '图表库',
+    importer: () => import('echarts'),
+    delay: 3000
+  },
+  {
+    name: '日期工具',
+    importer: () => import('dayjs'),
+    delay: 2000
+  },
+  {
+    name: '工具函数',
+    importer: () => import('@/utils/helpers'),
+    delay: 1000
+  }
+])
+</script>
+```
+
+## ⚡ 最佳实践
+
+### 1. 合理设置延迟时间
+
+```typescript
+// ❌ 不推荐：立即加载可能影响当前页面性能
+const modules = [
+  {
+    name: '大型组件',
+    importer: () => import('@/components/HeavyComponent.vue'),
+    delay: 0 // 立即加载
+  }
+]
+
+// ✅ 推荐：设置合理延迟，让当前页面先完成渲染
+const modules = [
+  {
+    name: '大型组件',
+    importer: () => import('@/components/HeavyComponent.vue'),
+    delay: 2000 // 2秒后加载
+  }
+]
+```
+
+### 2. 按优先级分层预加载
+
+```typescript
+// 按用户可能访问的优先级设置不同延迟
+const { isLoading, loadedModules } = usePreload([
+  // 高优先级：用户很可能访问的页面
+  {
+    name: '产品列表',
+    importer: () => import('@/views/ProductList.vue'),
+    delay: 1000
+  },
+  // 中优先级：用户可能访问的页面
+  {
+    name: '购物车',
+    importer: () => import('@/views/ShoppingCart.vue'),
+    delay: 3000
+  },
+  // 低优先级：用户较少访问的页面
+  {
+    name: '帮助中心',
+    importer: () => import('@/views/Help.vue'),
+    delay: 5000
+  }
+])
+```
+
+### 3. 监控预加载效果
+
+```vue
+<script setup>
+import { usePreload } from '@giom/shared/hooks/usePreload'
+import { watch } from 'vue'
+
+const { isLoading, loadedModules } = usePreload(modules)
+
+// 监控加载进度
+watch(loadedModules, (newModules) => {
+  console.log(`预加载进度: ${newModules.length}/${modules.length}`)
+  
+  // 所有模块加载完成
+  if (newModules.length === modules.length) {
+    console.log('🎉 所有模块预加载完成！')
+  }
+}, { deep: true })
+</script>
+```
+
+## 🔍 常见问题
+
+### Q: 预加载失败会影响应用吗？
+
+A: 不会。usePreload 内置了错误处理机制，预加载失败只会在控制台输出错误日志，不会影响应用的正常运行。
+
+### Q: 如何判断是否需要预加载？
+
+A: 建议预加载以下类型的资源：
+- 用户很可能访问的页面（如首页→产品列表）
+- 大型第三方库（如图表库、编辑器）
+- 关键业务组件
+
+### Q: 预加载会增加服务器压力吗？
+
+A: 预加载是在客户端进行的，主要消耗的是用户的网络带宽。建议在用户网络条件良好时进行预加载。
+
+### Q: 移动端需要注意什么？
+
+A: 移动端建议：
+- 增加延迟时间，避免影响页面性能
+- 减少预加载的模块数量
+- 考虑用户的流量消耗
+
+## 🚀 性能优化建议
+
+1. **分批预加载**：避免同时加载过多模块
+2. **网络检测**：在网络条件好时才进行预加载
+3. **缓存利用**：已加载的模块会被浏览器缓存
+4. **用户行为分析**：根据用户行为数据优化预加载策略
+
+---
+
+通过合理使用 usePreload Hook，可以显著提升应用的用户体验，让页面切换更加流畅！

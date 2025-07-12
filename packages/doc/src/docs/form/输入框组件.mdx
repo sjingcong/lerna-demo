@@ -1,0 +1,40 @@
+---
+title: "Input 输入框"
+description: "基础的表单输入组件"
+icon: "mdi:form-textbox"
+version: "1.0.0"
+tags: ["表单", "输入"]
+---
+
+# Input 输入框
+
+基础的表单输入组件，支持多种输入类型和验证。
+
+## 基础用法
+
+```vue
+<template>
+  <Input v-model="value" placeholder="请输入内容" />
+</template>
+
+<script setup>
+import { ref } from 'vue'
+const value = ref('')
+</script>
+```
+
+## 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+|------|------|------|--------|
+| modelValue | 绑定值 | string | - |
+| placeholder | 占位符 | string | - |
+| disabled | 是否禁用 | boolean | false |
+
+## 事件
+
+| 事件名 | 说明 | 参数 |
+|--------|------|------|
+| update:modelValue | 值改变时触发 | (value: string) |
+| focus | 获得焦点时触发 | (event: FocusEvent) |
+| blur | 失去焦点时触发 | (event: FocusEvent) |

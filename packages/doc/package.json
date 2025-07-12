@@ -1,5 +1,5 @@
 {
-  "name": "@lerna-demo/doc",
+  "name": "doc",
   "version": "1.0.0",
   "description": "开发环境工具书文档系统",
   "type": "module",
