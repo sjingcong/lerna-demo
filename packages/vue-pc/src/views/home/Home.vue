@@ -30,7 +30,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useCounterStore } from '@/stores/counter'
-import { usePreload } from '../../../../shared/src/hooks/usePreload'
+import { usePreload } from '@giom/shared/hooks/usePreload'
 usePreload([
   {
     name: 'About页面',

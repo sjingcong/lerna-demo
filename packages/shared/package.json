@@ -4,7 +4,7 @@
     "main": "index.ts",
     "module": "index.ts",
     "types": "index.ts",
-    "files": ["index.ts", "src"],
+    "files": ["index.ts", "hooks","performance","tools"],
     "scripts": {
       "build": "vite build",
       "dev": "vite build --watch"

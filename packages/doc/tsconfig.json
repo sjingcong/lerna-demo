@@ -31,6 +31,7 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "src/**/*.mdx",
-    "types/*.d.ts"
+    "types/*.d.ts",
+    "../shared/**/*.ts"
   ]
 }

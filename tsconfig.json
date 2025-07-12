@@ -35,8 +35,7 @@
     "packages/*/src/**/*.tsx",
     "packages/*/src/**/*.vue",
     "packages/*/src/**/*.d.ts",
-    "types/*.d.ts",
-    "packages/vue-app-a/toast-monitor.js"
+    "types/*.d.ts"
   ],
   "exclude": [
     "node_modules",
