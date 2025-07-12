@@ -10,23 +10,23 @@
       </div>
 
       <div class="menu-tree">
-        <div v-for="(category, categoryKey) in toolsData" :key="categoryKey" class="menu-category">
+        <div v-for="category in sortedCategories" :key="category.key" class="menu-category">
           <!-- 分类头部 -->
-          <div class="menu-category-header" :class="{ expanded: expandedCategories[categoryKey] }"
-            @click="toggleCategory(categoryKey)">
-            <Icon :icon="expandedCategories[categoryKey] ? 'mdi:chevron-down' : 'mdi:chevron-right'" class="expand-icon"
-              :style="{ transform: expandedCategories[categoryKey] ? 'rotate(0deg)' : 'rotate(0deg)' }" />
-            <Icon :icon="getCategoryIcon(categoryKey)" class="category-icon" />
-            <span class="category-name">{{ getCategoryLabel(categoryKey) }}</span>
+          <div class="menu-category-header" :class="{ expanded: expandedCategories[category.key] }"
+            @click="toggleCategory(category.key)">
+            <Icon :icon="expandedCategories[category.key] ? 'mdi:chevron-down' : 'mdi:chevron-right'" class="expand-icon"
+              :style="{ transform: expandedCategories[category.key] ? 'rotate(0deg)' : 'rotate(0deg)' }" />
+            <Icon :icon="getCategoryIcon(category.key)" class="category-icon" />
+            <span class="category-name">{{ getCategoryLabel(category.key) }}</span>
           </div>
 
           <!-- 分类内容 -->
-          <div v-if="expandedCategories[categoryKey]" class="menu-category-content">
+          <div v-if="expandedCategories[category.key]" class="menu-category-content">
             <!-- 主分类下的直接工具 -->
             <div v-if="category.tools && category.tools.length > 0" class="menu-tools">
-              <router-link v-for="tool in category.tools" :key="tool.name" :to="`/tools/${categoryKey}/${tool.name}`"
+              <router-link v-for="tool in category.tools" :key="tool.name" :to="`/tools/${category.key}/${tool.name}`"
                 class="menu-tool-item"
-                :class="{ active: currentCategory === categoryKey && currentToolName === tool.name && !currentSubCategory }">
+                :class="{ active: currentCategory === category.key && currentToolName === tool.name && !currentSubCategory }">
                 <Icon :icon="tool.icon || 'mdi:file-document'" class="tool-icon" />
                 <span class="tool-name">{{ tool.title }}</span>
               </router-link>
@@ -38,20 +38,20 @@
                 class="menu-subcategory">
                 <!-- 子分类头部 -->
                 <div class="menu-subcategory-header"
-                  :class="{ expanded: expandedSubCategories[`${categoryKey}-${subCategoryKey}`] }"
-                  @click="toggleSubCategory(categoryKey, subCategoryKey)">
+                  :class="{ expanded: expandedSubCategories[`${category.key}-${subCategoryKey}`] }"
+                  @click="toggleSubCategory(category.key, subCategoryKey)">
                   <Icon
-                    :icon="expandedSubCategories[`${categoryKey}-${subCategoryKey}`] ? 'mdi:chevron-down' : 'mdi:chevron-right'"
+                    :icon="expandedSubCategories[`${category.key}-${subCategoryKey}`] ? 'mdi:chevron-down' : 'mdi:chevron-right'"
                     class="expand-icon" />
                   <Icon :icon="subCategory.icon || 'mdi:folder-outline'" class="subcategory-icon" />
                   <span class="subcategory-name">{{ subCategory.title }}</span>
                 </div>
 
                 <!-- 子分类内容 -->
-                <div v-if="expandedSubCategories[`${categoryKey}-${subCategoryKey}`]" class="menu-subcategory-content">
+                <div v-if="expandedSubCategories[`${category.key}-${subCategoryKey}`]" class="menu-subcategory-content">
                   <router-link v-for="tool in subCategory.tools" :key="tool.name"
-                    :to="`/tools/${categoryKey}/${subCategoryKey}/${tool.name}`" class="menu-tool-item subcategory-tool"
-                    :class="{ active: currentCategory === categoryKey && currentSubCategory === subCategoryKey && currentToolName === tool.name }">
+                    :to="`/tools/${category.key}/${subCategoryKey}/${tool.name}`" class="menu-tool-item subcategory-tool"
+                    :class="{ active: currentCategory === category.key && currentSubCategory === subCategoryKey && currentToolName === tool.name }">
                     <Icon :icon="tool.icon || 'mdi:file-document'" class="tool-icon" />
                     <span class="tool-name">{{ tool.title }}</span>
                   </router-link>
@@ -166,6 +166,7 @@ interface SubCategory {
   description: string
   icon: string
   tools: Tool[]
+  order?: number
 }
 
 interface Category {
@@ -174,6 +175,7 @@ interface Category {
   icon: string
   tools: Tool[]
   subCategories?: Record<string, SubCategory>
+  order?: number
 }
 
 type ToolsData = Record<string, Category>
@@ -213,7 +215,8 @@ const generateToolsData = (): ToolsData => {
           description: descData.description || '',
           icon: descData.icon || 'mdi:folder',
           tools: [],
-          subCategories: {}
+          subCategories: {},
+          order: descData.order || 999
         }
       }
     } else if (pathParts.length === 2) {
@@ -226,7 +229,8 @@ const generateToolsData = (): ToolsData => {
           description: categoryDesc?.description || '',
           icon: categoryDesc?.icon || 'mdi:folder',
           tools: [],
-          subCategories: {}
+          subCategories: {},
+          order: categoryDesc?.order || 999
         }
       }
       if (!toolsData[category].subCategories) {
@@ -236,7 +240,8 @@ const generateToolsData = (): ToolsData => {
         title: descData.title || subCategory,
         description: descData.description || '',
         icon: descData.icon || 'mdi:folder-outline',
-        tools: []
+        tools: [],
+        order: descData.order || 999
       }
     }
   })
@@ -289,7 +294,8 @@ const generateToolsData = (): ToolsData => {
           description: categoryDesc?.description || '',
           icon: categoryDesc?.icon || 'mdi:folder',
           tools: [],
-          subCategories: {}
+          subCategories: {},
+          order: categoryDesc?.order || 999
         }
       }
       toolsData[category].tools.push(tool)
@@ -315,7 +321,8 @@ const generateToolsData = (): ToolsData => {
           title: subCategoryDesc?.title || subCategory,
           description: subCategoryDesc?.description || '',
           icon: subCategoryDesc?.icon || 'mdi:folder-outline',
-          tools: []
+          tools: [],
+          order: subCategoryDesc?.order || 999
         }
       }
       toolsData[category].subCategories![subCategory].tools.push(tool)
@@ -327,6 +334,24 @@ const generateToolsData = (): ToolsData => {
 
 // 生成工具数据
 const toolsData = ref<ToolsData>(generateToolsData())
+
+// 排序后的分类数据
+const sortedCategories = computed(() => {
+  return Object.entries(toolsData.value)
+    .sort(([, a], [, b]) => (a.order || 999) - (b.order || 999))
+    .map(([key, category]) => ({
+      key,
+      ...category,
+      subCategories: category.subCategories ? 
+        Object.entries(category.subCategories)
+          .sort(([, a], [, b]) => (a.order || 999) - (b.order || 999))
+          .reduce((acc, [subKey, subCategory]) => {
+            acc[subKey] = subCategory
+            return acc
+          }, {} as Record<string, SubCategory>)
+        : undefined
+    }))
+})
 
 const currentCategory = computed(() => route.params.category as string)
 const currentSubCategory = computed(() => route.params.subcategory as string)
@@ -396,13 +421,19 @@ const loadMdxDoc = async () => {
 
 // 初始化展开状态
 const initializeExpandedState = () => {
-  if (currentCategory.value) {
-    expandedCategories.value[currentCategory.value] = true
-    if (currentSubCategory.value) {
-      const key = `${currentCategory.value}-${currentSubCategory.value}`
-      expandedSubCategories.value[key] = true
+  // 默认展开所有分类
+  Object.keys(toolsData.value).forEach(categoryKey => {
+    expandedCategories.value[categoryKey] = true
+    
+    // 默认展开所有子分类
+    const category = toolsData.value[categoryKey]
+    if (category.subCategories) {
+      Object.keys(category.subCategories).forEach(subCategoryKey => {
+        const key = `${categoryKey}-${subCategoryKey}`
+        expandedSubCategories.value[key] = true
+      })
     }
-  }
+  })
 }
 
 // 监听路由变化

@@ -1,5 +1,6 @@
 {
     "title": "通用组件",
-    "description": "组件描述",
-    "icon": "mdi:view-dashboard"
+    "description": "通用工具和组件",
+    "icon": "mdi:puzzle",
+    "order": 2
 }

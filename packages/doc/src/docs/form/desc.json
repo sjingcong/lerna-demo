@@ -1,5 +1,6 @@
 {
-    "title": "表单组件",
-    "description": "组件描述",
-    "icon": "mdi:view-dashboard"
+    "title": "表单",
+    "description": "表单组件和验证",
+    "icon": "mdi:form-select",
+    "order": 5
 }

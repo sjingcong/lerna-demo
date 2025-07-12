@@ -1,5 +1,6 @@
 {
     "title": "预加载",
-    "description": "预加载",
-    "icon": "mdi:view-dashboard"
+    "description": "页面和组件预加载",
+    "icon": "mdi:loading",
+    "order": 4
 }
