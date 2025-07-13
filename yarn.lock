@@ -822,6 +822,11 @@
     "@babel/helper-string-parser" "^7.27.1"
     "@babel/helper-validator-identifier" "^7.27.1"
 
+"@bundled-es-modules/axios@^0.27.2":
+  version "0.27.2"
+  resolved "https://registry.npmmirror.com/@bundled-es-modules/axios/-/axios-0.27.2.tgz#bf7bf6e314ad294f15ef794d1629b8c80a12fef0"
+  integrity sha512-PO/CUWB4KzesrPCHgpoLWBTl6v0jXdod84msF6J/8KyaK+BHahnfv1FvMCJpUnpdP2naMhIIBOzMl1ydBZmCRA==
+
 "@ctrl/tinycolor@^3.4.0", "@ctrl/tinycolor@^3.5.0":
   version "3.6.1"
   resolved "https://registry.npmjs.org/@ctrl/tinycolor/-/tinycolor-3.6.1.tgz"

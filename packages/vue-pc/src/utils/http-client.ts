@@ -1,385 +1,177 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import { axios } from '@bundled-es-modules/axios';
+import qs from 'qs';
+import { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import { showToast, showFailToast } from 'vant';
 
-// 自定义配置接口
-interface CustomConfig {
-  showLoading?: boolean;
-  showError?: boolean;
-  skipAuth?: boolean;
-  timeout?: number;
-  retryCount?: number;
-  retryDelay?: number;
+// 根据错误代码，获取对应文字
+const errorMsgHandler = (errStatus: number): string => {
+  if (errStatus === 500) return '服务器内部错误';
+  if (errStatus === 400) return '没有权限';
+  if (errStatus === 401) return '登录已过期，请重新登录!';
+  return '未知错误';
+};
+
+// 根据mode，返回错误信息
+export const errorHandler = (errMsg: string, mode = 'modal') => {
+  const msg = errMsg || '未知错误';
+  
+  if (mode === 'modal') {
+    showToast(`${msg}`);
+  }
+  if (mode === 'toast') {
+    showFailToast(`${msg}`);
+  }
+  if (mode === 'hidden') {
+    console.log(msg);
+  }
+};
+
+interface AxiosRequestConfig<D = any> extends InternalAxiosRequestConfig<D> {
+  isReturnNativeData?: boolean; // 是否返回原数据
+  errorMode?: string; // 错误提示展示方式
+  needBlackbox?: boolean
+  repeatRequest?: boolean; // 允许重复请求
 }
 
-// 扩展 AxiosRequestConfig
-declare module 'axios' {
-  interface AxiosRequestConfig {
-    customConfig?: CustomConfig;
-    metadata?: {
-      startTime?: Date;
-    };
+const pendingMap = new Map();
+
+function getRequestKey(config: AxiosRequestConfig) {
+  return (config.method || '') + config.url + '?' + qs.stringify(config.data);
+}
+
+//获取url参数
+const getUrlParameter = (name: string): string | null => {
+  const url = new URL(window.location.href);
+  const params = new URLSearchParams(url.search);
+  return params.get(name) || null; // 使用 || 替代三元运算符，更简洁明了。
+};
+
+function setPendingMap(config: AxiosRequestConfig) {
+  const controller = new AbortController();
+  config.signal = controller.signal;
+  const key = getRequestKey(config);
+  if (pendingMap.has(key)) {
+    pendingMap.get(key).abort();
+    pendingMap.delete(key);
+  } else {
+    pendingMap.set(key, controller);
   }
 }
 
-// 请求队列项接口
-interface PendingRequest {
-  resolve: (value: any) => void;
-  reject: (reason: any) => void;
-  config: AxiosRequestConfig;
+function extractToken(bearerString: string) {
+  if (bearerString.startsWith('Bearer ')) {
+    return bearerString.split('Bearer ')[1];
+  }
+  return null;
 }
 
-class HttpClient {
-  private instance: AxiosInstance;
-  private isRefreshing = false;
-  private pendingRequests: PendingRequest[] = [];
-  private refreshTokenPromise: Promise<string> | null = null;
-
-  constructor(baseURL?: string, timeout = 10000) {
-    this.instance = axios.create({
-      baseURL: baseURL || process.env.VUE_APP_API_BASE_URL || '/api',
-      timeout,
+class HttpRequest {
+  private onRefreshTokenCompleted?: () => void
+  private onRefreshTokenHandler?: () => Promise<any>
+  private onRefreshTokenFailed?: () => void
+  private auth: any
+  private baseUrl: string
+  private service: AxiosInstance
+  
+  constructor(params: {
+    auth: any,
+    baseUrl: string,
+  }) {
+    const { auth, baseUrl, } = params
+    this.auth = auth
+    this.baseUrl = baseUrl
+    this.service = axios.create({
+      timeout: 1000 * 30,
+      baseURL: baseUrl,
     });
-
-    this.setupInterceptors();
+    this.initInterceptors()
   }
 
-  private setupInterceptors() {
-    // 请求拦截器
-    this.instance.interceptors.request.use(
+  private initInterceptors() {
+    this.service.interceptors.request.use(
       (config: AxiosRequestConfig) => {
-        const customConfig = config.customConfig;
-        
-        console.log('请求拦截器 - 自定义配置:', customConfig);
-        
-        // 显示加载状态
-        if (customConfig?.showLoading) {
-          this.showLoading();
+        if (!config.repeatRequest) {
+          setPendingMap(config);
         }
-        
-        // 设置自定义超时时间
-        if (customConfig?.timeout) {
-          config.timeout = customConfig.timeout;
-        }
-        
-        // 添加认证头
-        if (!customConfig?.skipAuth) {
-          const token = this.getToken();
-          if (token) {
-            config.headers = {
-              ...config.headers,
-              Authorization: `Bearer ${token}`,
-            };
-          }
-        }
-        
-        // 添加请求时间戳
-        config.metadata = { startTime: new Date() };
-        
+        // @ts-ignore
+        config.headers = Object.assign(
+          {},
+          {
+            'Content-Type': 'application/json;charset=UTF-8',
+            Authorization: `Bearer ${this.auth.accessToken}`,
+            ...config.headers
+          },
+        );
         return config;
       },
       (error: AxiosError) => {
-        console.error('请求拦截器错误:', error);
-        return Promise.reject(error);
-      }
-    );
-
-    // 响应拦截器
-    this.instance.interceptors.response.use(
-      (response: AxiosResponse) => {
-        const customConfig = response.config.customConfig;
-        
-        // 计算请求耗时
-        this.logRequestDuration(response);
-        
-        // 隐藏加载状态
-        if (customConfig?.showLoading) {
-          this.hideLoading();
-        }
-        
-        // 处理响应数据
-        return this.handleResponse(response, customConfig);
+        return Promise.reject();
       },
-      async (error: AxiosError) => {
-        const customConfig = error.config?.customConfig;
-        
-        // 隐藏加载状态
-        if (customConfig?.showLoading) {
-          this.hideLoading();
-        }
-        
-        // 处理token失效
-        if (error.response?.status === 401 && !customConfig?.skipAuth) {
-          return this.handleTokenExpired(error);
-        }
-        
-        // 处理重试逻辑
-        if (this.shouldRetry(error, customConfig)) {
-          return this.retryRequest(error);
-        }
-        
-        // 显示错误信息
-        if (customConfig?.showError !== false) {
-          this.showError(error);
-        }
-        
-        return Promise.reject(error);
-      }
     );
-  }
 
-  // 处理token失效
-  private async handleTokenExpired(error: AxiosError): Promise<any> {
-    const originalRequest = error.config!;
-    
-    // 如果已经在刷新token，将请求加入队列
-    if (this.isRefreshing) {
-      return new Promise((resolve, reject) => {
-        this.pendingRequests.push({
-          resolve,
-          reject,
-          config: originalRequest,
-        });
-      });
-    }
-    
-    // 开始刷新token
-    this.isRefreshing = true;
-    
-    try {
-      // 如果没有正在进行的刷新请求，创建一个新的
-      if (!this.refreshTokenPromise) {
-        this.refreshTokenPromise = this.refreshToken();
-      }
-      
-      const newToken = await this.refreshTokenPromise;
-      
-      // 更新token
-      this.setToken(newToken);
-      
-      // 重新发起原始请求
-      originalRequest.headers = {
-        ...originalRequest.headers,
-        Authorization: `Bearer ${newToken}`,
-      };
-      
-      const response = await this.instance.request(originalRequest);
-      
-      // 处理队列中的请求
-      this.processPendingRequests(newToken);
-      
-      return response;
-    } catch (refreshError) {
-      // 刷新token失败，清空队列并跳转登录
-      this.rejectPendingRequests(refreshError);
-      this.handleRefreshTokenError();
-      return Promise.reject(refreshError);
-    } finally {
-      this.isRefreshing = false;
-      this.refreshTokenPromise = null;
-    }
-  }
-
-  // 处理队列中的请求
-  private async processPendingRequests(newToken: string) {
-    const requests = [...this.pendingRequests];
-    this.pendingRequests = [];
-    
-    for (const { resolve, reject, config } of requests) {
-      try {
-        config.headers = {
-          ...config.headers,
-          Authorization: `Bearer ${newToken}`,
-        };
-        const response = await this.instance.request(config);
-        resolve(response);
-      } catch (error) {
-        reject(error);
-      }
-    }
-  }
-
-  // 拒绝队列中的请求
-  private rejectPendingRequests(error: any) {
-    const requests = [...this.pendingRequests];
-    this.pendingRequests = [];
-    
-    requests.forEach(({ reject }) => {
-      reject(error);
-    });
-  }
-
-  // 刷新token
-  private async refreshToken(): Promise<string> {
-    const refreshToken = this.getRefreshToken();
-    
-    if (!refreshToken) {
-      throw new Error('No refresh token available');
-    }
-    
-    try {
-      const response = await axios.post('/api/auth/refresh', {
-        refreshToken,
-      });
-      
-      const { token, refreshToken: newRefreshToken } = response.data;
-      
-      // 更新refresh token
-      if (newRefreshToken) {
-        this.setRefreshToken(newRefreshToken);
-      }
-      
-      return token;
-    } catch (error) {
-      console.error('刷新token失败:', error);
-      throw error;
-    }
-  }
-
-  // 判断是否需要重试
-  private shouldRetry(error: AxiosError, customConfig?: CustomConfig): boolean {
-    return (
-      customConfig?.retryCount !== undefined &&
-      customConfig.retryCount > 0 &&
-      error.response?.status !== 401 &&
-      error.code !== 'ECONNABORTED' // 不重试超时错误
-    );
-  }
-
-  // 重试请求
-  private async retryRequest(error: AxiosError): Promise<any> {
-    const customConfig = error.config?.customConfig!;
-    const retryDelay = customConfig.retryDelay || 1000;
-    
-    // 等待指定时间后重试
-    await new Promise(resolve => setTimeout(resolve, retryDelay));
-    
-    const retryConfig = { ...error.config };
-    retryConfig.customConfig = {
-      ...customConfig,
-      retryCount: customConfig.retryCount! - 1,
-    };
-    
-    console.log(`重试请求，剩余次数: ${retryConfig.customConfig.retryCount}`);
-    return this.instance.request(retryConfig);
-  }
-
-  // 处理响应数据
-  private handleResponse(response: AxiosResponse, customConfig?: CustomConfig) {
-    if (response.data && response.data.code !== undefined) {
-      if (response.data.code === 200) {
-        return response.data.data || response.data;
-      } else {
-        const error = new Error(response.data.message || '请求失败');
-        if (customConfig?.showError !== false) {
-          console.error('API错误:', response.data.message);
+    this.service.interceptors.response.use(
+      (response: AxiosResponse) => {
+        const config = response.config as AxiosRequestConfig;
+        const key = getRequestKey(config);
+        pendingMap.delete(key);
+        if (response.status === 200) {
+          // 假如14401表示token失效，则刷新token回调逻辑
+          if (response.data.code === '14401') {
+            this.asyncRefreshToken();
+          }
+          if (config?.isReturnNativeData) {
+            return response.data;
+          } else {
+            const { data, code, message } = response.data;
+            if (code === '0') {
+              return data;
+            } else {
+              errorHandler(message || errorMsgHandler(code), config.errorMode);
+            }
+          }
+        } else {
+          const errMsg = errorMsgHandler(response.status);
+          errorHandler(errMsg, config.errorMode);
+          return Promise.reject();
         }
-        throw error;
-      }
+      },
+      (error: AxiosError) => {
+        return Promise.reject();
+      },
+    );
+   }
+
+   public get(url: string, params = {}, config = {}) {
+      return this.service.get(url, { params: params, ...config });
     }
-    
-    return response.data;
-  }
 
-  // 记录请求耗时
-  private logRequestDuration(response: AxiosResponse) {
-    const endTime = new Date();
-    const startTime = response.config.metadata?.startTime;
-    if (startTime) {
-      const duration = endTime.getTime() - startTime.getTime();
-      console.log(`请求耗时: ${duration}ms`);
+    public post(url: string, params = {}, config = {}) {
+      return this.service.post(url, params, config);
     }
-  }
 
-  // Token管理方法
-  private getToken(): string | null {
-    return localStorage.getItem('token');
-  }
+    public setRefreshToken(params: {
+      onRefreshTokenCompleted: () => void
+      onRefreshTokenHandler: () => Promise<any>
+      onRefreshTokenFailed: () => void
+    }) {
+      this.onRefreshTokenCompleted = params.onRefreshTokenCompleted
+      this.onRefreshTokenHandler = params.onRefreshTokenHandler
+      this.onRefreshTokenFailed = params.onRefreshTokenFailed
+    }
 
-  private setToken(token: string): void {
-    localStorage.setItem('token', token);
-  }
-
-  private getRefreshToken(): string | null {
-    return localStorage.getItem('refreshToken');
-  }
-
-  private setRefreshToken(refreshToken: string): void {
-    localStorage.setItem('refreshToken', refreshToken);
-  }
-
-  private clearTokens(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-  }
-
-  // 处理刷新token失败
-  private handleRefreshTokenError(): void {
-    this.clearTokens();
-    console.log('Token刷新失败，需要重新登录');
-    // 这里可以跳转到登录页
-    // router.push('/login');
-  }
-
-  // UI交互方法（可以根据实际UI框架调整）
-  private showLoading(): void {
-    console.log('显示加载中...');
-    // 这里可以调用您的loading组件
-  }
-
-  private hideLoading(): void {
-    console.log('隐藏加载中...');
-    // 这里可以调用您的loading组件
-  }
-
-  private showError(error: AxiosError): void {
-    const errorMessage = error.response?.data?.message || error.message || '网络错误';
-    console.error('请求错误:', errorMessage);
-    // 这里可以调用您的错误提示组件
-  }
-
-  // 公共方法
-  public get<T = any>(
-    url: string,
-    config?: AxiosRequestConfig & { customConfig?: CustomConfig }
-  ): Promise<T> {
-    return this.instance.get(url, config);
-  }
-
-  public post<T = any>(
-    url: string,
-    data?: any,
-    config?: AxiosRequestConfig & { customConfig?: CustomConfig }
-  ): Promise<T> {
-    return this.instance.post(url, data, config);
-  }
-
-  public put<T = any>(
-    url: string,
-    data?: any,
-    config?: AxiosRequestConfig & { customConfig?: CustomConfig }
-  ): Promise<T> {
-    return this.instance.put(url, data, config);
-  }
-
-  public delete<T = any>(
-    url: string,
-    config?: AxiosRequestConfig & { customConfig?: CustomConfig }
-  ): Promise<T> {
-    return this.instance.delete(url, config);
-  }
-
-  // 设置基础URL
-  public setBaseURL(baseURL: string): void {
-    this.instance.defaults.baseURL = baseURL;
-  }
-
-  // 设置默认超时时间
-  public setTimeout(timeout: number): void {
-    this.instance.defaults.timeout = timeout;
-  }
-}
-
-// 创建默认实例
-const httpClient = new HttpClient();
-
-export default httpClient;
-export { HttpClient };
+    private async asyncRefreshToken() {
+       if (this.onRefreshTokenHandler) {
+         try {
+           const result = await this.onRefreshTokenHandler();
+           if (this.onRefreshTokenCompleted) {
+             this.onRefreshTokenCompleted();
+           }
+         } catch (error) {
+           if (this.onRefreshTokenFailed) {
+             this.onRefreshTokenFailed();
+           }
+         }
+       }
+     }
+ }
+ export default HttpRequest
