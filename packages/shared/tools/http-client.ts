@@ -11,9 +11,9 @@ const HTTP_STATUS = {
   SERVER_ERROR: 500
 } as const;
 
-const ERROR_CODES = {
+const RESPONSE_CODES = {
   TOKEN_EXPIRED: '14401',
-  SUCCESS: '0'
+  SUCCESS: '00000'
 } as const;
 
 const DEFAULT_CONFIG = {
@@ -36,9 +36,7 @@ interface ApiResponse<T = any> {
 }
 
 interface RefreshTokenCallbacks {
-  onRefreshTokenCompleted: () => void;
-  onRefreshTokenHandler: () => Promise<any>;
-  onRefreshTokenFailed: () => void;
+  refreshTokenUrl: string;
 }
 
 interface HttpClientConfig {
@@ -46,11 +44,13 @@ interface HttpClientConfig {
   baseUrl: string;
   timeout?: number;
   enableLogging?: boolean;
+  refreshTokenUrl?: string;
 }
 
 interface AxiosRequestConfig<D = any> extends InternalAxiosRequestConfig<D> {
   isReturnNativeData?: boolean;
   errorMode?: ErrorMode;
+  isRefreshToken?: boolean;
 }
 
 // 错误消息映射
@@ -110,9 +110,15 @@ class Logger {
     }
   }
   
+  warn(message: string, data?: any): void {
+    if (this.enableLogging) {
+      console.log(`[HttpClient] ${message}`, data);
+    }
+  }
+  
   error(message: string, error?: any): void {
     if (this.enableLogging) {
-      console.error(`[HttpClient] ${message}`, error);
+      console.log(`[HttpClient] ${message}`, error);
     }
   }
 }
@@ -125,9 +131,9 @@ interface PendingRequest {
 }
 
 class HttpRequest {
-  private refreshTokenCallbacks?: RefreshTokenCallbacks;
   private auth: AuthConfig;
   private baseUrl: string;
+  private refreshTokenUrl: string;
   private service: AxiosInstance;
   private logger: Logger;
   
@@ -136,10 +142,11 @@ class HttpRequest {
   private pendingRequests: PendingRequest[] = [];
   
   constructor(config: HttpClientConfig) {
-    const { auth, baseUrl, timeout = DEFAULT_CONFIG.timeout, enableLogging = false } = config;
+    const { auth, baseUrl, timeout = DEFAULT_CONFIG.timeout, enableLogging = false, refreshTokenUrl } = config;
     
     this.auth = auth;
     this.baseUrl = baseUrl;
+    this.refreshTokenUrl = refreshTokenUrl || '';
     this.logger = new Logger(enableLogging);
     
     this.service = axios.create({
@@ -155,6 +162,13 @@ class HttpRequest {
     // 请求拦截器
     this.service.interceptors.request.use(
       (config: AxiosRequestConfig) => {
+        // 如果正在刷新Token，将请求加入队列而不发送（但排除refreshToken请求本身）
+        if (this.isRefreshing && !this.isRefreshTokenRequest(config)) {
+            
+          this.logger.info(`Token refresh in progress, queuing request: ${config.method?.toUpperCase?.()} ${config.url}`);
+          return this.queueRequestDuringRefresh(config);
+        }
+        
         // 只处理请求头设置，保持幂等性
         config.headers = {
           'Content-Type': DEFAULT_CONFIG.contentType,
@@ -199,7 +213,7 @@ class HttpRequest {
     const responseData = response.data as ApiResponse;
     
     // Token过期处理 - 加入队列等待刷新
-    if (responseData.code === ERROR_CODES.TOKEN_EXPIRED) {
+    if (responseData.code === RESPONSE_CODES.TOKEN_EXPIRED) {
       return this.handleTokenExpired(config);
     }
     
@@ -209,7 +223,7 @@ class HttpRequest {
     }
     
     // 业务逻辑处理
-    if (responseData.code === ERROR_CODES.SUCCESS) {
+    if (responseData.code === RESPONSE_CODES.SUCCESS) {
       return responseData.data;
     } else {
       const errorMsg = responseData.message || errorMsgHandler(Number(responseData.code));
@@ -238,31 +252,50 @@ class HttpRequest {
   }
 
   // HTTP方法 - 类型安全
-  public get<T = any>(url: string, params?: Record<string, any>, config?: AxiosRequestConfig): Promise<T> {
+  public get<T = any>(url: string, params?: Record<string, any>, config?: Partial<AxiosRequestConfig>): Promise<T> {
     this.logger.info('GET request', { url, params });
     return this.service.get(url, { params, ...config });
   }
 
-  public post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  public post<T = any>(url: string, data?: any, config?: Partial<AxiosRequestConfig>): Promise<T> {
     this.logger.info('POST request', { url, data });
     return this.service.post(url, data, config);
   }
 
-  // Token管理
-  public setRefreshToken(callbacks: RefreshTokenCallbacks): void {
-    this.refreshTokenCallbacks = callbacks;
-    this.logger.info('Refresh token callbacks set');
+  // 判断是否为refreshToken请求
+  private isRefreshTokenRequest(config: AxiosRequestConfig): boolean {
+    const url = config.url || '';
+    // 检查URL是否包含refreshToken相关路径
+    return url.includes(this.refreshTokenUrl);
+  }
+
+  // 在Token刷新期间将请求加入队列
+  private queueRequestDuringRefresh(config: AxiosRequestConfig): Promise<any> {
+    return new Promise((resolve, reject) => {
+        
+      this.logger.info(`Queuing request during token refresh: ${config.method?.toUpperCase?.()} ${config.url}`);
+      
+      // 将请求加入待处理队列
+      this.pendingRequests.push({ config, resolve, reject });
+      this.logger.info(`Request queued during refresh, current queue size: ${this.pendingRequests.length}`);
+    });
   }
 
   // 处理Token过期的请求
   private handleTokenExpired(config: AxiosRequestConfig): Promise<any> {
     return new Promise((resolve, reject) => {
+      this.logger.warn(`Token expired detected for ${config.method?.toUpperCase?.()} ${config.url}`);
+      
       // 将请求加入待处理队列
       this.pendingRequests.push({ config, resolve, reject });
+      this.logger.info(`Request queued due to token expiry, current queue size: ${this.pendingRequests.length}`);
       
       // 如果没有正在刷新，则开始刷新
       if (!this.isRefreshing) {
+        this.logger.info('Starting token refresh process...');
         this.asyncRefreshToken();
+      } else {
+        this.logger.info('Token refresh already in progress, request added to queue');
       }
     });
   }
@@ -272,11 +305,19 @@ class HttpRequest {
     const requests = [...this.pendingRequests];
     this.pendingRequests = [];
     
-    this.logger.info(`Retrying ${requests.length} pending requests in parallel`);
+    if (requests.length === 0) {
+      this.logger.info('No pending requests to retry');
+      return;
+    }
+    
+    this.logger.info(`Starting to retry ${requests.length} pending requests in parallel`);
     
     // 并行处理所有待处理的请求
-    const retryPromises = requests.map(async ({ config, resolve, reject }) => {
+    const retryPromises = requests.map(async ({ config, resolve, reject }, index) => {
+      const requestId = `${config.method?.toUpperCase?.()} ${config.url}`;
       try {
+        this.logger.info(`[${index + 1}/${requests.length}] Retrying request: ${requestId}`);
+        
         // 更新请求头中的token
         config.headers = {
           ...config.headers,
@@ -286,12 +327,19 @@ class HttpRequest {
         const response = await this.service.request(config);
         resolve(response);
       } catch (error) {
+        this.logger.error(`[${index + 1}/${requests.length}] Request retry failed: ${requestId}`, error);
         reject(error);
       }
     });
     
     // 等待所有请求完成（不管成功还是失败）
-    await Promise.allSettled(retryPromises);
+    const results = await Promise.allSettled(retryPromises);
+    
+    // 统计重试结果
+    const successful = results.filter(r => r.status === 'fulfilled').length;
+    const failed = results.filter(r => r.status === 'rejected').length;
+    
+    this.logger.info(`Retry completed: ${successful} successful, ${failed} failed out of ${requests.length} requests`);
   }
 
   // 清空待处理请求队列
@@ -299,58 +347,76 @@ class HttpRequest {
     const requests = [...this.pendingRequests];
     this.pendingRequests = [];
     
-    this.logger.info(`Clearing ${requests.length} pending requests due to refresh failure`);
-    
-    requests.forEach(({ reject }) => {
-      reject(error);
-    });
-  }
-
-  private async asyncRefreshToken(): Promise<void> {
-    if (this.isRefreshing) {
-      // 如果已经在刷新中，直接返回，不需要等待
+    if (requests.length === 0) {
+      this.logger.info('No pending requests to clear');
       return;
     }
     
-    if (!this.refreshTokenCallbacks?.onRefreshTokenHandler) {
-      this.logger.error('No refresh token handler configured');
+    this.logger.warn(`Clearing ${requests.length} pending requests due to: ${error.message}`);
+    
+    // 拒绝所有待处理的请求
+    requests.forEach(({ config, reject }, index) => {
+      const requestId = `${config.method?.toUpperCase?.()} ${config.url}`;
+      this.logger.warn(`[${index + 1}/${requests.length}] Rejecting request: ${requestId}`);
+      reject(error);
+    });
+    
+    this.logger.info(`Successfully cleared ${requests.length} pending requests`);
+  }
+
+  refreshTokenApi(): Promise<any> {
+    return this.post(this.refreshTokenUrl, {}, {
+      errorMode: 'hidden',
+      isRefreshToken: true,
+    }).then((res: any) => {
+      // 添加15秒延迟
+      return new Promise(resolve => {
+        setTimeout(() => {
+          this.auth.accessToken = res.accessToken;
+          this.auth.refreshToken = res.refreshToken;
+          resolve(res);
+        }, 10000); // 15秒延迟
+      });
+    });
+  }
+  private async asyncRefreshToken(): Promise<void> {
+    if (!this.refreshTokenUrl) {
+      this.logger.error('No refresh token api configured');
       const error = new Error('登录已失效，请重新登录');
       this.clearPendingRequests(error);
       return;
     }
 
     this.isRefreshing = true;
-    this.logger.info('Starting token refresh...');
     
     try {
-      const result = await this.refreshTokenCallbacks.onRefreshTokenHandler();
-      
-      if (this.refreshTokenCallbacks.onRefreshTokenCompleted) {
-        this.refreshTokenCallbacks.onRefreshTokenCompleted();
-      }
-      
-      this.logger.info('Token refreshed successfully');
+      this.logger.info('Calling refresh token handler...');
+      const result = await this.refreshTokenApi()
+      console.log('token 刷新成功')
+      this.logger.info('Token refresh completed successfully');
       this.isRefreshing = false;
+      
+      this.logger.info('Processing pending requests after successful token refresh...');
       // 重新发送待处理的请求
       await this.retryPendingRequests();
       
     } catch (error) {
       this.isRefreshing = false;
-      this.logger.error('Token refresh failed', error);
+      this.logger.error('Token refresh failed:', error);
       
       // 清空待处理请求队列 - 登录失效
       const loginExpiredError = new Error('登录已失效，请重新登录');
       this.clearPendingRequests(loginExpiredError);
-      
-      if (this.refreshTokenCallbacks.onRefreshTokenFailed) {
-        this.refreshTokenCallbacks.onRefreshTokenFailed();
-      }
+      console.log('token 刷新失败');
+      this.logger.warn('All pending requests have been rejected due to token refresh failure');
+    } finally {
+      this.logger.info('Token refresh process ended, isRefreshing reset to false');
     }
   }
 
   // 实例销毁
   public destroy(): void {
-    this.logger.info('HttpClient destroyed');
+    this.logger.info('Destroying HttpClient instance...');
     
     // 清理待处理的请求队列
     if (this.pendingRequests.length > 0) {
@@ -360,6 +426,8 @@ class HttpRequest {
     
     // 重置刷新状态
     this.isRefreshing = false;
+    
+    this.logger.info('HttpClient instance destroyed successfully');
   }
 }
 
