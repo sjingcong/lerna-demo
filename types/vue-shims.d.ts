@@ -3,3 +3,10 @@ declare module '*.vue' {
   const component: DefineComponent<{}, {}, any>;
   export default component;
 }
+
+
+declare module '@bundled-es-modules/axios' {
+  import { AxiosStatic } from 'axios'
+  const axios: AxiosStatic
+  export {axios}
+}
