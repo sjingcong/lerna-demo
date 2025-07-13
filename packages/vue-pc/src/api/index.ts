@@ -6,7 +6,7 @@ const httpInstance = new HttpRequest({
   enableLogging: true,
   auth: auth,
   baseUrl: '/',
-  refreshTokenUrl: '/auth/refreshToken',
+  refreshTokenApi: '/auth/refreshToken',
 });
 
 

@@ -1,0 +1,268 @@
+# 接口使用规范
+
+<div style={{
+  position: 'fixed',
+  top: '200px',
+  left: '400px',
+  backgroundColor: 'white',
+  border: '1px solid #e1e5e9',
+  borderRadius: '8px',
+  padding: '12px',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+  zIndex: 1000,
+  fontSize: '14px',
+  maxWidth: '200px'
+}}>
+  <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#1890ff' }}>📋 快速导航</div>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+    <a href="#1-实例化httprequest单例" style={{ color: '#666', textDecoration: 'none' }}>🔧 实例化HttpRequest</a>
+    <a href="#2-post方法调用" style={{ color: '#666', textDecoration: 'none' }}>📤 POST方法调用</a>
+    <a href="#3-get方法调用" style={{ color: '#666', textDecoration: 'none' }}>📥 GET方法调用</a>
+    <a href="#4-config参数详解" style={{ color: '#666', textDecoration: 'none' }}>⚙️ config参数详解</a>
+    <a href="#5-错误处理" style={{ color: '#666', textDecoration: 'none' }}>❌ 错误处理</a>
+    <a href="#6-最佳实践" style={{ color: '#666', textDecoration: 'none' }}>✅ 最佳实践</a>
+    <a href="#7-注意事项" style={{ color: '#666', textDecoration: 'none' }}>⚠️ 注意事项</a>
+  </div>
+</div>
+
+本文档介绍项目中HTTP请求的标准使用方式和配置说明。
+
+## <span id="1-实例化httprequest单例">1. 实例化HttpRequest单例</span>
+
+在项目中，我们使用单例模式创建HttpRequest实例，确保全局统一的配置和状态管理。
+
+### auth参数的来源
+
+首先需要从Pinia store中获取认证信息：
+
+```typescript
+import { createPinia, defineStore } from 'pinia';
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
+
+const store = createPinia();
+
+// 持久化插件
+store.use(piniaPluginPersistedstate);
+
+const useAuthStore = defineStore('authStore', {
+  state: () => ({
+    accessToken: '11111', // 这里是调用登录接口获得，或者从跳链中拿到
+    refreshToken: '22222', // 这里是调用登录接口获得，或者从跳链中拿到
+  }),
+  getters: {
+    getTokenStore: state => {
+      return state;
+    },
+  },
+  actions: {},
+  persist: {}, // 启用持久化存储
+});
+```
+
+### 创建HttpRequest实例
+
+```typescript
+import { HttpRequest } from '@giom/shared/tools/http-client';
+
+// 获取认证store实例
+const authStore = useAuthStore();
+
+// 创建HttpRequest实例
+const httpInstance = new HttpRequest({
+  enableLogging: true,
+  auth: authStore, // 来自Pinia store的认证信息
+  baseUrl: '/',
+  refreshTokenApi: '/auth/refreshToken', // token刷新接口
+});
+```
+
+### 配置参数说明
+
+- `enableLogging`: 是否启用日志记录，建议开发环境设为true
+- `auth`: 认证配置对象，**来源于Pinia store**，包含accessToken和refreshToken，支持持久化存储
+- `baseUrl`: API基础URL，通常设为'/'
+- `refreshTokenUrl`: Token刷新接口地址
+
+### auth配置的特点
+
+1. **持久化存储**: 通过`pinia-plugin-persistedstate`插件，认证信息会自动保存到本地存储
+2. **响应式更新**: 当Token更新时，store中的数据会自动同步
+3. **全局共享**: 多个组件可以共享同一份认证状态
+4. **自动管理**: HttpRequest会自动处理Token的刷新和更新
+
+## <span id="2-post方法调用">2. POST方法调用</span>
+
+POST方法用于创建、更新数据或执行复杂操作。
+
+### 基础用法
+
+```typescript
+// 基本POST请求
+const response = await httpInstance.post('/api/users', {
+  name: '张三',
+  email: 'zhangsan@example.com'
+});
+
+// 带配置的POST请求
+const response = await httpInstance.post('/api/users', userData, {
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+```
+
+### 方法签名
+
+```typescript
+post<T = any>(
+  url: string,
+  data?: any,
+  config?: Partial<AxiosRequestConfig>
+): Promise<T>
+```
+
+## <span id="3-get方法调用">3. GET方法调用</span>
+
+GET方法用于获取数据，支持查询参数。
+
+### 基础用法
+
+```typescript
+// 基本GET请求
+const users = await httpInstance.get('/api/users');
+
+// 带查询参数的GET请求
+const users = await httpInstance.get('/api/users', {
+  page: 1,
+  size: 10,
+  status: 'active'
+});
+
+// 带配置的GET请求
+const users = await httpInstance.get('/api/users', params, {
+  timeout: 5000,
+  responseType: 'json'
+});
+```
+
+### 方法签名
+
+```typescript
+get<T = any>(
+  url: string,
+  params?: Record<string, any>,
+  config?: Partial<AxiosRequestConfig>
+): Promise<T>
+```
+
+## <span id="4-config参数详解">4. config参数详解</span>
+
+config参数是可选的配置对象，基于Axios的RequestConfig，支持以下常用配置：
+
+### 通用配置
+
+```typescript
+interface RequestConfig {
+  // 请求超时时间（毫秒）
+  timeout?: number;
+  
+  // 请求头
+  headers?: Record<string, string>;
+  
+  // 响应类型
+  responseType?: 'json' | 'text' | 'blob' | 'arraybuffer';
+  
+  // 错误处理模式
+  errorMode?: 'toast' | 'modal' | 'hidden';
+  
+  // 是否为刷新Token请求
+  isRefreshToken?: boolean;
+}
+```
+
+### 配置示例
+
+```typescript
+// 文件上传配置
+const uploadConfig = {
+  timeout: 30000,
+  headers: {
+    'Content-Type': 'multipart/form-data'
+  },
+  errorMode: 'toast'
+};
+
+// 静默请求配置（不显示错误提示）
+const silentConfig = {
+  errorMode: 'hidden'
+};
+
+// 长时间请求配置
+const longRequestConfig = {
+  timeout: 60000,
+  responseType: 'json'
+};
+```
+
+## <span id="5-错误处理">5. 错误处理</span>
+
+HttpRequest内置了完善的错误处理机制：
+
+- **Token自动刷新**: 当Token过期时自动刷新并重试请求
+- **请求队列管理**: Token刷新期间的请求会被加入队列
+- **频率限制**: 防止短时间内频繁刷新Token
+- **错误提示**: 支持toast、modal、hidden三种错误显示模式
+
+## <span id="6-最佳实践">6. 最佳实践</span>
+
+### 类型安全
+
+```typescript
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+// 使用泛型确保类型安全
+const user = await httpInstance.get<User>('/api/users/1');
+const users = await httpInstance.get<User[]>('/api/users');
+```
+
+### 错误处理
+
+```typescript
+try {
+  const result = await httpInstance.post('/api/users', userData);
+  console.log('创建成功:', result);
+} catch (error) {
+  console.error('创建失败:', error);
+  // 错误已由HttpRequest内部处理，这里可以添加额外逻辑
+}
+```
+
+### 取消请求
+
+```typescript
+const controller = new AbortController();
+
+const request = httpInstance.get('/api/users', {}, {
+  signal: controller.signal
+});
+
+// 5秒后取消请求
+setTimeout(() => {
+  controller.abort();
+}, 5000);
+```
+
+## <span id="7-注意事项">7. 注意事项</span>
+
+1. **单例使用**: 确保全局只有一个HttpRequest实例
+2. **Token管理**: auth配置会被自动管理，无需手动更新
+3. **错误处理**: 大部分错误已内置处理，特殊情况才需要额外处理
+4. **性能优化**: 避免在循环中创建大量并发请求
+5. **类型安全**: 建议使用TypeScript泛型确保类型安全
+
+通过遵循以上规范，可以确保项目中HTTP请求的一致性和可维护性。

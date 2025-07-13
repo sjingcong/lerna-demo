@@ -7,9 +7,38 @@ tags: ["规范", "目录结构", "Vue", "项目管理"]
 
 # 项目目录规范
 
+<div style={{
+  position: 'fixed',
+  top: '200px',
+  left: '400px',
+  backgroundColor: 'white',
+  border: '1px solid #e1e5e9',
+  borderRadius: '8px',
+  padding: '12px',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+  zIndex: 1000,
+  fontSize: '14px',
+  maxWidth: '220px'
+}}>
+  <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#1890ff' }}>📋 快速导航</div>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+    <a href="#目录结构概览" style={{ color: '#666', textDecoration: 'none' }}>📁 目录结构概览</a>
+    <a href="#目录规范详解" style={{ color: '#666', textDecoration: 'none' }}>📋 目录规范详解</a>
+    <a href="#api接口层" style={{ color: '#666', textDecoration: 'none', paddingLeft: '12px' }}>🔌 api/ - 接口层</a>
+    <a href="#components全局组件" style={{ color: '#666', textDecoration: 'none', paddingLeft: '12px' }}>🧩 components/ - 全局组件</a>
+    <a href="#composables全局hooks" style={{ color: '#666', textDecoration: 'none', paddingLeft: '12px' }}>🎣 composables/ - 全局Hooks</a>
+    <a href="#router路由配置" style={{ color: '#666', textDecoration: 'none', paddingLeft: '12px' }}>🛣️ router/ - 路由配置</a>
+    <a href="#stores状态管理" style={{ color: '#666', textDecoration: 'none', paddingLeft: '12px' }}>🗄️ stores/ - 状态管理</a>
+    <a href="#utils全局工具" style={{ color: '#666', textDecoration: 'none', paddingLeft: '12px' }}>🔧 utils/ - 全局工具</a>
+    <a href="#views页面目录" style={{ color: '#666', textDecoration: 'none', paddingLeft: '12px' }}>📄 views/ - 页面目录</a>
+    <a href="#最佳实践" style={{ color: '#666', textDecoration: 'none' }}>✅ 最佳实践</a>
+    <a href="#总结" style={{ color: '#666', textDecoration: 'none' }}>🚀 总结</a>
+  </div>
+</div>
+
 本文档定义了Vue项目的标准目录结构和文件组织规范，旨在提高代码的可维护性和团队协作效率。
 
-## 📁 目录结构概览
+## <span id="目录结构概览">📁 目录结构概览</span>
 
 ```
 src/
@@ -41,9 +70,9 @@ src/
 └── main.ts               # 应用入口文件
 ```
 
-## 📋 目录规范详解
+## <span id="目录规范详解">📋 目录规范详解</span>
 
-### 🔌 api/ - 接口层
+### <span id="api接口层">🔌 api/ - 接口层</span>
 
 **用途**: 存放全局通用的API接口
 
@@ -68,7 +97,7 @@ export const getUserInfo = () => {
 }
 ```
 
-### 🧩 components/ - 全局组件
+### <span id="components全局组件">🧩 components/ - 全局组件</span>
 
 **用途**: 存放项目中通用的业务组件
 
@@ -96,7 +125,7 @@ defineProps<Props>()
 </script>
 ```
 
-### 🎣 composables/ - 全局Hooks
+### <span id="composables全局hooks">🎣 composables/ - 全局Hooks</span>
 
 **用途**: 存放项目通用的组合式函数
 
@@ -130,7 +159,7 @@ export function useAuth() {
 }
 ```
 
-### 🛣️ router/ - 路由配置
+### <span id="router路由配置">🛣️ router/ - 路由配置</span>
 
 **用途**: 存放路由相关配置
 
@@ -170,7 +199,7 @@ const router = createRouter({
 export default router
 ```
 
-### 🗄️ stores/ - 状态管理
+### <span id="stores状态管理">🗄️ stores/ - 状态管理</span>
 
 **用途**: 使用Pinia实现全局状态管理
 
@@ -209,7 +238,7 @@ export const useUserStore = defineStore('user', () => {
 })
 ```
 
-### 🔧 utils/ - 全局工具
+### <span id="utils全局工具">🔧 utils/ - 全局工具</span>
 
 **用途**: 存放项目中通用的工具函数
 
@@ -229,7 +258,7 @@ export const formatCurrency = (amount: number, currency = 'CNY') => {
 }
 ```
 
-### 📄 views/ - 页面目录
+### <span id="views页面目录">📄 views/ - 页面目录</span>
 
 **用途**: 存放所有页面组件
 
@@ -303,7 +332,7 @@ export const createUser = (data: Omit<User, 'id' | 'createdAt'>) => {
 }
 ```
 
-## ✅ 最佳实践
+## <span id="最佳实践">✅ 最佳实践</span>
 
 ### 1. 文件命名规范
 - **组件文件**: PascalCase (如 `UserTable.vue`)
@@ -331,7 +360,7 @@ import type { User } from './types' // 类型导入
 - **复用优先**: 可复用的代码提取到上层目录
 - **类型安全**: 为所有函数和变量提供类型定义
 
-## 🚀 总结
+## <span id="总结">🚀 总结</span>
 
 遵循这套目录规范可以带来以下好处：
 

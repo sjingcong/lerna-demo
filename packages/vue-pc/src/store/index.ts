@@ -4,7 +4,7 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 const store = createPinia();
 
 // 持久化插件
-// store.use(piniaPluginPersistedstate);
+store.use(piniaPluginPersistedstate);
 
 const useAuthStore = defineStore('authStore', {
   state: () => ({

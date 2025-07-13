@@ -35,7 +35,7 @@ interface ApiResponse<T = any> {
 }
 
 interface RefreshTokenCallbacks {
-  refreshTokenUrl: string;
+  refreshTokenApi: string;
 }
 
 interface HttpClientConfig {
@@ -43,7 +43,7 @@ interface HttpClientConfig {
   baseUrl: string;
   timeout?: number;
   enableLogging?: boolean;
-  refreshTokenUrl?: string;
+  refreshTokenApi?: string;
 }
 
 interface AxiosRequestConfig<D = any> extends InternalAxiosRequestConfig<D> {
@@ -119,7 +119,7 @@ interface PendingRequest {
 class HttpRequest {
   private auth: AuthConfig;
   private baseUrl: string;
-  private refreshTokenUrl: string;
+  private refreshTokenApi: string;
   private service: AxiosInstance;
   private logger: Logger;
 
@@ -132,11 +132,11 @@ class HttpRequest {
   private refreshCooldown = 10000; // 10秒内不允许重复刷新
 
   constructor(config: HttpClientConfig) {
-    const { auth, baseUrl, timeout = DEFAULT_CONFIG.timeout, enableLogging = false, refreshTokenUrl } = config;
+    const { auth, baseUrl, timeout = DEFAULT_CONFIG.timeout, enableLogging = false, refreshTokenApi } = config;
 
     this.auth = auth;
     this.baseUrl = baseUrl;
-    this.refreshTokenUrl = refreshTokenUrl || '';
+    this.refreshTokenApi = refreshTokenApi || '';
     this.logger = new Logger(enableLogging);
 
     this.service = axios.create({
@@ -196,7 +196,7 @@ class HttpRequest {
     const responseData = response.data as ApiResponse;
 
     // Token过期处理 - 加入队列等待刷新
-    if (responseData.code === RESPONSE_CODES.TOKEN_EXPIRED) {
+    if (responseData.code === RESPONSE_CODES.TOKEN_EXPIRED && this.auth.refreshToken) {
       return this.handleTokenExpired(config);
     }
 
@@ -262,7 +262,7 @@ class HttpRequest {
   // 判断是否为refreshToken请求
   private isRefreshTokenRequest(url: string): boolean {
     // 检查URL是否包含refreshToken相关路径
-    return url.includes(this.refreshTokenUrl);
+    return url.includes(this.refreshTokenApi);
   }
 
   // 在Token刷新期间将请求加入队列
@@ -381,8 +381,8 @@ class HttpRequest {
     this.logger.info(`Successfully cleared ${requests.length} pending requests`);
   }
 
-  refreshTokenApi(): Promise<any> {
-    return this.post(this.refreshTokenUrl, {}, {
+  applyRefreshToken(): Promise<any> {
+    return this.post(this.refreshTokenApi, { refreshToken: this.auth.refreshToken }, {
       errorMode: 'hidden',
       isRefreshToken: true,
     }).then((res: any) => {
@@ -392,7 +392,7 @@ class HttpRequest {
     });
   }
   private async asyncRefreshToken(): Promise<void> {
-    if (!this.refreshTokenUrl) {
+    if (!this.refreshTokenApi && this.auth.refreshToken) {
       this.logger.error('No refresh token api configured');
       const error = new Error('登录已失效，请重新登录');
       this.clearPendingRequests(error);
@@ -403,7 +403,7 @@ class HttpRequest {
 
     try {
       this.logger.info('Calling refresh token handler...');
-      await this.refreshTokenApi()
+      await this.applyRefreshToken()
       console.log('token 刷新成功')
       this.logger.info('Token refresh completed successfully');
       
