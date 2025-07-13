@@ -1,0 +1,271 @@
+---
+title: "开源库使用规范"
+description: "项目中第三方库的使用规范表格"
+icon: "mdi:package-variant"
+version: "1.0.0"
+tags: ["规范", "第三方库", "依赖管理"]
+---
+
+<div style={{
+  position: 'fixed',
+  top: '200px',
+  left: '400px',
+  backgroundColor: 'white',
+  border: '1px solid #e1e5e9',
+  borderRadius: '8px',
+  padding: '12px',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+  zIndex: 1000,
+  fontSize: '14px',
+  maxWidth: '200px'
+}}>
+  <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#1890ff' }}>📋 快速导航</div>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+    <a href="#违规处理" style={{ color: '#666', textDecoration: 'none' }}>⚠️ 违规处理</a>
+    <a href="#总体原则" style={{ color: '#666', textDecoration: 'none' }}>📋 总体原则</a>
+    <a href="#库使用规范表" style={{ color: '#666', textDecoration: 'none' }}>📦 规范表</a>
+    <a href="#详细使用文档" style={{ color: '#666', textDecoration: 'none' }}>📚 详细文档</a>
+    <div style={{ paddingLeft: '12px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+      <a href="#ant-design-vue" style={{ color: '#999', textDecoration: 'none', fontSize: '12px' }}>Ant Design Vue</a>
+      <a href="#vant" style={{ color: '#999', textDecoration: 'none', fontSize: '12px' }}>Vant</a>
+      <a href="#dayjs" style={{ color: '#999', textDecoration: 'none', fontSize: '12px' }}>Day.js</a>
+      <a href="#pinia" style={{ color: '#999', textDecoration: 'none', fontSize: '12px' }}>Pinia</a>
+      <a href="#bigjs" style={{ color: '#999', textDecoration: 'none', fontSize: '12px' }}>Big.js</a>
+      <a href="#vue-scrollto" style={{ color: '#999', textDecoration: 'none', fontSize: '12px' }}>vue-scrollto</a>
+      <a href="#axios" style={{ color: '#999', textDecoration: 'none', fontSize: '12px' }}>Axios</a>
+      <a href="#lodash-es" style={{ color: '#999', textDecoration: 'none', fontSize: '12px' }}>lodash-es</a>
+    </div>
+
+    <a href="#规范更新" style={{ color: '#666', textDecoration: 'none' }}>📝 规范更新</a>
+  </div>
+</div>
+
+# 开源库使用规范
+
+## <span id="违规处理">⚠️ 违规处理</span>
+
+❗ **代码审查**: 所有违反本规范的代码将在Code Review阶段被拒绝
+❗ **自动检测**: 配置ESLint规则检测禁用库的使用
+❗ **文档更新**: 本规范会根据项目发展持续更新，请及时关注
+---
+## <span id="总体原则">📋 总体原则</span>
+
+❗ **统一性原则**: 同一功能只能使用一个指定的库，不允许混用  
+❗ **轻量化原则**: 优先选择体积小、性能好的库  
+❗ **维护性原则**: 选择活跃维护、社区支持好的库  
+❗ **类型安全**: 优先选择有完整TypeScript支持的库
+
+---
+## <span id="库使用规范表">📦 库使用规范表</span>
+
+| 功能分类 | ✅ 必须使用 | 引用方式 | ❌ 禁止使用 | 禁用原因 |
+|---------|------------|----------|------------|----------|
+| **UI组件(PC)** | [Ant Design Vue](#ant-design-vue) | `<a-button>` (自动导入，无需手动import) | | |
+| **UI组件(移动)** | [Vant](#vant) | `<van-button>` (自动导入，无需手动import) | | |
+| **日期时间** | [Day.js](#dayjs) | `import dayjs from 'dayjs'` | Moment.js | 体积过大，已停止维护 |
+| | | | Date-fns | 与项目技术栈不符 |
+| | | | 原生Date对象 | 复杂操作不便 |
+| **状态管理** | [Pinia](#pinia) | `import { defineStore } from 'pinia'` | Vuex | 已被Pinia替代 |
+| | | | Redux | 不适用于Vue生态 |
+| **数值计算** | [Big.js](#bigjs) | `import Big from 'big.js'` | 原生JS运算 | 浮点数精度问题 |
+| | | | Decimal.js | 功能过于复杂 |
+| | | | Math.js | 体积过大 |
+| **滚动交互** | [vue-scrollto](#vue-scrollto) | `import { scrollTo } from 'vue-scrollto'` | 原生scrollIntoView | 功能有限 |
+| | | | AOS | 非滚动专用库 |
+| **HTTP请求** | [Axios](#axios) | `import axios from 'axios'` | 原生fetch | 复杂场景不便 |
+| | | | ky | 不符合项目习惯 |
+| | | | superagent | 过时的库 |
+| **工具函数** | [lodash-es](#lodash-es) | `import { debounce } from 'lodash-es'` | Lodash | 使用lodash-es替代 |
+| | | | Underscore.js | 功能重复 |
+| | | | Ramda | 编程风格不符 |
+| **移动端手势** | @vueuse/gesture | `import { useSwipe } from '@vueuse/gesture'` | Hammer.js | 体积大，功能重复 |
+| **设备检测** | @vueuse/core | `import { useGeolocation } from '@vueuse/core'` | 手动编写 | 重复造轮子 |
+| **CSS预处理** | Sass/SCSS | `@import 'styles.scss'` | Less | 不符合技术栈 |
+| | | | Stylus | 语法过于灵活 |
+
+---
+### <span id="ant-design-vue">Ant Design Vue</span>
+
+PC端UI组件库，提供丰富的企业级组件。
+
+```vue
+<template>
+  <!-- ⚠️ 重要：直接使用组件，完全无需手动导入！ -->
+  <a-button type="primary">按钮</a-button>
+  <a-table :columns="columns" :data-source="data" />
+  <a-form>
+    <a-form-item>
+      <a-input placeholder="请输入" />
+    </a-form-item>
+  </a-form>
+</template>
+
+<script setup lang="ts">
+// ✅ 由于配置了AntDesignVueResolver，组件会自动按需导入
+// ❌ 禁止手动import：import { Button, Table } from 'ant-design-vue'
+// ❌ 禁止全局注册：app.use(Antd)
+const columns = [/* 表格列配置 */]
+const data = [/* 表格数据 */]
+</script>
+```
+
+### <span id="vant">Vant</span>
+
+移动端UI组件库，轻量且功能完整。
+
+```vue
+<template>
+  <!-- ⚠️ 重要：直接使用组件，完全无需手动导入！ -->
+  <van-button type="primary">按钮</van-button>
+  <van-cell title="单元格" value="内容" />
+  <van-form>
+    <van-field
+      v-model="value"
+      name="用户名"
+      label="用户名"
+      placeholder="用户名"
+    />
+  </van-form>
+</template>
+
+<script setup lang="ts">
+// ✅ 由于配置了VantResolver，组件会自动按需导入
+// ❌ 禁止手动import：import { Button, Cell } from 'vant'
+// ❌ 禁止全局注册：app.use(Vant)
+import { ref } from 'vue'
+const value = ref('')
+</script>
+```
+## <span id="详细使用文档">📚 详细使用文档</span>
+
+### <span id="dayjs">Day.js</span>
+
+轻量级日期处理库，Moment.js的现代替代品。
+
+```typescript
+import dayjs from 'dayjs'
+import 'dayjs/locale/zh-cn'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+import relativeTime from 'dayjs/plugin/relativeTime'
+
+// 扩展插件
+dayjs.extend(customParseFormat)
+dayjs.extend(relativeTime)
+dayjs.locale('zh-cn')
+
+// 基本使用
+const now = dayjs()
+const formatted = now.format('YYYY-MM-DD HH:mm:ss')
+const relative = now.fromNow()
+```
+
+### <span id="pinia">Pinia</span>
+
+Vue 3 官方推荐的状态管理库，替代Vuex。
+
+```typescript
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+
+// 组合式API风格
+export const useUserStore = defineStore('user', () => {
+  const token = ref<string>('')
+  const userInfo = ref<UserInfo | null>(null)
+  
+  const isLoggedIn = computed(() => !!token.value)
+  
+  const setToken = (newToken: string) => {
+    token.value = newToken
+  }
+  
+  return { token, userInfo, isLoggedIn, setToken }
+})
+```
+
+### <span id="bigjs">Big.js</span>
+
+精确的十进制运算库，解决JavaScript浮点数精度问题。
+
+```typescript
+import Big from 'big.js'
+
+// 精确计算
+const result = new Big('0.1').plus('0.2') // 0.3
+const price = new Big('99.99').times('1.08') // 107.9892
+const percentage = new Big('50').div('100') // 0.5
+
+// 格式化输出
+const formatted = result.toFixed(2) // "0.30"
+```
+
+### <span id="vue-scrollto">vue-scrollto</span>
+
+平滑滚动库，提供丰富的滚动动画效果。
+
+```typescript
+import VueScrollTo from 'vue-scrollto'
+
+// 全局注册
+app.use(VueScrollTo)
+
+// 使用
+this.$scrollTo('#element', 800, { easing: 'ease-in-out' })
+
+// 或直接调用
+import { scrollTo } from 'vue-scrollto'
+scrollTo('#element', 800)
+```
+
+### <span id="axios">Axios</span>
+
+HTTP客户端库，支持请求/响应拦截器。
+
+```typescript
+import axios from 'axios'
+
+// 创建实例
+const api = axios.create({
+  baseURL: '/api',
+  timeout: 10000,
+  headers: { 'Content-Type': 'application/json' }
+})
+
+// 请求拦截器
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+```
+
+### <span id="lodash-es">lodash-es</span>
+
+工具函数库，支持tree-shaking的ES模块版本。
+
+```typescript
+// 按需引入
+import { debounce, throttle, cloneDeep } from 'lodash-es'
+
+// 使用
+const debouncedFn = debounce(handleInput, 300)
+const deepCopy = cloneDeep(originalObject)
+const throttledFn = throttle(handleScroll, 100)
+```
+
+
+
+---
+
+## <span id="规范更新">📝 规范更新</span>
+
+如需添加新的库或修改现有规范，请：
+
+1. 提交技术方案评审
+2. 团队讨论确认
+3. 更新本文档
+4. 通知所有开发人员
+
+**最后更新**: 2024年12月
+**维护人员**: 前端团队

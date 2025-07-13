@@ -28,6 +28,7 @@
     "vant": "^4.8.0",
     "vue": "^3.3.0",
     "vue-router": "^4.5.1",
+    "vue-scrollto": "^2.20.0",
     "web-vitals": "^5.0.3"
   },
   "devDependencies": {
