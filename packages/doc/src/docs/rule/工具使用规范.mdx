@@ -32,10 +32,14 @@ tags: ["规范", "第三方库", "依赖管理"]
       <a href="#pinia" style={{ color: '#999', textDecoration: 'none', fontSize: '12px' }}>Pinia</a>
       <a href="#bigjs" style={{ color: '#999', textDecoration: 'none', fontSize: '12px' }}>Big.js</a>
       <a href="#vue-scrollto" style={{ color: '#999', textDecoration: 'none', fontSize: '12px' }}>vue-scrollto</a>
-      <a href="#axios" style={{ color: '#999', textDecoration: 'none', fontSize: '12px' }}>Axios</a>
       <a href="#lodash-es" style={{ color: '#999', textDecoration: 'none', fontSize: '12px' }}>lodash-es</a>
     </div>
-
+    <a href="#shared包使用" style={{ color: '#666', textDecoration: 'none' }}>📦 Shared包</a>
+    <div style={{ paddingLeft: '12px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+      <a href="#useImagePreload" style={{ color: '#999', textDecoration: 'none', fontSize: '12px' }}>useImagePreload</a>
+      <a href="#usePreload" style={{ color: '#999', textDecoration: 'none', fontSize: '12px' }}>usePreload</a>
+      <a href="#webVitals" style={{ color: '#999', textDecoration: 'none', fontSize: '12px' }}>webVitals</a>
+    </div>
     <a href="#规范更新" style={{ color: '#666', textDecoration: 'none' }}>📝 规范更新</a>
   </div>
 </div>
@@ -72,16 +76,12 @@ tags: ["规范", "第三方库", "依赖管理"]
 | | | | Math.js | 体积过大 |
 | **滚动交互** | [vue-scrollto](#vue-scrollto) | `import { scrollTo } from 'vue-scrollto'` | 原生scrollIntoView | 功能有限 |
 | | | | AOS | 非滚动专用库 |
-| **HTTP请求** | [Axios](#axios) | `import axios from 'axios'` | 原生fetch | 复杂场景不便 |
-| | | | ky | 不符合项目习惯 |
-| | | | superagent | 过时的库 |
 | **工具函数** | [lodash-es](#lodash-es) | `import { debounce } from 'lodash-es'` | Lodash | 使用lodash-es替代 |
 | | | | Underscore.js | 功能重复 |
 | | | | Ramda | 编程风格不符 |
-| **移动端手势** | @vueuse/gesture | `import { useSwipe } from '@vueuse/gesture'` | Hammer.js | 体积大，功能重复 |
-| **设备检测** | @vueuse/core | `import { useGeolocation } from '@vueuse/core'` | 手动编写 | 重复造轮子 |
-| **CSS预处理** | Sass/SCSS | `@import 'styles.scss'` | Less | 不符合技术栈 |
-| | | | Stylus | 语法过于灵活 |
+| **图片预加载** | [useImagePreload](#useImagePreload) | `import { useImagePreload } from '@giom/shared/composables/useImagePreload'` | 手动编写预加载 | 功能不完整 |
+| **模块预加载** | [usePreload](#usePreload) | `import { usePreload } from '@giom/shared/composables/usePreload'` | 手动编写预加载 | 性能不佳 |
+| **性能监控** | [webVitals](#webVitals) | `import '@giom/shared/performance/webVitals'` | 手动监控 | 数据不准确 |
 
 ---
 ### <span id="ant-design-vue">Ant Design Vue</span>
@@ -216,30 +216,6 @@ import { scrollTo } from 'vue-scrollto'
 scrollTo('#element', 800)
 ```
 
-### <span id="axios">Axios</span>
-
-HTTP客户端库，支持请求/响应拦截器。
-
-```typescript
-import axios from 'axios'
-
-// 创建实例
-const api = axios.create({
-  baseURL: '/api',
-  timeout: 10000,
-  headers: { 'Content-Type': 'application/json' }
-})
-
-// 请求拦截器
-api.interceptors.request.use(config => {
-  const token = localStorage.getItem('token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
-```
-
 ### <span id="lodash-es">lodash-es</span>
 
 工具函数库，支持tree-shaking的ES模块版本。
@@ -254,7 +230,165 @@ const deepCopy = cloneDeep(originalObject)
 const throttledFn = throttle(handleScroll, 100)
 ```
 
+### <span id="useImagePreload">useImagePreload</span>
 
+图片预加载组合式函数，提供批量图片预加载功能。
+
+```typescript
+import { useImagePreload } from '@giom/shared/composables/useImagePreload'
+
+// 基本使用
+const { preloadImages, isLoading, loadedCount, totalCount } = useImagePreload()
+
+// 预加载图片列表
+const imageUrls = [
+  '/images/banner1.jpg',
+  '/images/banner2.jpg',
+  '/images/banner3.jpg'
+]
+
+// 开始预加载
+preloadImages(imageUrls).then(() => {
+  console.log('所有图片预加载完成')
+})
+
+// 监听加载进度
+watchEffect(() => {
+  console.log(`加载进度: ${loadedCount.value}/${totalCount.value}`)
+})
+```
+
+### <span id="usePreload">usePreload</span>
+
+模块预加载组合式函数，提供路由和组件的预加载功能。
+
+```typescript
+import { usePreload } from '@giom/shared/composables/usePreload'
+
+// 基本使用
+const { preloadModules, isPreloading } = usePreload()
+
+// 定义预加载模块
+const modules = [
+  {
+    name: 'UserProfile',
+    importer: () => import('@/views/UserProfile.vue'),
+    delay: 1000 // 延迟1秒加载
+  },
+  {
+    name: 'Dashboard',
+    importer: () => import('@/views/Dashboard.vue')
+  }
+]
+
+// 开始预加载
+preloadModules(modules)
+
+// 监听预加载状态
+watchEffect(() => {
+  if (isPreloading.value) {
+    console.log('正在预加载模块...')
+  }
+})
+```
+
+### <span id="webVitals">webVitals</span>
+
+ Web Vitals性能监控工具，自动收集核心性能指标。
+
+```typescript
+// 直接引入即可自动开始监控
+import '@giom/shared/performance/webVitals'
+
+// 监控指标包括：
+// - CLS (Cumulative Layout Shift) - 累积布局偏移
+// - FID (First Input Delay) - 首次输入延迟
+// - FCP (First Contentful Paint) - 首次内容绘制
+// - LCP (Largest Contentful Paint) - 最大内容绘制
+// - TTFB (Time to First Byte) - 首字节时间
+
+// 性能数据会自动上报到控制台
+// 生产环境可配置上报到监控平台
+```
+
+### <span id="shared包使用">@giom/shared 共享包规范</span>
+
+项目级别的共享代码包，❗ **只能存放多项目共享的内容**。
+
+#### 📁 包结构
+```
+packages/shared/
+├── composables/              # 组合式函数
+│   ├── useImagePreload.ts   # 图片预加载Hook
+│   └── usePreload.ts        # 模块预加载Hook
+├── performance/              # 性能监控
+│   └── webVitals.ts         # Web Vitals性能指标
+└── tools/                    # 工具函数（待扩展）
+```
+
+#### ✅ 正确引用方式
+```typescript
+// ✅ 推荐：使用完整路径引用
+import { useImagePreload } from '@giom/shared/composables/useImagePreload'
+import { usePreload } from '@giom/shared/composables/usePreload'
+import '@giom/shared/performance/webVitals'
+```
+
+#### ❌ 禁止的引用方式
+```typescript
+// ❌ 禁止：直接引用包名
+import { usePreload } from '@giom/shared'
+
+// ❌ 禁止：使用相对路径
+import { usePreload } from '../../../shared/composables/usePreload'
+```
+
+#### 🎯 添加内容的审核标准
+
+**必须确认的4个条件**：
+1. **多项目需求**: 是否在至少2个项目中都需要使用？
+2. **通用性**: 是否具有足够的通用性，不包含特定业务逻辑？
+3. **稳定性**: API是否稳定，不会频繁变更？
+4. **维护性**: 是否有明确的维护责任人？
+
+#### ✅ 可以放入shared的内容
+```typescript
+// ✅ 通用工具函数
+export function debounce(fn: Function, delay: number): Function
+
+// ✅ 通用类型定义
+export interface ApiResponse<T> {
+  code: number
+  data: T
+  message: string
+}
+
+// ✅ 通用Hook
+export function useLocalStorage(key: string)
+
+// ✅ 性能监控工具
+export function trackPageView(page: string)
+```
+
+#### ❌ 不能放入shared的内容
+```typescript
+// ❌ 业务特定逻辑
+export function calculateShippingFee(order: Order): number
+
+// ❌ 项目特定配置
+export const API_ENDPOINTS = {
+  user: '/api/user',
+  order: '/api/order'
+}
+
+// ❌ 单项目使用的组件
+export function useOrderManagement()
+
+// ❌ 特定UI框架的组件
+export function useAntdForm()
+```
+
+**核心原则**: ❗ **只存放项目级别共享的内容**
 
 ---
 
