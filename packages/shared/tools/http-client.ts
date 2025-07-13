@@ -117,12 +117,23 @@ class Logger {
   }
 }
 
+// Token刷新状态管理
+interface PendingRequest {
+  config: AxiosRequestConfig;
+  resolve: (value: any) => void;
+  reject: (reason: any) => void;
+}
+
 class HttpRequest {
   private refreshTokenCallbacks?: RefreshTokenCallbacks;
   private auth: AuthConfig;
   private baseUrl: string;
   private service: AxiosInstance;
   private logger: Logger;
+  
+  // Token刷新相关状态
+  private isRefreshing = false;
+  private pendingRequests: PendingRequest[] = [];
   
   constructor(config: HttpClientConfig) {
     const { auth, baseUrl, timeout = DEFAULT_CONFIG.timeout, enableLogging = false } = config;
@@ -187,10 +198,9 @@ class HttpRequest {
     
     const responseData = response.data as ApiResponse;
     
-    // Token过期处理
+    // Token过期处理 - 加入队列等待刷新
     if (responseData.code === ERROR_CODES.TOKEN_EXPIRED) {
-      this.asyncRefreshToken();
-      return Promise.reject(new Error('Token expired'));
+      return this.handleTokenExpired(config);
     }
     
     // 返回原始数据
@@ -244,14 +254,75 @@ class HttpRequest {
     this.logger.info('Refresh token callbacks set');
   }
 
+  // 处理Token过期的请求
+  private handleTokenExpired(config: AxiosRequestConfig): Promise<any> {
+    return new Promise((resolve, reject) => {
+      // 将请求加入待处理队列
+      this.pendingRequests.push({ config, resolve, reject });
+      
+      // 如果没有正在刷新，则开始刷新
+      if (!this.isRefreshing) {
+        this.asyncRefreshToken();
+      }
+    });
+  }
+
+  // 重新发送待处理的请求 - 并行处理
+  private async retryPendingRequests(): Promise<void> {
+    const requests = [...this.pendingRequests];
+    this.pendingRequests = [];
+    
+    this.logger.info(`Retrying ${requests.length} pending requests in parallel`);
+    
+    // 并行处理所有待处理的请求
+    const retryPromises = requests.map(async ({ config, resolve, reject }) => {
+      try {
+        // 更新请求头中的token
+        config.headers = {
+          ...config.headers,
+          Authorization: `Bearer ${this.auth.accessToken}`
+        };
+        
+        const response = await this.service.request(config);
+        resolve(response);
+      } catch (error) {
+        reject(error);
+      }
+    });
+    
+    // 等待所有请求完成（不管成功还是失败）
+    await Promise.allSettled(retryPromises);
+  }
+
+  // 清空待处理请求队列
+  private clearPendingRequests(error: Error): void {
+    const requests = [...this.pendingRequests];
+    this.pendingRequests = [];
+    
+    this.logger.info(`Clearing ${requests.length} pending requests due to refresh failure`);
+    
+    requests.forEach(({ reject }) => {
+      reject(error);
+    });
+  }
+
   private async asyncRefreshToken(): Promise<void> {
+    if (this.isRefreshing) {
+      // 如果已经在刷新中，直接返回，不需要等待
+      return;
+    }
+    
     if (!this.refreshTokenCallbacks?.onRefreshTokenHandler) {
       this.logger.error('No refresh token handler configured');
+      const error = new Error('登录已失效，请重新登录');
+      this.clearPendingRequests(error);
       return;
     }
 
+    this.isRefreshing = true;
+    this.logger.info('Starting token refresh...');
+    
     try {
-      this.logger.info('Refreshing token...');
       const result = await this.refreshTokenCallbacks.onRefreshTokenHandler();
       
       if (this.refreshTokenCallbacks.onRefreshTokenCompleted) {
@@ -259,8 +330,17 @@ class HttpRequest {
       }
       
       this.logger.info('Token refreshed successfully');
+      this.isRefreshing = false;
+      // 重新发送待处理的请求
+      await this.retryPendingRequests();
+      
     } catch (error) {
+      this.isRefreshing = false;
       this.logger.error('Token refresh failed', error);
+      
+      // 清空待处理请求队列 - 登录失效
+      const loginExpiredError = new Error('登录已失效，请重新登录');
+      this.clearPendingRequests(loginExpiredError);
       
       if (this.refreshTokenCallbacks.onRefreshTokenFailed) {
         this.refreshTokenCallbacks.onRefreshTokenFailed();
@@ -271,6 +351,15 @@ class HttpRequest {
   // 实例销毁
   public destroy(): void {
     this.logger.info('HttpClient destroyed');
+    
+    // 清理待处理的请求队列
+    if (this.pendingRequests.length > 0) {
+      const error = new Error('HttpRequest instance destroyed');
+      this.clearPendingRequests(error);
+    }
+    
+    // 重置刷新状态
+    this.isRefreshing = false;
   }
 }
 
