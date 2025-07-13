@@ -155,8 +155,8 @@ class HttpRequest {
         // 只处理请求头设置，保持幂等性
         config.headers = {
           'Content-Type': DEFAULT_CONFIG.contentType,
+          ...config.headers,
           Authorization: `Bearer ${this.auth.accessToken}`,
-          ...config.headers
         };
 
         this.logger.info('Request sent', {
