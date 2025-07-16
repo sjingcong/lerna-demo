@@ -1,10 +1,10 @@
 <template>
   <div class="module-config">
-    <!-- 左侧模板列表 -->
+    <!-- 左侧模块列表 -->
     <div class="template-list">
       <div class="list-header">
-        <h3 class="list-title">模板列表</h3>
-        <div class="list-count">{{ templates.length }} 个模板</div>
+        <h3 class="list-title">模块列表</h3>
+        <div class="list-count">{{ templates.length }} 个模块</div>
       </div>
       
       <div class="list-content">
@@ -12,11 +12,11 @@
           v-for="(template, index) in templates" 
           :key="template.moduleName"
           class="template-item"
-          :class="{ 'selected': selectedTemplate?.moduleName === template.moduleName }"
+          :class="{ 'selected': selectedModule?.moduleName === template.moduleName }"
           @click="selectTemplate(template)"
         >
           <div class="template-icon">
-            <i class="icon" :class="getTemplateIcon(template.moduleCode)"></i>
+            <i class="icon" :class="getModuleIcon(template.moduleCode)"></i>
           </div>
           
           <div class="template-info">
@@ -30,15 +30,15 @@
           <div class="template-actions">
             <button 
               class="action-btn preview-btn"
-              @click.stop="previewTemplate(template)"
-              title="预览模板"
+              @click.stop="previewModule(template)"
+              title="预览模块"
             >
               <EyeOutlined />
             </button>
             <button 
               class="action-btn edit-btn"
-              @click.stop="editTemplate(template)"
-              title="编辑模板"
+              @click.stop="editModule(template)"
+              title="编辑模块"
             >
               <EditOutlined />
             </button>
@@ -49,23 +49,24 @@
       <div class="list-footer">
         <button class="add-template-btn" @click="addNewTemplate">
           <i class="icon-plus"></i>
-          添加新模板
+          添加新模块
         </button>
       </div>
     </div>
     
     <!-- 右侧配置区域 -->
     <div class="config-panel">
-      <div v-if="selectedTemplate" class="panel-content">
+      <div v-if="selectedModule" class="panel-content">
         <div class="panel-header">
-          <h3>{{ selectedTemplate.moduleName }} 配置</h3>
+          <h3>{{ selectedModule.moduleName }} 配置</h3>
         </div>
         <div class="panel-body">
-          <!-- 动态渲染选中的模板组件 -->
-           <div class="template-render" v-if="selectedTemplate">
-             <TemplateRender 
-               :template-component="selectedTemplate.moduleCode"
-               :data="templateData"
+          <!-- 动态渲染选中的模块组件 -->
+           <div class="template-render" v-if="selectedModule">
+             <ModuleRender 
+               :template-component="selectedModule.moduleCode"
+               :data="selectedModuleData.data"
+               :config="selectedModuleData.config"
              />
            </div>
           <p class="placeholder">配置面板内容待实现...</p>
@@ -76,7 +77,7 @@
         <div class="empty-icon">
           <i class="icon-template"></i>
         </div>
-        <p class="empty-text">请选择一个模板进行配置</p>
+        <p class="empty-text">请选择一个模块进行配置</p>
       </div>
     </div>
   </div>
@@ -86,58 +87,40 @@
 import { computed, ref, onMounted } from 'vue'
 import { usePlanTemplateStore } from '../../store/planTemplate'
 import { EyeOutlined, EditOutlined } from '@ant-design/icons-vue'
-import TemplateRender from './TemplateRender.vue'
+import ModuleRender from './ModuleRender.vue'
 import type { IModule } from './types'
 
 // 使用store并确保类型正确
 const store = usePlanTemplateStore()
 
-// 响应式数据
-const selectedTemplate = ref<IModule | null>(null)
-
 // 计算属性
-const templates = computed(() => store.templates)
+const templates = computed(() => store.modules)
+const selectedModule = computed(() => store.currentModule)
 
-// 初始化模板数据
-const initTemplateData = (templateType: string) => {
-  if (templateType === 'cover' && !store.templateData.cover) {
-    store.initCoverData()
-  } else if (templateType === 'catalog' && !store.templateData.catalog) {
-    store.initCatalogData()
-  }
-}
 
-// 模板组件的数据
-const templateData = computed(() => {
-  if (!selectedTemplate.value) return {}
+
+// 模块组件的数据
+const selectedModuleData = computed(() => {
+  if (!selectedModule.value) return {}
   
-  // 根据模板类型获取对应的数据
-  const templateType = selectedTemplate.value.moduleCode.toLowerCase()
-  let data = {}
-  
-  if (templateType === 'cover') {
-    data = store.templateData.cover || {}
-  } else if (templateType === 'catalog') {
-    data = store.templateData.catalog || {}
-  }
+  // 根据模块代码获取对应的数据
+  const moduleCode = selectedModule.value.moduleCode
+  const data = store.moduleValueMap[moduleCode] || {}
   
   return {
-    ...data,
-    // 同时传递模板配置信息
-    config: selectedTemplate.value
+    data,
+    // 同时传递模块配置信息
+    config: selectedModule.value
   }
 })
 
-// 选择模板
-const selectTemplate = (template: IModule) => {
-  selectedTemplate.value = template
-  // 初始化对应模板的数据
-  const templateType = template.moduleCode.toLowerCase()
-  initTemplateData(templateType)
+// 选择模块
+const selectTemplate = async (template: IModule) => {
+  await store.setCurrentModule(template)
 }
 
-// 获取模板图标
-const getTemplateIcon = (moduleCode: string) => {
+// 获取模块图标
+const getModuleIcon = (moduleCode: string) => {
   const iconMap: Record<string, string> = {
     'cover': 'icon-cover',
     'catalog': 'icon-catalog',
@@ -147,28 +130,36 @@ const getTemplateIcon = (moduleCode: string) => {
   return iconMap[moduleCode] || 'icon-template'
 }
 
-// 预览模板
-const previewTemplate = (template: IModule) => {
-  console.log('预览模板:', template.moduleName)
+// 预览模块
+const previewModule = (template: IModule) => {
+  console.log('预览模块:', template.moduleName)
   // TODO: 实现预览功能
 }
 
-// 编辑模板
-const editTemplate = (template: IModule) => {
-  console.log('编辑模板:', template.moduleName)
+// 编辑模块
+const editModule = (template: IModule) => {
+  console.log('编辑模块:', template.moduleName)
   // TODO: 实现编辑功能
 }
 
-// 添加新模板
+// 添加新模块
 const addNewTemplate = () => {
-  console.log('添加新模板')
+  console.log('添加新模块')
   // TODO: 实现添加功能
 }
 
-// 组件挂载时默认选择第一个模板
-onMounted(() => {
-  if (templates.value.length > 0) {
-    selectTemplate(templates.value[0])
+// 组件挂载时初始化模块列表并选择第一个模块
+onMounted(async () => {
+  try {
+    // 初始化模块列表
+    await store.initModules()
+    
+    // 选择第一个模块
+    if (templates.value.length > 0) {
+      await store.selectModuleByCode(templates.value[0].moduleCode)
+    }
+  } catch (error) {
+    console.error('初始化模块配置失败:', error)
   }
 })
 </script>
@@ -180,7 +171,7 @@ onMounted(() => {
   background-color: #f5f7fa;
 }
 
-/* 左侧模板列表 */
+/* 左侧模块列表 */
 .template-list {
   width: 400px;
   background: white;

@@ -7,24 +7,24 @@ import Catalog from '@/views/modules/Catalog.vue'
 
 
 
-// 模板组件映射对象
+// 模块组件映射对象
 export const TEMPLATE_COMPONENTS: Record<string, Component> = {
   cover: Cover,
   catalog: Catalog
 }
 
-// 获取模板组件的函数
+// 获取模块组件的函数
 export const getTemplateComponent = (componentName: string): Component | undefined => {
   return TEMPLATE_COMPONENTS[componentName]
 }
 
 interface PlanTemplateState {
-  // 当前选中的模板
-  currentTemplate: IModule | null
-  // 模板列表
-  templates: IModule[]
-  // 当前模板的数据
-  templateData: Record<string, any>
+  // 当前选中的模块
+  currentModule: IModule | null
+  // 模块列表
+  modules: IModule[]
+  // 当前模块的数据
+  moduleValueMap: Record<string, any>
   // 计划书标题
   planTitle: string
   // 计划书描述
@@ -35,54 +35,14 @@ interface PlanTemplateState {
   isSaving: boolean
 }
 
-// 默认模板列表
-const defaultTemplateList: IModule[] = [
-  {
-    moduleCode: 'cover',
-    moduleType: '封面',
-    moduleName: '封面模板',
-    backImage: '',
-    editable: true,
-    deletable: false,
-    templateAttrs: [
-      {
-        attrKey: 'title',
-        attrName: '标题',
-        editComponentType: 'Input'
-      }
-    ],
-    moduleValue: {
-      title: '请输入标题'
-    }
-  },
-  {
-    moduleCode: 'catalog',
-    moduleType: '目录',
-    moduleName: '目录模板',
-    backImage: '',
-    editable: true,
-    deletable: false,
-    templateAttrs: [
-      {
-        attrKey: 'catalogList',
-        attrName: '目录列表',
-        editComponentType: null
-      }
-    ],
-    moduleValue: {
-      catalogList: []
-    }
-  }
-]
-
 
 
 export const usePlanTemplateStore = defineStore('planTemplate', () => {
   // 状态
   const state = reactive<PlanTemplateState>({
-    currentTemplate: null,
-    templates: [],
-    templateData: {},
+    currentModule: null,
+    modules: [],
+    moduleValueMap: {},
     planTitle: '',
     planDescription: '',
     isEditing: false,
@@ -90,15 +50,15 @@ export const usePlanTemplateStore = defineStore('planTemplate', () => {
   })
 
   /**
-   * 从远程获取模板列表（暂时使用mock数据）
+   * 从远程获取模块列表（暂时使用mock数据）
    */
-  const getRemoteTemplates = async (): Promise<IModule[]> => {
-    // 模拟远程模板数据
+  const getRemoteModules = async (): Promise<IModule[]> => {
+    // 模拟远程模块数据
     const mockTemplates: IModule[] = [
       {
         moduleCode: 'cover',
         moduleType: '封面',
-        moduleName: '封面模板',
+        moduleName: '封面模块',
         backImage: 'https://example.com/cover-bg.jpg',
         editable: true,
         deletable: false,
@@ -128,7 +88,7 @@ export const usePlanTemplateStore = defineStore('planTemplate', () => {
       {
         moduleCode: 'catalog',
         moduleType: '目录',
-        moduleName: '目录模板',
+        moduleName: '目录模块',
         backImage: 'https://example.com/catalog-bg.jpg',
         editable: true,
         deletable: false,
@@ -146,7 +106,7 @@ export const usePlanTemplateStore = defineStore('planTemplate', () => {
       {
         moduleCode: 'content',
         moduleType: '内容',
-        moduleName: '内容模板',
+        moduleName: '内容模块',
         backImage: 'https://example.com/content-bg.jpg',
         editable: true,
         deletable: true,
@@ -176,17 +136,15 @@ export const usePlanTemplateStore = defineStore('planTemplate', () => {
   }
 
   /**
-   * 初始化模板列表
+   * 初始化模块列表
    */
-  const initTemplates = async () => {
+  const initModules = async () => {
     try {
-      const templates = await getRemoteTemplates()
-      state.templates = templates
-      console.log('Templates initialized successfully:', templates.length)
+      const modules = await getRemoteModules()
+      state.modules = modules
+      console.log('Templates initialized successfully:', modules.length)
     } catch (error) {
       console.error('Failed to initialize templates:', error)
-      // 降级处理：使用默认模板
-      state.templates = [...defaultTemplateList]
     }
   }
 
@@ -223,7 +181,7 @@ export const usePlanTemplateStore = defineStore('planTemplate', () => {
   }
 
   /**
-   * 根据moduleCode初始化模板数据
+   * 根据moduleCode初始化模块数据
    * @param moduleCode 模块代码
    */
   const initModuleValue = async (moduleCode: string) => {
@@ -232,7 +190,7 @@ export const usePlanTemplateStore = defineStore('planTemplate', () => {
       const remoteData = await getRemoteDataByCode(moduleCode)
       
       // 查找对应的模块配置
-      const moduleConfig = state.templates.find(template => template.moduleCode === moduleCode)
+      const moduleConfig = state.modules.find(template => template.moduleCode === moduleCode)
       
       if (moduleConfig) {
         // 合并模块的默认值和远程数据
@@ -242,8 +200,8 @@ export const usePlanTemplateStore = defineStore('planTemplate', () => {
         }
         
         // 更新状态
-        state.templateData = {
-          ...state.templateData,
+        state.moduleValueMap = {
+          ...state.moduleValueMap,
           [moduleCode]: mergedData
         }
       } else {
@@ -253,10 +211,10 @@ export const usePlanTemplateStore = defineStore('planTemplate', () => {
       console.error(`Failed to initialize template data for ${moduleCode}:`, error)
       
       // 降级处理：使用模块默认值
-      const moduleConfig = state.templates.find(template => template.moduleCode === moduleCode)
+      const moduleConfig = state.modules.find(template => template.moduleCode === moduleCode)
       if (moduleConfig) {
-        state.templateData = {
-          ...state.templateData,
+        state.moduleValueMap = {
+          ...state.moduleValueMap,
           [moduleCode]: moduleConfig.moduleValue
         }
       }
@@ -265,25 +223,51 @@ export const usePlanTemplateStore = defineStore('planTemplate', () => {
 
 
   /**
-   * 检查模板数据是否已初始化
-   * @param templateKey 模板键值
+   * 检查模块数据是否已初始化
+   * @param templateKey 模块键值
    */
-  const isTemplateDataInitialized = (templateKey: string): boolean => {
-    return !!state.templateData[templateKey]
+  const isModuleDataInitialized = (templateKey: string): boolean => {
+    return !!state.moduleValueMap[templateKey]
   }
 
+  /**
+   * 设置当前选中的模块
+   * @param module 要选中的模块
+   */
+  const setCurrentModule = async (module: IModule | null) => {
+    state.currentModule = module
+    
+    // 如果选中了模块，自动初始化其数据
+    if (module) {
+      await initModuleValue(module.moduleCode)
+    }
+  }
 
- 
+  /**
+   * 根据moduleCode选择模块
+   * @param moduleCode 模块代码
+   */
+  const selectModuleByCode = async (moduleCode: string) => {
+    const module = state.modules.find(m => m.moduleCode === moduleCode)
+    if (module) {
+      await setCurrentModule(module)
+    } else {
+      console.warn(`Module not found for code: ${moduleCode}`)
+    }
+  }
 
   return {
     // 暴露状态
     ...toRefs(state),
-    // 暴露模板管理方法
-    initTemplates,
+    // 暴露模块管理方法
+    initModules,
     // 暴露数据管理方法
     initModuleValue,
-    isTemplateDataInitialized,
-
+    isModuleDataInitialized,
+    // 暴露模块选择方法
+    setCurrentModule,
+    selectModuleByCode,
+    getRemoteDataByCode
   }
 }, {
   // 持久化配置

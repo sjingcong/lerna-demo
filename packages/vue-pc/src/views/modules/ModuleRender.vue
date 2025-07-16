@@ -3,7 +3,7 @@
     <component 
       :is="currentComponent" 
       v-if="currentComponent"
-      v-bind="data"
+      v-bind="{ data, config }"
     />
     <div v-else class="component-not-found">
       组件 "{{ templateComponent }}" 未找到
@@ -14,10 +14,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { getTemplateComponent } from '@/store/planTemplate'
+import type { IModule } from './types'
 
 interface Props {
   templateComponent: string
   data?: Record<string, any>
+  config?: IModule
 }
 
 const props = withDefaults(defineProps<Props>(), {

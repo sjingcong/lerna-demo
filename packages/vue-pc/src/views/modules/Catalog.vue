@@ -4,16 +4,17 @@
       <h2 class="catalog-title">目录</h2>
     </div>
     <div class="catalog-content">
-      <ul class="catalog-list" v-if="catalogList && catalogList.length > 0">
+      <ul class="catalog-list" v-if="props.data?.catalogList && props.data.catalogList.length > 0">
         <li 
-          v-for="(item, index) in catalogList" 
+          v-for="(item, index) in props.data.catalogList" 
           :key="index" 
           class="catalog-item"
           @click="handleItemClick(item, index)"
         >
           <span class="catalog-number">{{ index + 1 }}.</span>
-          <span class="catalog-text">{{ item }}</span>
+          <span class="catalog-text">{{ typeof item === 'string' ? item : item.title }}</span>
           <span class="catalog-dots"></span>
+          <span v-if="typeof item === 'object' && item.page" class="catalog-page">{{ item.page }}</span>
         </li>
       </ul>
       <div v-else class="catalog-empty">
@@ -26,18 +27,23 @@
 
 <script setup lang="ts">
 import { defineProps, defineEmits, watch } from 'vue'
-
-
+import type { IModule } from './types'
 
 interface Props {
-  catalogList: (string )[]
+  data?: {
+    catalogList?: (string | { title: string; page?: number })[];
+    [key: string]: any;
+  };
+  config?: IModule;
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  data: () => ({})
+})
 
 
 // 处理目录项点击事件
-const handleItemClick = (item: string, index: number) => {
+const handleItemClick = (item: string | { title: string; page?: number }, index: number) => {
   console.log('Catalog item clicked:', { item, index })
   // 可以在这里添加跳转逻辑
 }

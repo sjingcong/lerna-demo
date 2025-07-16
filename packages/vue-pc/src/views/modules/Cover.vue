@@ -64,6 +64,7 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
 import { Field as VanField } from 'vant'
+import type { IModule } from './types'
 
 // 表单数据接口
 interface FormData {
@@ -76,19 +77,19 @@ interface FormData {
 
 // Props
 interface Props {
-  companyName?: string
-  year?: string
-  serviceManager?: string
-  phone?: string
-  email?: string
+  data?: {
+    companyName?: string
+    year?: string
+    serviceManager?: string
+    phone?: string
+    email?: string
+    [key: string]: any
+  }
+  config?: IModule
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  companyName: '',
-  year: new Date().getFullYear().toString(),
-  serviceManager: '',
-  phone: '',
-  email: ''
+  data: () => ({})
 })
 
 // Emits
@@ -98,11 +99,11 @@ const emit = defineEmits<{
 
 // 表单数据
 const formData = reactive<FormData>({
-  companyName: props.companyName,
-  year: props.year,
-  serviceManager: props.serviceManager,
-  phone: props.phone,
-  email: props.email
+  companyName: props.data?.companyName || '',
+  year: props.data?.year || new Date().getFullYear().toString(),
+  serviceManager: props.data?.serviceManager || '',
+  phone: props.data?.phone || '',
+  email: props.data?.email || ''
 })
 
 // 处理字段变化
