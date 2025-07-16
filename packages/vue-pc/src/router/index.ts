@@ -19,7 +19,7 @@ const routes = [
   {
     path: '/template-demo',
     name: 'TemplateDemo',
-    component: () => import('@/views/modules/TemplateDemoPage.vue')
+    component: () => import('@/views/modules/ModuleConfig.vue')
   }
 ]
 
