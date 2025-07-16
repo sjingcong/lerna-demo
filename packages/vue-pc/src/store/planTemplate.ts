@@ -394,11 +394,38 @@ export const usePlanTemplateStore = defineStore('planTemplate', () => {
     }
   }
 
+  /**
+   * 更新模块配置
+   * @param updatedModule 更新后的模块数据
+   */
+  const updateModule = async (updatedModule: IModule) => {
+    try {
+      // 查找并更新模块列表中的对应模块
+      const moduleIndex = state.modules.findIndex(m => m.moduleCode === updatedModule.moduleCode)
+      if (moduleIndex !== -1) {
+        state.modules[moduleIndex] = { ...state.modules[moduleIndex], ...updatedModule }
+        
+        // 如果更新的是当前选中的模块，同时更新当前模块
+        if (state.currentModule?.moduleCode === updatedModule.moduleCode) {
+          state.currentModule = state.modules[moduleIndex]
+        }
+        
+        console.log('Module updated successfully:', updatedModule.moduleCode)
+      } else {
+        console.warn(`Module not found for update: ${updatedModule.moduleCode}`)
+      }
+    } catch (error) {
+      console.error('Failed to update module:', error)
+      throw error
+    }
+  }
+
   return {
     // 暴露状态
     ...toRefs(state),
     // 暴露模块管理方法
     initModules,
+    updateModule,
     // 暴露数据管理方法
     initModuleValue,
     isModuleDataInitialized,

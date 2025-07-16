@@ -54,11 +54,11 @@
       </div>
     </div>
     
-    <!-- 右侧配置区域 -->
-    <div class="config-panel">
+    <!-- 中间模块渲染区域 -->
+    <div class="render-panel">
       <div v-if="selectedModule" class="panel-content">
         <div class="panel-header">
-          <h3>{{ selectedModule.moduleName }} 配置</h3>
+          <h3>{{ selectedModule.moduleName }} 预览</h3>
         </div>
         <div class="panel-body">
           <!-- 动态渲染选中的模块组件 -->
@@ -69,7 +69,6 @@
                :config="selectedModuleData.config"
              />
            </div>
-          <p class="placeholder">配置面板内容待实现...</p>
         </div>
       </div>
       
@@ -77,8 +76,16 @@
         <div class="empty-icon">
           <i class="icon-template"></i>
         </div>
-        <p class="empty-text">请选择一个模块进行配置</p>
+        <p class="empty-text">请选择一个模块进行预览</p>
       </div>
+    </div>
+    
+    <!-- 右侧数据配置区域 -->
+    <div class="data-config-panel">
+      <ModuleDataConfig 
+        :module-data="selectedModule"
+        @save="handleModuleDataSave"
+      />
     </div>
   </div>
 </template>
@@ -88,6 +95,7 @@ import { computed, ref, onMounted } from 'vue'
 import { usePlanTemplateStore } from '../../store/planTemplate'
 import { EyeOutlined, EditOutlined } from '@ant-design/icons-vue'
 import ModuleRender from './ModuleRender.vue'
+import ModuleDataConfig from './ModuleDataConfig.vue'
 import type { IModule } from './types'
 
 // 使用store并确保类型正确
@@ -146,6 +154,17 @@ const editModule = (template: IModule) => {
 const addNewTemplate = () => {
   console.log('添加新模块')
   // TODO: 实现添加功能
+}
+
+// 处理模块数据保存
+const handleModuleDataSave = async (moduleData: IModule) => {
+  try {
+    // 更新store中的模块数据
+    await store.updateModule(moduleData)
+    console.log('模块数据保存成功:', moduleData)
+  } catch (error) {
+    console.error('保存模块数据失败:', error)
+  }
 }
 
 // 组件挂载时初始化模块列表并选择第一个模块
@@ -371,9 +390,18 @@ onMounted(async () => {
   border-radius: 2px;
 }
 
-/* 右侧配置面板 */
-.config-panel {
+/* 中间模块渲染面板 */
+.render-panel {
   flex: 1;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #e4e7ed;
+}
+
+/* 右侧数据配置面板 */
+.data-config-panel {
+  width: 350px;
   background: white;
   display: flex;
   flex-direction: column;
@@ -450,9 +478,23 @@ onMounted(async () => {
 }
 
 /* 响应式设计 */
+@media (max-width: 1200px) {
+  .template-list {
+    width: 300px;
+  }
+  
+  .data-config-panel {
+    width: 300px;
+  }
+}
+
 @media (max-width: 1024px) {
   .template-list {
-    width: 320px;
+    width: 280px;
+  }
+  
+  .data-config-panel {
+    width: 280px;
   }
 }
 
@@ -464,11 +506,18 @@ onMounted(async () => {
   
   .template-list {
     width: 100%;
-    height: 50vh;
+    height: 40vh;
   }
   
-  .config-panel {
-    height: 50vh;
+  .render-panel {
+    height: 40vh;
+    border-right: none;
+    border-bottom: 1px solid #e4e7ed;
+  }
+  
+  .data-config-panel {
+    width: 100%;
+    height: 20vh;
   }
 }
 
