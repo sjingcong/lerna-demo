@@ -100,10 +100,9 @@ const templates = computed(() => store.templates)
 
 // 初始化模板数据
 const initTemplateData = (templateType: string) => {
-  if (templateType === 'cover' && !store.templateData.cover) {
-    store.initCoverData()
-  } else if (templateType === 'catalog' && !store.templateData.catalog) {
-    store.initCatalogData()
+  // 使用新的通用初始化方法
+  if (!store.isTemplateDataInitialized(templateType)) {
+    store.initTemplateData(templateType)
   }
 }
 

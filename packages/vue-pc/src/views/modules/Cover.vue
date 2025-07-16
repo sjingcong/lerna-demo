@@ -1,86 +1,287 @@
 <template>
   <div class="cover-template">
-    <div class="cover-container">
-      <h1 class="cover-title">{{ title || '请输入标题' }}</h1>
-      <div class="cover-decoration"></div>
+    <!-- 企业保障计划书表单区域 -->
+    <div class="form-section">
+      <div class="form-container">
+        <h2 class="form-title">企业保障计划书</h2>
+        
+        <div class="form-fields">
+          <div class="field-item">
+            <label class="field-label">企业名称</label>
+            <van-field
+              v-model="formData.companyName"
+              placeholder="请输入企业名称"
+              class="custom-field"
+              @update:model-value="handleFieldChange"
+            />
+          </div>
+          
+          <div class="field-item">
+            <label class="field-label">年份</label>
+            <van-field
+              v-model="formData.year"
+              placeholder="请输入年份"
+              class="custom-field"
+              @update:model-value="handleFieldChange"
+            />
+          </div>
+          
+          <div class="field-item">
+            <label class="field-label">服务经理</label>
+            <van-field
+              v-model="formData.serviceManager"
+              placeholder="请输入服务经理姓名"
+              class="custom-field"
+              @update:model-value="handleFieldChange"
+            />
+          </div>
+          
+          <div class="field-item">
+            <label class="field-label">联系电话</label>
+            <van-field
+              v-model="formData.phone"
+              placeholder="请输入联系电话"
+              class="custom-field"
+              @update:model-value="handleFieldChange"
+            />
+          </div>
+          
+          <div class="field-item">
+            <label class="field-label">电子邮箱</label>
+            <van-field
+              v-model="formData.email"
+              placeholder="请输入电子邮箱"
+              class="custom-field"
+              @update:model-value="handleFieldChange"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, watch } from 'vue'
+import { reactive } from 'vue'
+import { Field as VanField } from 'vant'
 
+// 表单数据接口
+interface FormData {
+  companyName: string
+  year: string
+  serviceManager: string
+  phone: string
+  email: string
+}
+
+// Props
 interface Props {
-  title?: string
+  companyName?: string
+  year?: string
+  serviceManager?: string
+  phone?: string
+  email?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  title: ''
+  companyName: '',
+  year: new Date().getFullYear().toString(),
+  serviceManager: '',
+  phone: '',
+  email: ''
 })
 
+// Emits
+const emit = defineEmits<{
+  update: [data: FormData]
+}>()
+
+// 表单数据
+const formData = reactive<FormData>({
+  companyName: props.companyName,
+  year: props.year,
+  serviceManager: props.serviceManager,
+  phone: props.phone,
+  email: props.email
+})
+
+// 处理字段变化
+const handleFieldChange = () => {
+  emit('update', { ...formData })
+}
 </script>
 
 <style scoped>
 .cover-template {
-  width: 100%;
-  height: 400px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 350px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   position: relative;
+  padding: 20px;
+  margin: 0 auto;
+}
+
+/* 企业保障计划书悬浮模块 */
+.cover-template > * {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  width: 100%;
+  display: flex;
 }
 
-.cover-container {
-  text-align: center;
+/* 背景图片区域 */
+.background-section {
+  flex: 1;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px;
   color: white;
-  z-index: 2;
 }
 
-.cover-title {
-  font-size: 3rem;
+.company-logo {
+  text-align: left;
+}
+
+.logo-text {
+  font-size: 24px;
   font-weight: bold;
-  margin: 0;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  line-height: 1.2;
+  margin-bottom: 8px;
+  letter-spacing: 2px;
 }
 
-.cover-decoration {
-  width: 100px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.8);
-  margin: 20px auto 0;
-  border-radius: 2px;
+.logo-subtitle {
+  font-size: 14px;
+  opacity: 0.9;
+  letter-spacing: 1px;
 }
 
-.cover-template::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-  animation: float 6s ease-in-out infinite;
+.business-people {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-20px) rotate(180deg);
-  }
+.people-placeholder {
+  font-size: 80px;
+  opacity: 0.8;
+  text-align: center;
 }
 
+/* 表单区域 */
+.form-section {
+  flex: 1;
+  background: white;
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+.form-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.field-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.field-label {
+  min-width: 80px;
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+  text-align: left;
+}
+
+.custom-field {
+  flex: 1;
+}
+
+.custom-field :deep(.van-field__control) {
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 14px;
+  background: #f8f9fa;
+}
+
+.custom-field :deep(.van-field__control:focus) {
+  outline: none;
+  background: #f0f2f5;
+}
+
+.custom-field :deep(.van-field__body) {
+  padding: 0;
+}
+
+/* 响应式设计 */
 @media (max-width: 768px) {
-  .cover-title {
-    font-size: 2rem;
+  .cover-template {
+    padding: 10px;
+    min-height: 100vh;
   }
   
-  .cover-template {
-    height: 300px;
+  .cover-template > * {
+    flex-direction: column;
+    max-width: none;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .background-section {
+    min-height: 250px;
+    padding: 20px;
+  }
+  
+  .logo-text {
+    font-size: 20px;
+  }
+  
+  .people-placeholder {
+    font-size: 60px;
+  }
+  
+  .form-section {
+    padding: 20px;
+  }
+  
+  .field-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .field-label {
+    min-width: auto;
+    text-align: left;
+  }
+  
+  .custom-field {
+    width: 100%;
   }
 }
 </style>

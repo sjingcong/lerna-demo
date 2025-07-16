@@ -12,6 +12,7 @@ export interface ITemplateAttr {
 
 // 模板配置接口
 export interface ITemplateConfig {
+  templateKey: string;
   templateName: string;
   templateDesc?: string;
   templateComponent: string;
