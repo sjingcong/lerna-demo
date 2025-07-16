@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { getTemplateComponent } from './constant'
+import { getTemplateComponent } from '@/store/planTemplate'
 
 interface Props {
   templateComponent: string

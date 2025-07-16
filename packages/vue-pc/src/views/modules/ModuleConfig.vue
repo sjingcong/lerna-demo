@@ -10,18 +10,18 @@
       <div class="list-content">
         <div 
           v-for="(template, index) in templates" 
-          :key="template.templateName"
+          :key="template.moduleName"
           class="template-item"
-          :class="{ 'selected': selectedTemplate?.templateName === template.templateName }"
+          :class="{ 'selected': selectedTemplate?.moduleName === template.moduleName }"
           @click="selectTemplate(template)"
         >
           <div class="template-icon">
-            <i class="icon" :class="getTemplateIcon(template.templateComponent)"></i>
+            <i class="icon" :class="getTemplateIcon(template.moduleCode)"></i>
           </div>
           
           <div class="template-info">
-            <div class="template-name">{{ template.templateName }}</div>
-            <div class="template-desc">{{ template.templateDesc }}</div>
+            <div class="template-name">{{ template.moduleName }}</div>
+            <div class="template-desc">{{ template.moduleType }}</div>
             <div class="template-attrs">
               <span class="attr-count">{{ template.templateAttrs.length }} 个属性</span>
             </div>
@@ -58,13 +58,13 @@
     <div class="config-panel">
       <div v-if="selectedTemplate" class="panel-content">
         <div class="panel-header">
-          <h3>{{ selectedTemplate.templateName }} 配置</h3>
+          <h3>{{ selectedTemplate.moduleName }} 配置</h3>
         </div>
         <div class="panel-body">
           <!-- 动态渲染选中的模板组件 -->
            <div class="template-render" v-if="selectedTemplate">
              <TemplateRender 
-               :template-component="selectedTemplate.templateComponent"
+               :template-component="selectedTemplate.moduleCode"
                :data="templateData"
              />
            </div>
@@ -87,22 +87,23 @@ import { computed, ref, onMounted } from 'vue'
 import { usePlanTemplateStore } from '../../store/planTemplate'
 import { EyeOutlined, EditOutlined } from '@ant-design/icons-vue'
 import TemplateRender from './TemplateRender.vue'
-import type { ITemplateConfig } from './types'
+import type { IModule } from './types'
 
 // 使用store并确保类型正确
 const store = usePlanTemplateStore()
 
 // 响应式数据
-const selectedTemplate = ref<ITemplateConfig | null>(null)
+const selectedTemplate = ref<IModule | null>(null)
 
 // 计算属性
 const templates = computed(() => store.templates)
 
 // 初始化模板数据
 const initTemplateData = (templateType: string) => {
-  // 使用新的通用初始化方法
-  if (!store.isTemplateDataInitialized(templateType)) {
-    store.initTemplateData(templateType)
+  if (templateType === 'cover' && !store.templateData.cover) {
+    store.initCoverData()
+  } else if (templateType === 'catalog' && !store.templateData.catalog) {
+    store.initCatalogData()
   }
 }
 
@@ -111,7 +112,7 @@ const templateData = computed(() => {
   if (!selectedTemplate.value) return {}
   
   // 根据模板类型获取对应的数据
-  const templateType = selectedTemplate.value.templateComponent.toLowerCase()
+  const templateType = selectedTemplate.value.moduleCode.toLowerCase()
   let data = {}
   
   if (templateType === 'cover') {
@@ -128,33 +129,33 @@ const templateData = computed(() => {
 })
 
 // 选择模板
-const selectTemplate = (template: ITemplateConfig) => {
+const selectTemplate = (template: IModule) => {
   selectedTemplate.value = template
   // 初始化对应模板的数据
-  const templateType = template.templateComponent.toLowerCase()
+  const templateType = template.moduleCode.toLowerCase()
   initTemplateData(templateType)
 }
 
 // 获取模板图标
-const getTemplateIcon = (componentName: string) => {
+const getTemplateIcon = (moduleCode: string) => {
   const iconMap: Record<string, string> = {
-    'Cover': 'icon-cover',
-    'Catalog': 'icon-catalog',
-    'Content': 'icon-content',
-    'Chart': 'icon-chart'
+    'cover': 'icon-cover',
+    'catalog': 'icon-catalog',
+    'content': 'icon-content',
+    'chart': 'icon-chart'
   }
-  return iconMap[componentName] || 'icon-template'
+  return iconMap[moduleCode] || 'icon-template'
 }
 
 // 预览模板
-const previewTemplate = (template: ITemplateConfig) => {
-  console.log('预览模板:', template.templateName)
+const previewTemplate = (template: IModule) => {
+  console.log('预览模板:', template.moduleName)
   // TODO: 实现预览功能
 }
 
 // 编辑模板
-const editTemplate = (template: ITemplateConfig) => {
-  console.log('编辑模板:', template.templateName)
+const editTemplate = (template: IModule) => {
+  console.log('编辑模板:', template.moduleName)
   // TODO: 实现编辑功能
 }
 
