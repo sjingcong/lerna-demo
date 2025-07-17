@@ -4,68 +4,80 @@
       <h3>模块数据配置</h3>
       <p class="config-desc">配置当前模块的基本属性</p>
     </div>
-    
-    <div class="config-content" v-if="moduleData">
+
+    <div class="config-content" v-if="module">
       <div class="config-section">
         <h4 class="section-title">基本信息</h4>
-        
+
         <!-- 模块名称 -->
         <div class="config-item">
           <label class="config-label">模块名称</label>
-          <a-input 
-            v-model:value="localModuleData.moduleName"
-            placeholder="请输入模块名称"
-            @change="handleModuleNameChange"
-          />
+          <a-input v-model:value="localModuleData.moduleName" placeholder="请输入模块名称" @change="handleModuleNameChange" />
         </div>
-        
+
         <!-- 可编辑状态 -->
         <div class="config-item">
           <label class="config-label">可编辑</label>
           <div class="switch-wrapper">
-            <a-switch 
-              v-model:checked="localModuleData.editable"
-              @change="handleEditableChange"
-            />
+            <a-switch v-model:checked="localModuleData.editable" @change="handleEditableChange" />
             <span class="switch-desc">
               {{ localModuleData.editable ? '允许编辑' : '禁止编辑' }}
             </span>
           </div>
         </div>
-        
+
         <!-- 可删除状态 -->
         <div class="config-item">
           <label class="config-label">可删除</label>
           <div class="switch-wrapper">
-            <a-switch 
-              v-model:checked="localModuleData.deletable"
-              @change="handleDeletableChange"
-            />
+            <a-switch v-model:checked="localModuleData.deletable" @change="handleDeletableChange" />
             <span class="switch-desc">
               {{ localModuleData.deletable ? '允许删除' : '禁止删除' }}
             </span>
           </div>
         </div>
       </div>
-      
 
-    </div>
-    
-    <div v-else class="config-empty">
-      <div class="empty-icon">
-        <i class="icon-settings"></i>
+      <!-- 模块属性编辑区域 -->
+      <div class="config-section" v-if="module?.templateAttrs && module.templateAttrs.length > 0">
+        <h4 class="section-title">模块属性配置</h4>
+
+        <div v-for="(attr, index) in module.templateAttrs" :key="attr.attrKey || index">
+          <div v-if="attr.editComponentType && hasEditComponent(attr.editComponentType)" class="attr-config-item">
+            <div class="attr-header">
+              <h5 class="attr-name">{{ attr.attrName }}</h5>
+              <span class="attr-key">{{ attr.attrKey }}</span>
+            </div>
+
+            <!-- 渲染对应的编辑组件 -->
+            <div class="attr-editor">
+              <component :is="getEditComponent(attr.editComponentType)" :data="getAttrData(attr.attrKey)"
+                @update:data="(newData) => updateAttrData(attr.attrKey, newData)"
+                @change="(newData) => updateAttrData(attr.attrKey, newData)" />
+            </div>
+          </div>
+        </div>
+
       </div>
-      <p class="empty-text">请选择一个模块进行配置</p>
     </div>
-  </div>
+
+    <div v-else class="config-empty">
+        <div class="empty-icon">
+          <i class="icon-settings"></i>
+        </div>
+        <p class="empty-text">请选择一个模块进行配置</p>
+      </div>
+    </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
 import type { IModule } from './types'
+import { getEditComponent, hasEditComponent } from './editComponents'
+import { usePlanTemplateStore } from '@/store/planTemplate'
 
 interface Props {
-  moduleData?: IModule | null
+  module?: IModule | null
 }
 
 interface Emits {
@@ -76,12 +88,15 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
+// 使用planTemplate store
+const planTemplateStore = usePlanTemplateStore()
+
 // 本地数据副本
 const localModuleData = ref<Partial<IModule>>({})
 
 // 监听外部数据变化
 watch(
-  () => props.moduleData,
+  () => props.module,
   (newData) => {
     if (newData) {
       localModuleData.value = {
@@ -100,18 +115,22 @@ watch(
 )
 
 // 实时更新模块数据
-const updateModuleData = () => {
-  if (!props.moduleData) return
-  
-  const updatedData: IModule = {
-    ...props.moduleData,
-    moduleName: localModuleData.value.moduleName || props.moduleData.moduleName,
-    editable: localModuleData.value.editable ?? props.moduleData.editable,
-    deletable: localModuleData.value.deletable ?? props.moduleData.deletable
+const updateModuleData = async () => {
+  if (!props.module) return
+
+  try {
+    const updatedData: IModule = {
+      ...props.module,
+      moduleName: localModuleData.value.moduleName || props.module.moduleName,
+      editable: localModuleData.value.editable ?? props.module.editable,
+      deletable: localModuleData.value.deletable ?? props.module.deletable
+    }
+
+    // 使用store方法更新整个模块数据
+    await planTemplateStore.updateModule(updatedData)
+  } catch (error) {
+    console.error('Failed to update module data:', error)
   }
-  
-  emit('save', updatedData)
-  emit('update:moduleData', updatedData)
 }
 
 // 处理模块名称变化
@@ -127,6 +146,27 @@ const handleEditableChange = (checked: boolean) => {
 // 处理可删除状态变化
 const handleDeletableChange = (checked: boolean) => {
   updateModuleData()
+}
+
+// 获取属性数据
+const getAttrData = (attrKey: string) => {
+  if (!props.module?.moduleCode) return null
+  const moduleValue = planTemplateStore.moduleValueMap[props.module.moduleCode]
+  return moduleValue?.[attrKey] || null
+}
+
+// 更新属性数据
+const updateAttrData = async (attrKey: string, newData: any) => {
+  if (!props.module) return
+
+  try {
+    // 使用store中的方法更新模块属性
+    await planTemplateStore.updateModuleAttr(props.module.moduleCode, attrKey, newData)
+
+    // 数据已通过store更新，无需额外处理
+  } catch (error) {
+    console.error('Failed to update attribute data:', error)
+  }
 }
 </script>
 
@@ -197,6 +237,60 @@ const handleDeletableChange = (checked: boolean) => {
 .switch-desc {
   font-size: 14px;
   color: #909399;
+}
+
+/* 属性配置样式 */
+.attr-config-item {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #fafbfc;
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+}
+
+.attr-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e4e7ed;
+}
+
+.attr-name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.attr-key {
+  font-size: 12px;
+  color: #909399;
+  background: #f0f2f5;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+}
+
+.attr-editor {
+  background: white;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.attr-placeholder {
+  padding: 20px;
+  text-align: center;
+  background: white;
+  border-radius: 4px;
+  border: 1px dashed #d9d9d9;
+}
+
+.placeholder-text {
+  margin: 0;
+  color: #909399;
+  font-size: 14px;
 }
 
 

@@ -1,7 +1,9 @@
 // 编辑组件类型枚举
 export type EditComponentType = 
   | 'Input'
-  | 'ImageList';
+  | 'ImageList'
+  | 'SectionGroupHorizontal'
+  | 'SectionListVertical'
 
 // 模块属性接口
 export interface IModuleValueAttrs {

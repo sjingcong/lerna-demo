@@ -138,12 +138,12 @@ export const usePlanTemplateStore = defineStore('planTemplate', () => {
           {
             attrKey: 'section1',
             attrName: '时效承诺',
-            editComponentType: ''
+            editComponentType: 'SectionGroupHorizontal'
           },
           {
             attrKey: 'section2',
             attrName: '服务安排',
-            editComponentType: ''
+            editComponentType: 'SectionListVertical'
           }
         ],
         moduleValue: {
@@ -420,12 +420,80 @@ export const usePlanTemplateStore = defineStore('planTemplate', () => {
     }
   }
 
+  /**
+   * 更新模块的moduleValue
+   * @param moduleCode 模块代码
+   * @param moduleValue 新的模块值
+   */
+  const updateModuleValue = async (moduleCode: string, moduleValue: any) => {
+    try {
+      // 更新moduleValueMap
+      state.moduleValueMap = {
+        ...state.moduleValueMap,
+        [moduleCode]: moduleValue
+      }
+      
+      // 查找并更新模块列表中的对应模块
+      const moduleIndex = state.modules.findIndex(m => m.moduleCode === moduleCode)
+      if (moduleIndex !== -1) {
+        state.modules[moduleIndex] = {
+          ...state.modules[moduleIndex],
+          moduleValue
+        }
+        
+        // 如果更新的是当前选中的模块，同时更新当前模块
+        if (state.currentModule?.moduleCode === moduleCode) {
+          state.currentModule = {
+            ...state.currentModule,
+            moduleValue
+          }
+        }
+        
+        console.log('Module value updated successfully:', moduleCode)
+      } else {
+        console.warn(`Module not found for value update: ${moduleCode}`)
+      }
+    } catch (error) {
+      console.error('Failed to update module value:', error)
+      throw error
+    }
+  }
+
+  /**
+   * 更新模块属性值
+   * @param moduleCode 模块代码
+   * @param attrKey 属性键
+   * @param attrValue 属性值
+   */
+  const updateModuleAttr = async (moduleCode: string, attrKey: string, attrValue: any) => {
+    try {
+      // 获取当前模块值
+      const currentModuleValue = state.moduleValueMap[moduleCode] || {}
+      
+      // 更新特定属性
+      const updatedModuleValue = {
+        ...currentModuleValue,
+        [attrKey]: attrValue
+      }
+      
+      // 调用updateModuleValue方法
+      await updateModuleValue(moduleCode, updatedModuleValue)
+      
+      console.log('Module attribute updated successfully:', { moduleCode, attrKey })
+    } catch (error) {
+      console.error('Failed to update module attribute:', error)
+      throw error
+    }
+  }
+
   return {
     // 暴露状态
     ...toRefs(state),
     // 暴露模块管理方法
     initModules,
     updateModule,
+    updateModuleValue,
+    updateModuleAttr,
     // 暴露数据管理方法
     initModuleValue,
     isModuleDataInitialized,

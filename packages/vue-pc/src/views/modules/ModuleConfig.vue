@@ -83,7 +83,7 @@
     <!-- 右侧数据配置区域 -->
     <div class="data-config-panel">
       <ModuleDataConfig 
-        :module-data="selectedModule"
+        :module="selectedModule"
         @save="handleModuleDataSave"
       />
     </div>
@@ -401,7 +401,7 @@ onMounted(async () => {
 
 /* 右侧数据配置面板 */
 .data-config-panel {
-  width: 350px;
+  width: 550px;
   background: white;
   display: flex;
   flex-direction: column;
@@ -484,7 +484,7 @@ onMounted(async () => {
   }
   
   .data-config-panel {
-    width: 300px;
+    width: 380px;
   }
 }
 
@@ -494,7 +494,7 @@ onMounted(async () => {
   }
   
   .data-config-panel {
-    width: 280px;
+    width: 320px;
   }
 }
 
