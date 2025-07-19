@@ -21,7 +21,7 @@
         <button @click="zoomIn" :disabled="scale >= 3" class="btn">
           放大
         </button>
-        <button @click="downloadPdf" class="btn">
+        <button v-if="props.showDownload" @click="downloadPdf" class="btn">
           下载
         </button>
       </div>
@@ -62,12 +62,14 @@ interface Props {
   initialPage?: number // 初始页码
   initialScale?: number // 初始缩放比例
   renderBuffer?: number // 预渲染缓冲区大小
+  showDownload?: boolean // 是否显示下载按钮
 }
 
 const props = withDefaults(defineProps<Props>(), {
   initialPage: 1,
   initialScale: 1,
-  renderBuffer: 1000
+  renderBuffer: 1000,
+  showDownload: false
 })
 
 const emit = defineEmits<{
@@ -90,8 +92,8 @@ const pagesContainerRef = ref<HTMLDivElement>()
 const renderedPages = new Set<number>() // 跟踪已渲染的页面
 // 存储每个页面的渲染任务
 const renderTasks = new Map<number, any>()
-// 存储每个页面的预计算信息（scaleToFit和viewport）
-const pageInfoCache = new Map<number, { scaleToFit: number, viewport: any }>()
+// 存储每个页面的预计算信息（viewport）
+const pageInfoCache = new Map<number, { viewport: any }>()
 // 存储每个页面的loading状态
 const pageLoadingStates = new Map<number, boolean>()
 // 存储每个页面的容器div引用
@@ -125,7 +127,7 @@ const createAllCanvasElements = async () => {
 
   // 获取容器可用宽度
   const container = pagesContainerRef.value
-  const containerWidth = container ? container.clientWidth - 40 : window.innerWidth - 40
+  const containerWidth = container ? container.clientWidth - 16 : window.innerWidth - 16
 
   if (containerWidth <= 0) {
     console.warn('容器宽度无效，无法创建canvas元素')
@@ -140,11 +142,7 @@ const createAllCanvasElements = async () => {
       const viewport = page.getViewport({ scale: scale.value })
 
       // 计算适合的缩放比例
-      const scaleToFit = Math.min(
-        containerWidth / viewport.width,
-        (window.innerHeight * 0.9) / viewport.height,
-        1
-      )
+      const scaleToFit = containerWidth / viewport.width
 
       if (scaleToFit <= 0 || !isFinite(scaleToFit)) {
         console.warn(`页面 ${pageNum} 缩放比例无效: ${scaleToFit}`)
@@ -152,8 +150,7 @@ const createAllCanvasElements = async () => {
       }
 
       // 计算最终尺寸
-      const adjustedViewport = page.getViewport({ scale: scale.value * scaleToFit })
-
+      const adjustedViewport = page.getViewport({ scale: scaleToFit })
       if (adjustedViewport.width <= 0 || adjustedViewport.height <= 0) {
         console.warn(`页面 ${pageNum} viewport尺寸无效`)
         continue
@@ -161,7 +158,6 @@ const createAllCanvasElements = async () => {
 
       // 缓存页面信息，避免在渲染时重复计算
       pageInfoCache.set(pageNum, {
-        scaleToFit,
         viewport: adjustedViewport
       })
 
@@ -301,6 +297,7 @@ const renderPageContent = async (pageNum, retryCount = 0) => {
   // 如果该页面正在渲染，先取消之前的渲染任务
   const existingTask = renderTasks.get(pageNum)
   if (existingTask) {
+    console.log(`页面已经在渲染,页面${pageNum}`)
     return
   }
 
@@ -380,9 +377,6 @@ const initializePdfDisplay = async () => {
   await nextTick()
   initBetterScroll()
 
-  // 应用初始缩放样式
-  applyZoomStyle()
-
   // 触发初始的动态渲染检查，基于可视区域判断是否需要渲染
   await nextTick()
   updateCurrentPageByScroll()
@@ -403,33 +397,29 @@ const nextPage = () => {
   }
 }
 
-// 缩放功能
+// 缩放功能 - 使用BetterScroll的缩放能力
 const zoomIn = () => {
-  if (scale.value < 3) {
-    scale.value += 0.2
-    applyZoomStyle()
+  if (bscroll.value && scale.value < 3) {
+    const newScale = Math.min(scale.value + 0.5, 3)
+    // 立即更新scale值以确保UI显示同步
+    scale.value = newScale
+    // 使用BetterScroll的zoomTo方法，在当前视口中心进行缩放
+    const centerX = scrollWrapper.value ? scrollWrapper.value.clientWidth / 2 : 0
+    const centerY = scrollWrapper.value ? scrollWrapper.value.clientHeight / 2 : 0
+    bscroll.value.zoomTo(newScale, centerX, centerY, 300)
   }
 }
 
 const zoomOut = () => {
-  if (scale.value > 0.5) {
-    scale.value -= 0.2
-    applyZoomStyle()
+  if (bscroll.value && scale.value > 0.5) {
+    const newScale = Math.max(scale.value - 0.2, 1)
+    // 立即更新scale值以确保UI显示同步
+    scale.value = newScale
+    // 使用BetterScroll的zoomTo方法，在当前视口中心进行缩放
+    const centerX = scrollWrapper.value ? scrollWrapper.value.clientWidth / 2 : 0
+    const centerY = scrollWrapper.value ? scrollWrapper.value.clientHeight / 2 : 0
+    bscroll.value.zoomTo(newScale, centerX, centerY, 300)
   }
-}
-
-// 应用缩放样式
-const applyZoomStyle = () => {
-  if (!pagesContainerRef.value) return
-
-  // 通过CSS transform实现缩放
-  pagesContainerRef.value.style.transform = `scale(${scale.value})`
-  pagesContainerRef.value.style.transformOrigin = 'center top'
-
-  // 刷新滚动容器以适应缩放后的尺寸
-  nextTick(() => {
-    refreshBetterScroll()
-  })
 }
 
 // 下载PDF
@@ -456,7 +446,7 @@ const initBetterScroll = () => {
     probeType: 3, // 关键配置：实时触发scroll事件
     zoom: {
       start: scale.value,
-      min: 1,
+      min: 0.5,
       max: 3
     },
     momentum: true,
@@ -569,13 +559,7 @@ const updateCurrentPageByScroll = () => {
 
         // 检查是否已经渲染过
         if (!renderedPages.has(i)) {
-          const context = canvas.getContext('2d')
-          const isPlaceholder = context && isPlaceholderContent(context, canvas)
-          
-          if (isPlaceholder) {
-            renderQueue.push(i)
-          }
-        } else {
+          renderQueue.push(i)
         }
       }
 
@@ -595,6 +579,7 @@ const updateCurrentPageByScroll = () => {
   
   
   toRender.forEach(pageNum => {
+    console.log(`动态渲染页面 ${pageNum}`)
     renderPageContent(pageNum).catch(err => {
       console.error(`动态渲染页面 ${pageNum} 失败:`, err)
     })
@@ -606,21 +591,7 @@ const updateCurrentPageByScroll = () => {
   }
 }
 
-// 检查canvas是否还是占位内容
-const isPlaceholderContent = (context, canvas) => {
-  try {
-    // 检查canvas中心区域的颜色，如果是占位背景色则认为是占位内容
-    const centerX = Math.floor(canvas.width / 2)
-    const centerY = Math.floor(canvas.height / 2)
-    const imageData = context.getImageData(centerX, centerY, 1, 1)
-    const [r, g, b] = imageData.data
 
-    // 检查是否是占位背景色 #f8f9fa (248, 249, 250)
-    return r === 248 && g === 249 && b === 250
-  } catch (err) {
-    return false
-  }
-}
 
 // 创建基于requestAnimationFrame的页面更新函数
 const throttledUpdateCurrentPage = createRAFThrottle(updateCurrentPageByScroll)
@@ -742,15 +713,11 @@ onUnmounted(() => {
   background-color: #f5f5f5;
 }
 
-.pdf-scroll-content {
-  padding: 20px;
-}
 
 .pdf-pages-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
   min-height: 100%;
 }
 
