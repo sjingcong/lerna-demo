@@ -15,7 +15,10 @@
     "@better-scroll/core": "^2.5.1",
     "@better-scroll/zoom": "^2.5.1",
     "@giom/shared": "*",
+    "@vue-office/excel": "^1.7.14",
     "amfe-flexible": "^2.2.1",
-    "pdfjs-dist": "^2.16.105"
+    "docx-preview": "^0.3.0",
+    "pdfjs-dist": "^2.16.105",
+    "vue-demi": "0.14.6"
   }
 }

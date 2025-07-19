@@ -268,11 +268,14 @@ const loadPdf = async () => {
     // 等待DOM更新完成后初始化显示
     await nextTick()
     await initializePdfDisplay()
+    loading.value = false
+    await nextTick(() => {
+      refreshBetterScroll()
+    })
   } catch (err: any) {
+    loading.value = false
     error.value = `PDF加载失败: ${err.message}`
     emit('error', error.value)
-  } finally {
-    loading.value = false
   }
 }
 
@@ -503,7 +506,7 @@ const destroyBetterScroll = () => {
 const createRAFThrottle = (func: Function) => {
   let rafId: number | null = null
   let isScheduled = false
-  
+
   return function (this: any, ...args: any[]) {
     if (isScheduled) {
       return
@@ -573,8 +576,8 @@ const updateCurrentPageByScroll = () => {
   // 限制同时渲染的页面数量，避免一次性渲染过多页面
   const maxConcurrentRenders = 2
   const toRender = renderQueue.slice(0, maxConcurrentRenders)
-  
-  
+
+
   toRender.forEach(pageNum => {
     console.log(`动态渲染页面 ${pageNum}`)
     renderPageContent(pageNum).catch(err => {
@@ -617,7 +620,7 @@ const scrollToPage = (pageNum: number) => {
 const resetComponentState = () => {
   // 取消所有渲染任务
   cancelAllRenderTasks()
-  
+
   // 重置状态变量
   loading.value = true
   error.value = ''
@@ -626,22 +629,22 @@ const resetComponentState = () => {
   scale.value = props.initialScale
   isUserTriggered.value = false
   loadedPageCount.value = 0
-  
+
   // 清空所有缓存和引用
   canvasRefs.clear()
   renderedPages.clear()
   pageInfoCache.clear()
   pageLoadingStates.clear()
   pageContainerRefs.clear()
-  
+
   // 清空PDF文档引用
   pdfDoc.value = null
-  
+
   // 清空容器内容
   if (pagesContainerRef.value) {
     pagesContainerRef.value.innerHTML = ''
   }
-  
+
   // 重置BetterScroll到初始状态
   if (bscroll.value) {
     bscroll.value.scrollTo(0, 0, 0)
@@ -652,9 +655,7 @@ const resetComponentState = () => {
 watch(() => props.src, () => {
   if (props.src && isMounted.value) {
     resetComponentState()
-    setTimeout(() => {
-      loadPdf()
-    }, 300)
+    loadPdf()
   }
 }, { immediate: true })
 

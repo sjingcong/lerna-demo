@@ -3,6 +3,8 @@
     <div class="navbar">
       <router-link to="/about" class="nav-link">关于</router-link>
       <router-link to="/pdf-demo" class="nav-link">PDF</router-link>
+      <router-link to="/excel-demo" class="nav-link">Excel</router-link>
+      <router-link to="/doc-demo" class="nav-link">Word</router-link>
     </div>
     <router-view />
   </div>
@@ -31,10 +33,9 @@
   font-size: 12px;
   color: #2c3e50;
   text-decoration: none;
-  padding: 0.5rem 1rem;
-  margin: 0 0.5rem;
+  padding: 2px 4px;
+  margin: 0 8px;
   border-radius: 4px;
-  transition: background-color 0.3s;
 }
 
 .nav-link:hover,
