@@ -12,6 +12,10 @@
     "type-check": "vue-tsc --noEmit"
   },
   "dependencies": {
-    "@giom/shared": "*"
+    "@better-scroll/core": "^2.5.1",
+    "@better-scroll/zoom": "^2.5.1",
+    "@giom/shared": "*",
+    "amfe-flexible": "^2.2.1",
+    "pdfjs-dist": "^2.16.105"
   }
 }

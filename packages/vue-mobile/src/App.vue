@@ -1,9 +1,9 @@
 <template>
   <div id="app">
-    <nav class="navbar">
-      <router-link to="/" class="nav-link">首页</router-link>
+    <div class="navbar">
       <router-link to="/about" class="nav-link">关于</router-link>
-    </nav>
+      <router-link to="/pdf-demo" class="nav-link">PDF</router-link>
+    </div>
     <router-view />
   </div>
 </template>
@@ -22,12 +22,13 @@
 
 .navbar {
   background-color: #f8f9fa;
-  padding: 1rem;
+  padding: 5px;
   border-bottom: 1px solid #dee2e6;
   text-align: center;
 }
 
 .nav-link {
+  font-size: 12px;
   color: #2c3e50;
   text-decoration: none;
   padding: 0.5rem 1rem;
