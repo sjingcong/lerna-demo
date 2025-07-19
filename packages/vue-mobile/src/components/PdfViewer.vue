@@ -100,7 +100,7 @@ const pageLoadingStates = new Map<number, boolean>()
 const pageContainerRefs = new Map<number, HTMLDivElement>()
 // 懒加载配置
 const loadedPageCount = ref(0) // 已加载的页数
-
+const isMounted = ref(false)
 // 取消所有渲染任务的公共函数
 const cancelAllRenderTasks = () => {
   renderTasks.forEach((task) => {
@@ -126,7 +126,7 @@ const createAllCanvasElements = async () => {
   pageContainerRefs.clear() // 清空容器引用
 
   // 获取容器可用宽度
-  const container = pagesContainerRef.value
+  const container = scrollWrapper.value
   const containerWidth = container ? container.clientWidth - 16 : window.innerWidth - 16
 
   if (containerWidth <= 0) {
@@ -166,7 +166,7 @@ const createAllCanvasElements = async () => {
       pageContainer.className = 'pdf-page-container'
       pageContainer.style.position = 'relative'
       pageContainer.style.display = 'inline-block'
-      pageContainer.style.margin = '10px 0'
+      pageContainer.style.marginTop = '8px'
       pageContainer.dataset.page = pageNum.toString()
 
       // 创建canvas元素
@@ -244,6 +244,7 @@ const scrollContent = ref<HTMLDivElement>()
 
 // 加载PDF文档
 const loadPdf = async () => {
+  console.log('loadPdf')
   try {
     loading.value = true
     error.value = ''
@@ -276,7 +277,7 @@ const loadPdf = async () => {
 }
 
 // 渲染指定页面内容到已存在的canvas
-const renderPageContent = async (pageNum, retryCount = 0) => {
+const renderPageContent = async (pageNum: number) => {
   if (!pdfDoc.value) {
     console.warn('PDF文档未准备好')
     return
@@ -372,10 +373,6 @@ const initializePdfDisplay = async () => {
   await createAllCanvasElements()
 
   loadedPageCount.value = totalPages.value // 所有canvas都已创建
-
-  // 初始化BetterScroll
-  await nextTick()
-  initBetterScroll()
 
   // 触发初始的动态渲染检查，基于可视区域判断是否需要渲染
   await nextTick()
@@ -616,17 +613,55 @@ const scrollToPage = (pageNum: number) => {
     bscroll.value.scrollTo(0, -containerTop, 300)
   }
 }
-
+// 重置组件状态
+const resetComponentState = () => {
+  // 取消所有渲染任务
+  cancelAllRenderTasks()
+  
+  // 重置状态变量
+  loading.value = true
+  error.value = ''
+  currentPage.value = props.initialPage
+  totalPages.value = 0
+  scale.value = props.initialScale
+  isUserTriggered.value = false
+  loadedPageCount.value = 0
+  
+  // 清空所有缓存和引用
+  canvasRefs.clear()
+  renderedPages.clear()
+  pageInfoCache.clear()
+  pageLoadingStates.clear()
+  pageContainerRefs.clear()
+  
+  // 清空PDF文档引用
+  pdfDoc.value = null
+  
+  // 清空容器内容
+  if (pagesContainerRef.value) {
+    pagesContainerRef.value.innerHTML = ''
+  }
+  
+  // 重置BetterScroll到初始状态
+  if (bscroll.value) {
+    bscroll.value.scrollTo(0, 0, 0)
+    bscroll.value.zoomTo(props.initialScale, 0, 0, 0)
+  }
+}
 // 监听src变化
 watch(() => props.src, () => {
-  if (props.src) {
-    loadPdf()
+  if (props.src && isMounted.value) {
+    resetComponentState()
+    setTimeout(() => {
+      loadPdf()
+    }, 300)
   }
 }, { immediate: true })
 
 // 组件挂载
 onMounted(async () => {
   // 初始化better-scroll
+  isMounted.value = true
   initBetterScroll()
   if (props.src) {
     await loadPdf()
