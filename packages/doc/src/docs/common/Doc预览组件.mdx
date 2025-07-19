@@ -1,0 +1,405 @@
+---
+title: Doc预览组件
+description: 基于docx-preview的高性能Word文档预览组件
+---
+
+<div style={{ 
+  position: 'fixed', 
+  top: '200px', 
+  left: '400px',
+  backgroundColor: 'white', 
+  border: '1px solid #e1e5e9', 
+  borderRadius: '8px', 
+  padding: '12px', 
+  boxShadow: '0 2px 8px rgba(0,0,0,0.1)', 
+  zIndex: 1000, 
+  fontSize: '14px', 
+  maxWidth: '200px' 
+}}> 
+  <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#1890ff' }}>📋 快速导航</div> 
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}> 
+    <a href="#特性" style={{ color: '#666', textDecoration: 'none' }}>✨ 特性</a> 
+    <a href="#基础用法" style={{ color: '#666', textDecoration: 'none' }}>🚀 基础用法</a> 
+    <a href="#本地文件预览" style={{ color: '#666', textDecoration: 'none' }}>📁 本地文件预览</a> 
+    <a href="#api" style={{ color: '#666', textDecoration: 'none' }}>📋 API</a> 
+    <div style={{ paddingLeft: '12px', display: 'flex', flexDirection: 'column', gap: '2px' }}> 
+      <a href="#props" style={{ color: '#999', textDecoration: 'none', fontSize: '12px' }}>Props</a> 
+      <a href="#events" style={{ color: '#999', textDecoration: 'none', fontSize: '12px' }}>Events</a> 
+    </div> 
+    <a href="#高级配置" style={{ color: '#666', textDecoration: 'none' }}>⚙️ 高级配置</a> 
+    <a href="#样式定制" style={{ color: '#666', textDecoration: 'none' }}>🎨 样式定制</a> 
+    <a href="#技术实现" style={{ color: '#666', textDecoration: 'none' }}>🔧 技术实现</a> 
+    <a href="#注意事项" style={{ color: '#666', textDecoration: 'none' }}>⚠️ 注意事项</a> 
+  </div> 
+</div>
+
+# Doc预览组件
+
+基于 `docx-preview` 实现的高性能Word文档预览组件，支持.docx格式文档的在线预览，具备完善的错误处理和加载状态管理。
+
+<h2 id="特性">特性</h2>
+
+- 📄 **原生渲染**: 基于docx-preview的原生Word文档渲染
+- 🔄 **多数据源**: 支持URL、ArrayBuffer、Blob等多种数据格式
+- ⚡ **智能加载**: 30秒超时机制，防止长时间等待
+- 🎯 **错误处理**: 完善的错误提示和状态管理
+- 📱 **响应式设计**: 自适应容器宽度，移动端友好
+- 🎨 **样式优化**: 针对中文文档优化的排版样式
+- ⚙️ **高度可配置**: 丰富的渲染选项配置
+
+<h2 id="基础用法">基础用法</h2>
+
+```vue
+<template>
+  <div style="height: 600px;">
+    <DocViewer
+      :src="docUrl"
+      :file-name="fileName"
+      @rendered="onDocRendered"
+      @error="onError"
+    />
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import DocViewer from '@/components/DocViewer.vue'
+
+const docUrl = ref('https://example.com/document.docx')
+const fileName = ref('示例文档.docx')
+
+const onDocRendered = () => {
+  console.log('Word文档渲染完成')
+}
+
+const onError = (error) => {
+  console.error('Word文档加载失败：', error)
+}
+</script>
+```
+
+<h2 id="本地文件预览">本地文件预览</h2>
+
+```vue
+<template>
+  <div>
+    <input 
+      type="file" 
+      accept=".docx" 
+      @change="handleFileSelect" 
+    />
+    <div style="height: 600px;" v-if="docSrc">
+      <DocViewer 
+        :src="docSrc" 
+        :file-name="fileName"
+      />
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import DocViewer from '@/components/DocViewer.vue'
+
+const docSrc = ref(null)
+const fileName = ref('')
+
+const handleFileSelect = (event) => {
+  const file = event.target.files[0]
+  if (file && file.name.endsWith('.docx')) {
+    fileName.value = file.name
+    
+    // 方式1: 使用ArrayBuffer
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      docSrc.value = e.target.result
+    }
+    reader.readAsArrayBuffer(file)
+    
+    // 方式2: 直接使用Blob
+    // docSrc.value = file
+  }
+}
+</script>
+```
+
+<h2 id="api">API</h2>
+
+<h3 id="props">Props</h3>
+
+| 属性名 | 类型 | 默认值 | 说明 |
+|--------|------|--------|---------|
+| `src` | `String \| ArrayBuffer \| Blob` | `null` | Word文档数据源 |
+| `fileName` | `String` | `''` | 文件名，用于日志和错误提示 |
+| `options` | `Object` | 见下方 | docx-preview渲染选项 |
+
+#### 默认Options配置
+
+```javascript
+{
+  className: 'docx',           // CSS类名
+  inWrapper: true,             // 是否包装在容器中
+  ignoreWidth: false,          // 是否忽略宽度
+  ignoreHeight: false,         // 是否忽略高度
+  ignoreFonts: false,          // 是否忽略字体
+  breakPages: true,            // 是否分页
+  ignoreLastRenderedPageBreak: true,  // 忽略最后的分页符
+  experimental: false,         // 实验性功能
+  trimXmlDeclaration: true,    // 修剪XML声明
+  useBase64URL: false,         // 使用Base64 URL
+  renderChanges: false,        // 渲染修订
+  renderHeaders: true,         // 渲染页眉
+  renderFooters: true,         // 渲染页脚
+  renderFootnotes: true,       // 渲染脚注
+  renderEndnotes: true,        // 渲染尾注
+  renderComments: false,       // 渲染批注
+  debug: false                 // 调试模式
+}
+```
+
+<h3 id="events">Events</h3>
+
+| 事件名 | 参数 | 说明 |
+|--------|------|---------|
+| `rendered` | - | 文档渲染完成时触发 |
+| `error` | `(error: Error)` | 渲染错误时触发 |
+
+<h2 id="高级配置">高级配置</h2>
+
+### 自定义渲染选项
+
+```vue
+<template>
+  <DocViewer
+    :src="docUrl"
+    :options="customOptions"
+  />
+</template>
+
+<script setup>
+const customOptions = {
+  className: 'custom-docx',
+  breakPages: false,        // 不分页，连续显示
+  renderComments: true,     // 显示批注
+  renderChanges: true,      // 显示修订
+  debug: true              // 开启调试模式
+}
+</script>
+```
+
+### 处理大文件
+
+```vue
+<template>
+  <DocViewer
+    :src="largeDocUrl"
+    :options="performanceOptions"
+    @rendered="onLargeDocRendered"
+    @error="onLargeDocError"
+  />
+</template>
+
+<script setup>
+// 针对大文件的性能优化配置
+const performanceOptions = {
+  ignoreWidth: true,        // 忽略宽度以提升性能
+  ignoreHeight: true,       // 忽略高度以提升性能
+  renderFootnotes: false,   // 不渲染脚注
+  renderEndnotes: false,    // 不渲染尾注
+  renderComments: false     // 不渲染批注
+}
+
+const onLargeDocRendered = () => {
+  console.log('大文件渲染完成')
+}
+
+const onLargeDocError = (error) => {
+  console.error('大文件加载失败，可能需要优化:', error)
+}
+</script>
+```
+
+<h2 id="样式定制">样式定制</h2>
+
+### 自定义容器样式
+
+```vue
+<template>
+  <div class="custom-doc-viewer">
+    <DocViewer :src="docUrl" />
+  </div>
+</template>
+
+<style>
+.custom-doc-viewer {
+  height: 800px;
+  border: 2px solid #e1e5e9;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* 自定义文档内容样式 */
+.custom-doc-viewer :deep(.docx) {
+  font-family: 'Microsoft YaHei', sans-serif;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+/* 自定义表格样式 */
+.custom-doc-viewer :deep(table) {
+  border: 2px solid #409eff;
+}
+
+.custom-doc-viewer :deep(th) {
+  background-color: #409eff;
+  color: white;
+}
+</style>
+```
+
+### 主题定制
+
+```css
+/* 深色主题 */
+.dark-theme .doc-viewer {
+  background-color: #2c3e50;
+}
+
+.dark-theme .doc-container {
+  background-color: #34495e;
+  color: #ecf0f1;
+}
+
+.dark-theme :deep(.docx) {
+  color: #ecf0f1;
+  background-color: #34495e;
+}
+
+.dark-theme :deep(table) {
+  border-color: #7f8c8d;
+}
+
+.dark-theme :deep(th) {
+  background-color: #2c3e50;
+}
+```
+
+<h2 id="技术实现">技术实现</h2>
+
+### 核心依赖
+
+- **docx-preview**: Word文档解析和渲染引擎
+- **Vue 3**: 响应式框架和组合式API
+
+### 架构设计
+
+```
+┌─────────────────┐
+│   DocViewer     │
+├─────────────────┤
+│ • 状态管理      │
+│ • 错误处理      │
+│ • 超时控制      │
+├─────────────────┤
+│ docx-preview    │
+├─────────────────┤
+│ • 文档解析      │
+│ • DOM渲染       │
+│ • 样式应用      │
+├─────────────────┤
+│ 渲染容器        │
+├─────────────────┤
+│ • 响应式布局    │
+│ • 样式优化      │
+│ • 滚动处理      │
+└─────────────────┘
+```
+
+### 渲染流程
+
+1. **数据预处理**: 根据src类型进行相应的数据转换
+2. **容器准备**: 清空渲染容器，显示加载状态
+3. **文档解析**: 使用docx-preview解析Word文档
+4. **DOM渲染**: 将解析结果渲染到指定容器
+5. **样式应用**: 应用自定义样式优化显示效果
+6. **状态更新**: 更新组件状态，触发相应事件
+
+### 错误处理机制
+
+- **网络错误**: HTTP请求失败的处理
+- **格式错误**: 非Word文档格式的检测
+- **解析错误**: 文档损坏或不支持的功能
+- **超时处理**: 30秒加载超时保护
+- **内存管理**: 及时清理渲染资源
+
+<h2 id="注意事项">注意事项</h2>
+
+### 浏览器兼容性
+
+- 现代浏览器（Chrome 60+, Firefox 55+, Safari 12+）
+- 需要支持ES6+语法
+- 需要支持ArrayBuffer和Blob API
+
+### 性能建议
+
+1. **文件大小**: 建议Word文档不超过20MB
+2. **复杂度控制**: 避免过于复杂的表格和图片
+3. **批量处理**: 避免同时加载多个大文档
+4. **内存监控**: 定期检查内存使用情况
+
+### 支持的功能
+
+✅ **完全支持**
+- 基础文本格式（字体、大小、颜色、粗体、斜体等）
+- 段落格式（对齐、缩进、行距等）
+- 表格（边框、背景色、合并单元格等）
+- 图片（PNG、JPEG、GIF等）
+- 列表（有序、无序、多级列表）
+- 页眉页脚
+- 脚注尾注
+
+⚠️ **部分支持**
+- 复杂的图表和SmartArt
+- 嵌入的对象（Excel表格、PowerPoint等）
+- 某些高级格式效果
+
+❌ **不支持**
+- 宏和VBA代码
+- 密码保护的文档
+- 某些第三方插件效果
+
+### 常见问题
+
+**Q: 文档加载失败怎么办？**
+
+A: 检查以下几点：
+- 确认文件是.docx格式（不支持.doc）
+- 检查文件是否损坏
+- 确认网络连接正常
+- 检查是否存在跨域问题
+
+**Q: 文档显示不完整？**
+
+A: 尝试以下解决方案：
+- 调整容器高度
+- 检查CSS样式冲突
+- 尝试不同的渲染选项
+- 确认文档本身没有问题
+
+**Q: 加载速度慢？**
+
+A: 优化建议：
+- 压缩文档大小
+- 减少图片数量和质量
+- 使用性能优化配置
+- 考虑服务端预处理
+
+### 更新日志
+
+#### v1.0.0
+- 初始版本发布
+- 支持基础Word文档预览
+- 集成docx-preview渲染引擎
+- 实现错误处理和加载状态
+- 优化移动端显示效果
+- 添加样式定制功能
