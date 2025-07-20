@@ -1,11 +1,15 @@
 import type { Component } from 'vue'
 import SectionGroupHorizontal from './SectionGroupHorizontal.vue'
 import SectionListVertical from './SectionListVertical.vue'
+import BackImage from './BackImage.vue'
+import ImageList from './ImageList.vue'
 
 // 编辑组件映射
 export const EDIT_COMPONENTS_MAP: Record<string, Component> = {
   SectionGroupHorizontal,
   SectionListVertical,
+  BackImage,
+  ImageList,
   // 可以在这里添加更多编辑组件
 }
 

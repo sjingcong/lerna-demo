@@ -20,6 +20,11 @@ const routes = [
     path: '/template-demo',
     name: 'TemplateDemo',
     component: () => import('@/views/modules/ModuleConfig.vue')
+  },
+  {
+    path: '/image-list-demo',
+    name: 'ImageListDemo',
+    component: () => import('@/views/ImageListDemo.vue')
   }
 ]
 

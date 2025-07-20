@@ -1,90 +1,46 @@
 <template>
   <div class="section-group-horizontal">
     <div class="section-header">
-      <h3>{{ data.title }}</h3>
+      <a-input v-model:value="localData.title" size="large" class="title-input" placeholder="请输入标题"
+        @input="debouncedHandleDataChange" allow-clear />
     </div>
-    
+
     <!-- Tab组件 -->
     <div class="tabs-container">
-      <a-tabs 
-        v-model:activeKey="activeTabKey"
-        type="editable-card"
-        @edit="onTabEdit"
-        class="custom-tabs"
-      >
-        <a-tab-pane 
-          v-for="(item, itemIndex) in localData.items" 
-          :key="itemIndex.toString()"
-          :closable="localData.items.length > 1"
-        >
+      <a-tabs v-model:activeKey="activeTabKey" type="editable-card" @edit="onTabEdit" class="custom-tabs">
+        <a-tab-pane v-for="(item, itemIndex) in localData.items" :key="itemIndex.toString()"
+          :closable="localData.items.length > 1">
           <template #tab>
             <div class="tab-title-wrapper">
-              <a-input 
-                v-if="editingTabIndex === itemIndex"
-                v-model:value="item.title"
-                size="small"
-                class="tab-title-input"
-                @blur="stopEditingTab"
-                @pressEnter="stopEditingTab"
-                @input="debouncedHandleDataChange"
-                ref="tabTitleInput"
-                allow-clear
-              />
-              <span 
-                v-else
-                class="tab-title-text"
-                @click="startEditingTab(itemIndex)"
-              >
+              <a-input v-if="editingTabIndex === itemIndex" v-model:value="item.title" size="small"
+                class="tab-title-input" @blur="stopEditingTab" @pressEnter="stopEditingTab"
+                @input="debouncedHandleDataChange" ref="tabTitleInput" allow-clear />
+              <span v-else class="tab-title-text" @click="startEditingTab(itemIndex)">
                 {{ item.title }}
                 <EditOutlined class="edit-icon" />
               </span>
             </div>
           </template>
-          
+
           <!-- Tab内容 -->
           <div class="tab-content">
             <div class="content-list">
-              <div 
-                v-for="(content, contentIndex) in item.content" 
-                :key="contentIndex"
-                class="content-item"
-              >
+              <div v-for="(content, contentIndex) in item.content" :key="contentIndex" class="content-item">
                 <div class="content-header">
-                  <a-input 
-                    v-model:value="content.subTitle"
-                    placeholder="请输入子标题"
-                    class="subtitle-input"
-                    @input="debouncedHandleDataChange"
-                    allow-clear
-                  />
-                  <a-button 
-                    type="text" 
-                    danger 
-                    size="small"
-                    class="delete-content-btn"
-                    @click="deleteContent(itemIndex, contentIndex)"
-                  >
+                  <a-input v-model:value="content.subTitle" placeholder="请输入子标题" class="subtitle-input"
+                    @input="debouncedHandleDataChange" allow-clear />
+                  <a-button type="text" danger size="small" class="delete-content-btn"
+                    @click="deleteContent(itemIndex, contentIndex)">
                     <DeleteOutlined />
                   </a-button>
                 </div>
-                
-                <a-textarea 
-                  v-model:value="content.subDesc"
-                  placeholder="请输入描述内容"
-                  :rows="3"
-                  class="desc-textarea"
-                  @input="debouncedHandleDataChange"
-                  allow-clear
-                />
+
+                <a-textarea v-model:value="content.subDesc" placeholder="请输入描述内容" :rows="3" class="desc-textarea"
+                  @input="debouncedHandleDataChange" allow-clear />
               </div>
-              
+
               <!-- 添加内容项按钮 -->
-              <a-button 
-                type="dashed" 
-                block 
-                class="add-content-btn"
-                @click="addContent(itemIndex)"
-              >
+              <a-button type="dashed" block class="add-content-btn" @click="addContent(itemIndex)">
                 <PlusOutlined /> 添加内容项
               </a-button>
             </div>
@@ -203,9 +159,9 @@ const onTabEdit: TabsProps['onEdit'] = (targetKey, action) => {
 // 删除项目
 const deleteItem = (itemIndex: number) => {
   if (localData.items.length <= 1) return // 至少保留一个tab
-  
+
   localData.items.splice(itemIndex, 1)
-  
+
   // 调整activeTabKey
   const currentActive = parseInt(activeTabKey.value)
   if (currentActive >= itemIndex && currentActive > 0) {
@@ -213,7 +169,7 @@ const deleteItem = (itemIndex: number) => {
   } else if (currentActive >= localData.items.length) {
     activeTabKey.value = (localData.items.length - 1).toString()
   }
-  
+
   debouncedHandleDataChange()
 }
 
@@ -238,7 +194,6 @@ const deleteContent = (itemIndex: number, contentIndex: number) => {
   padding: 20px;
   background: #fff;
   border-radius: 8px;
-  border: 1px solid #e8e8e8;
 }
 
 .section-header {
@@ -247,9 +202,7 @@ const deleteContent = (itemIndex: number, contentIndex: number) => {
   border-bottom: 1px solid #f0f0f0;
 }
 
-.section-header h3 {
-  margin: 0;
-  color: #262626;
+.title-input {
   font-size: 16px;
   font-weight: 600;
 }
@@ -260,6 +213,15 @@ const deleteContent = (itemIndex: number, contentIndex: number) => {
 
 .custom-tabs {
   background: #fff;
+}
+
+.custom-tabs :deep(.ant-tabs-nav) {
+  margin-bottom: 0;
+}
+.custom-tabs :deep(.ant-tabs-content-holder) {
+  border: 1px solid #f0f0f0;
+  border-top: none;
+  padding: 8px;
 }
 
 .tab-title-wrapper {
@@ -389,15 +351,15 @@ const deleteContent = (itemIndex: number, contentIndex: number) => {
   .section-group-horizontal {
     padding: 16px;
   }
-  
+
   .tab-title-wrapper {
     max-width: 80px;
   }
-  
+
   .tab-title-input {
     width: 80px;
   }
-  
+
   .content-header {
     flex-direction: column;
     align-items: stretch;

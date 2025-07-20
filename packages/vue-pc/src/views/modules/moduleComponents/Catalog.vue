@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { defineProps, defineEmits, watch } from 'vue'
-import type { IModule } from './types'
+import type { IModule } from '../types'
 
 interface Props {
   data?: {
@@ -51,7 +51,6 @@ const handleItemClick = (item: string | { title: string; page?: number }, index:
 
 <style scoped>
 .catalog-container {
-  max-width: 800px;
   margin: 0 auto;
   padding: 40px 20px;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);

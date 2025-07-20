@@ -3,75 +3,56 @@
     <!-- 左侧模块列表 -->
     <div class="template-list">
       <div class="list-header">
-        <h3 class="list-title">模块列表</h3>
-        <div class="list-count">{{ templates.length }} 个模块</div>
-      </div>
-      
-      <div class="list-content">
-        <div 
-          v-for="(template, index) in templates" 
-          :key="template.moduleName"
-          class="template-item"
-          :class="{ 'selected': selectedModule?.moduleName === template.moduleName }"
-          @click="selectTemplate(template)"
-        >
-          <div class="template-icon">
-            <i class="icon" :class="getModuleIcon(template.moduleCode)"></i>
-          </div>
-          
-          <div class="template-info">
-            <div class="template-name">{{ template.moduleName }}</div>
-            <div class="template-desc">{{ template.moduleType }}</div>
-            <div class="template-attrs">
-              <span class="attr-count">{{ template.templateAttrs.length }} 个属性</span>
-            </div>
-          </div>
-          
-          <div class="template-actions">
-            <button 
-              class="action-btn preview-btn"
-              @click.stop="previewModule(template)"
-              title="预览模块"
-            >
-              <EyeOutlined />
-            </button>
-            <button 
-              class="action-btn edit-btn"
-              @click.stop="editModule(template)"
-              title="编辑模块"
-            >
-              <EditOutlined />
-            </button>
-          </div>
+        <div class="header-left">
+          <h3 class="list-title">模块列表</h3>
+          <div class="list-count">{{ store.modules.length }} 个模块</div>
+        </div>
+        <div class="header-right">
+          <button class="add-image-btn" @click="addImageModule" title="添加图片模块">
+            <i class="icon-image"></i>
+            添加图片模块
+          </button>
         </div>
       </div>
-      
-      <div class="list-footer">
-        <button class="add-template-btn" @click="addNewTemplate">
-          <i class="icon-plus"></i>
-          添加新模块
-        </button>
+
+      <div class="list-content">
+        <draggable v-model="store.modules" @change="handleDragChange" item-key="moduleName" :animation="200"
+          ghost-class="ghost" chosen-class="chosen" drag-class="drag">
+          <template #item="{ element: template }">
+            <div class="template-item" :class="{ 'selected': store.currentModule?.moduleName === template.moduleName }"
+              @click="selectTemplate(template)">
+              <div class="template-icon">
+                <i class="icon" :class="getModuleIcon(template.moduleCode)"></i>
+              </div>
+
+              <div class="template-info">
+                <div class="template-name">{{ template.moduleName }}</div>
+                <div class="template-desc">{{ template.moduleType }}</div>
+                <div class="template-attrs">
+                  <span class="attr-count">{{ template.templateAttrs.length }} 个属性</span>
+                </div>
+              </div>
+            </div>
+          </template>
+        </draggable>
       </div>
     </div>
-    
+
     <!-- 中间模块渲染区域 -->
     <div class="render-panel">
-      <div v-if="selectedModule" class="panel-content">
+      <div v-if="store.currentModule" class="panel-content">
         <div class="panel-header">
-          <h3>{{ selectedModule.moduleName }} 预览</h3>
+          <h3>{{ store.currentModule.moduleName }} 预览</h3>
         </div>
         <div class="panel-body">
           <!-- 动态渲染选中的模块组件 -->
-           <div class="template-render" v-if="selectedModule">
-             <ModuleRender 
-               :template-component="selectedModule.moduleCode"
-               :data="selectedModuleData.data"
-               :config="selectedModuleData.config"
-             />
-           </div>
+          <div class="template-render" v-if="store.currentModule">
+            <ModuleRender :template-component="store.currentModule.moduleCode" :data="selectedModuleData.data"
+              :config="selectedModuleData.config" />
+          </div>
         </div>
       </div>
-      
+
       <div v-else class="panel-empty">
         <div class="empty-icon">
           <i class="icon-template"></i>
@@ -79,13 +60,10 @@
         <p class="empty-text">请选择一个模块进行预览</p>
       </div>
     </div>
-    
+
     <!-- 右侧数据配置区域 -->
     <div class="data-config-panel">
-      <ModuleDataConfig 
-        :module="selectedModule"
-        @save="handleModuleDataSave"
-      />
+      <ModuleDataConfig :module="store.currentModule" @save="handleModuleDataSave" />
     </div>
   </div>
 </template>
@@ -97,28 +75,37 @@ import { EyeOutlined, EditOutlined } from '@ant-design/icons-vue'
 import ModuleRender from './ModuleRender.vue'
 import ModuleDataConfig from './ModuleDataConfig.vue'
 import type { IModule } from './types'
+import draggable from 'vuedraggable'
 
 // 使用store并确保类型正确
 const store = usePlanTemplateStore()
 
-// 计算属性
-const templates = computed(() => store.modules)
-const selectedModule = computed(() => store.currentModule)
+// 拖拽变化处理
+const handleDragChange = async (event: any) => {
+  if (event.moved) {
+    try {
+      // await store.reorderModules(store.modules)
+      console.log('模块顺序更新成功')
+    } catch (error) {
+      console.error('更新模块顺序失败:', error)
+    }
+  }
+}
 
 
 
 // 模块组件的数据
 const selectedModuleData = computed(() => {
-  if (!selectedModule.value) return {}
-  
+  if (!store.currentModule) return {}
+
   // 根据模块代码获取对应的数据
-  const moduleCode = selectedModule.value.moduleCode
+  const moduleCode = store.currentModule.moduleCode
   const data = store.moduleValueMap[moduleCode] || {}
-  
+
   return {
     data,
     // 同时传递模块配置信息
-    config: selectedModule.value
+    config: store.currentModule
   }
 })
 
@@ -138,22 +125,16 @@ const getModuleIcon = (moduleCode: string) => {
   return iconMap[moduleCode] || 'icon-template'
 }
 
-// 预览模块
-const previewModule = (template: IModule) => {
-  console.log('预览模块:', template.moduleName)
-  // TODO: 实现预览功能
-}
-
-// 编辑模块
-const editModule = (template: IModule) => {
-  console.log('编辑模块:', template.moduleName)
-  // TODO: 实现编辑功能
-}
-
-// 添加新模块
-const addNewTemplate = () => {
-  console.log('添加新模块')
-  // TODO: 实现添加功能
+// 添加图片模块
+const addImageModule = async () => {
+  try {
+    const newModule = await store.addImageModule()
+    console.log('图片模块添加成功:', newModule.moduleName)
+    // 自动选择新添加的模块
+    await store.setCurrentModule(newModule)
+  } catch (error) {
+    console.error('添加图片模块失败:', error)
+  }
 }
 
 // 处理模块数据保存
@@ -172,10 +153,10 @@ onMounted(async () => {
   try {
     // 初始化模块列表
     await store.initModules()
-    
+
     // 选择第一个模块
-    if (templates.value.length > 0) {
-      await store.selectModuleByCode(templates.value[0].moduleCode)
+    if (store.modules.length > 0) {
+      await store.selectModuleByCode(store.modules[0].moduleCode)
     }
   } catch (error) {
     console.error('初始化模块配置失败:', error)
@@ -200,22 +181,63 @@ onMounted(async () => {
 }
 
 .list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 20px;
   border-bottom: 1px solid #e4e7ed;
-  background: #fafbfc;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
 }
 
 .list-title {
-  margin: 0 0 8px 0;
-  font-size: 18px;
+  margin: 0;
+  font-size: 16px;
   font-weight: 600;
   color: #303133;
 }
 
 .list-count {
-  font-size: 14px;
+  font-size: 12px;
   color: #909399;
 }
+
+.add-image-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #409eff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.add-image-btn:hover {
+  background: #337ecc;
+}
+
+.add-image-btn .icon-image {
+  width: 14px;
+  height: 14px;
+  background: currentColor;
+  mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>') no-repeat center;
+  mask-size: contain;
+}
+
+
 
 .list-content {
   flex: 1;
@@ -238,20 +260,17 @@ onMounted(async () => {
 
 .template-item:hover {
   border-color: #409eff;
-  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.1);
   transform: translateY(-2px);
 }
 
 .template-item.active {
   border-color: #409eff;
   background: #f0f9ff;
-  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
 }
 
 .template-item.selected {
   border-color: #409eff;
   background: #f0f9ff;
-  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
 }
 
 .template-icon {
@@ -356,39 +375,6 @@ onMounted(async () => {
   border-radius: 2px;
 }
 
-.list-footer {
-  padding: 20px;
-  border-top: 1px solid #e4e7ed;
-}
-
-.add-template-btn {
-  width: 100%;
-  height: 44px;
-  border: 2px dashed #c0c4cc;
-  background: transparent;
-  color: #606266;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 14px;
-  transition: all 0.3s ease;
-}
-
-.add-template-btn:hover {
-  border-color: #409eff;
-  color: #409eff;
-  background: #f0f9ff;
-}
-
-.add-template-btn .icon-plus {
-  width: 16px;
-  height: 16px;
-  background: currentColor;
-  border-radius: 2px;
-}
 
 /* 中间模块渲染面板 */
 .render-panel {
@@ -429,14 +415,7 @@ onMounted(async () => {
 .panel-body {
   flex: 1;
   padding: 20px;
-}
-
-.template-render {
-  margin-bottom: 20px;
-  padding: 16px;
-  border: 1px solid #e4e7ed;
-  border-radius: 8px;
-  background: #fafbfc;
+  overflow-y: auto;
 }
 
 .placeholder {
@@ -482,7 +461,7 @@ onMounted(async () => {
   .template-list {
     width: 300px;
   }
-  
+
   .data-config-panel {
     width: 380px;
   }
@@ -492,7 +471,7 @@ onMounted(async () => {
   .template-list {
     width: 280px;
   }
-  
+
   .data-config-panel {
     width: 320px;
   }
@@ -503,22 +482,38 @@ onMounted(async () => {
     flex-direction: column;
     height: auto;
   }
-  
+
   .template-list {
     width: 100%;
     height: 40vh;
   }
-  
+
   .render-panel {
     height: 40vh;
     border-right: none;
     border-bottom: 1px solid #e4e7ed;
   }
-  
+
   .data-config-panel {
     width: 100%;
     height: 20vh;
   }
+}
+
+/* vuedraggable 拖拽样式 */
+.ghost {
+  opacity: 0.5;
+  background: #f0f0f0;
+}
+
+.chosen {
+  opacity: 0.8;
+  transform: rotate(2deg);
+}
+
+.drag {
+  opacity: 0.6;
+  transform: rotate(5deg);
 }
 
 /* 滚动条样式 */

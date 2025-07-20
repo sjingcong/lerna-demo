@@ -16,7 +16,7 @@
     "types/*.d.ts",
     "toast-monitor.js",
     "../shared/**/*.ts"
-  ],
+, "../shared/components/ImageList.vue"  ],
   "exclude": [
     "node_modules",
     "dist"

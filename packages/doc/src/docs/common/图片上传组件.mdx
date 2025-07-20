@@ -1,0 +1,138 @@
+---
+title: 图片上传组件
+description: 一个功能完整的图片上传和管理组件，支持拖拽排序、预览、删除等功能
+---
+
+# 图片上传组件 ImageList
+
+图片上传组件是一个功能完整的图片管理组件，提供图片上传、预览、删除、拖拽排序等功能。组件支持多种配置选项，可以满足不同场景的使用需求。
+
+## 特性
+
+- 📤 **图片上传**: 支持点击上传和拖拽上传
+- 🖼️ **图片预览**: 支持大图预览和切换
+- 🗑️ **删除功能**: 支持单张图片删除
+- 🔄 **拖拽排序**: 支持拖拽调整图片顺序
+- 📏 **尺寸控制**: 支持自定义图片显示尺寸
+- 🚫 **禁用状态**: 支持禁用所有操作
+- 📊 **数量限制**: 支持设置最大上传数量
+- 📁 **文件验证**: 支持文件类型和大小验证
+
+## 基础用法
+
+```vue
+<template>
+  <ImageList
+    v-model:value="imageList"
+    @change="onImageChange"
+  />
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import ImageList from '@giom/shared/components/ImageList.vue'
+
+interface ImageItem {
+  url: string
+  ratio: number
+}
+
+const imageList = ref<ImageItem[]>([
+  {
+    url: 'https://example.com/image1.jpg',
+    ratio: 1.5 // 宽高比 (宽度/高度)
+  },
+  {
+    url: 'https://example.com/image2.jpg',
+    ratio: 0.75
+  }
+])
+
+const onImageChange = (images: ImageItem[]) => {
+  console.log('图片列表变化:', images)
+}
+</script>
+```
+
+## API 参考
+
+### Props 属性
+
+| 属性名 | 类型 | 默认值 | 说明 |
+|--------|------|--------|------|
+| `value` | `ImageItem[]` | `[]` | 图片数据数组 |
+| `maxCount` | `number` | `9` | 最大上传数量 |
+| `disabled` | `boolean` | `false` | 是否禁用 |
+| `showUpload` | `boolean` | `true` | 是否显示上传按钮 |
+| `maxSize` | `number` | `10` | 最大文件大小(MB) |
+| `gridColumns` | `number` | `3` | 网格列数 |
+| `itemWidth` | `number` | `80` | 图片项宽度(px) |
+
+### Events 事件
+
+| 事件名 | 参数 | 说明 |
+|--------|------|------|
+| `update:value` | `(value: ImageItem[])` | 数据更新事件，用于v-model双向绑定 |
+| `change` | `(value: ImageItem[])` | 图片列表变化事件 |
+| `upload` | `(file: File)` | 文件上传事件 |
+| `remove` | `(item: ImageItem, index: number)` | 图片删除事件 |
+| `sort` | `(newList: ImageItem[])` | 拖拽排序事件 |
+
+### ImageItem 数据结构
+
+```typescript
+interface ImageItem {
+  url: string      // 图片URL地址
+  ratio: number    // 宽高比 (宽度/高度)
+  [key: string]: any // 允许其他自定义属性
+}
+```
+
+## 高级用法
+
+### 自定义配置
+
+```vue
+<template>
+  <ImageList
+    v-model:value="imageList"
+    :max-count="6"
+    :max-size="5"
+    :item-width="150"
+    :disabled="loading"
+    :show-upload="!readonly"
+  />
+</template>
+```
+
+### 只读模式
+
+```vue
+<template>
+  <ImageList
+    v-model:value="imageList"
+    :disabled="true"
+  />
+</template>
+```
+
+## 注意事项
+
+1. **依赖要求**: 需要安装 `vuedraggable` 依赖用于拖拽功能
+2. **图片格式**: 仅支持图片文件格式（image/*）
+3. **宽高比**: 图片上传后会计算并保存宽高比
+4. **禁用状态**: 当disabled为true时，所有交互功能（上传、删除、拖拽）都会被禁用
+
+## 常见问题
+
+### Q: 为什么拖拽排序后外部数据没有更新？
+A: 确保监听了 `sort` 事件或使用 `v-model:value` 进行双向绑定。
+
+## 更新日志
+
+### v1.0.0
+- 初始版本发布
+- 支持基础的图片上传、预览、删除功能
+- 支持拖拽排序
+- 完整的TypeScript类型定义
+- 支持禁用状态和各种配置选项
