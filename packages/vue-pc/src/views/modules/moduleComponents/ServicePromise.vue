@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import type { IModule } from './types'
+import type { IModule } from '../types'
 
 interface Props {
   data?: {

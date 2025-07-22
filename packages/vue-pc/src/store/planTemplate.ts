@@ -2,15 +2,17 @@ import { defineStore } from 'pinia'
 import { reactive, toRefs } from 'vue'
 import type { Component } from 'vue'
 import type { IModule } from '@/views/modules/types'
-import Cover from '@/views/modules/Cover.vue'
-import Catalog from '@/views/modules/Catalog.vue'
-import ServicePromise from '@/views/modules/ServicePromise.vue'
+import Cover from '@/views/modules/moduleComponents/Cover.vue'
+import Catalog from '@/views/modules/moduleComponents/Catalog.vue'
+import ServicePromise from '@/views/modules/moduleComponents/ServicePromise.vue'
+import ImageModule from '@/views/modules/moduleComponents/ImageModule.vue'
 
 // 模块组件映射对象
 export const TEMPLATE_COMPONENTS: Record<string, Component> = {
   cover: Cover,
   catalog: Catalog,
-  'service-promise': ServicePromise
+  'service-promise': ServicePromise,
+  'image-module': ImageModule
 }
 
 // 获取模块组件的函数
@@ -59,10 +61,14 @@ export const usePlanTemplateStore = defineStore('planTemplate', () => {
         moduleCode: 'cover',
         moduleType: '封面',
         moduleName: '封面模块',
-        backImage: 'https://example.com/cover-bg.jpg',
         editable: true,
         deletable: false,
         templateAttrs: [
+          {
+            attrKey: 'backImage',
+            attrName: '背景图',
+            editComponentType: 'BackImage'
+          },
           {
             attrKey: 'title',
             attrName: '标题',
@@ -89,7 +95,6 @@ export const usePlanTemplateStore = defineStore('planTemplate', () => {
         moduleCode: 'catalog',
         moduleType: '目录',
         moduleName: '目录模块',
-        backImage: 'https://example.com/catalog-bg.jpg',
         editable: true,
         deletable: false,
         templateAttrs: [
@@ -104,45 +109,25 @@ export const usePlanTemplateStore = defineStore('planTemplate', () => {
         }
       },
       {
-        moduleCode: 'content',
-        moduleType: '内容',
-        moduleName: '内容模块',
-        backImage: 'https://example.com/content-bg.jpg',
-        editable: true,
-        deletable: true,
-        templateAttrs: [
-          {
-            attrKey: 'title',
-            attrName: '标题',
-            editComponentType: 'Input'
-          },
-          {
-            attrKey: 'content',
-            attrName: '内容',
-            editComponentType: 'Input'
-          }
-        ],
-        moduleValue: {
-          title: '内容标题',
-          content: '请输入内容'
-        }
-      },
-      {
         moduleCode: 'service-promise',
         moduleType: '服务承诺',
         moduleName: '服务承诺模块',
-        backImage: 'https://example.com/service-promise-bg.jpg',
         editable: true,
         deletable: true,
         templateAttrs: [
           {
+            attrKey: 'backImage',
+            attrName: '背景图',
+            editComponentType: 'BackImage'
+          },
+          {
             attrKey: 'section1',
-            attrName: '时效承诺',
+            attrName: '模块1',
             editComponentType: 'SectionGroupHorizontal'
           },
           {
             attrKey: 'section2',
-            attrName: '服务安排',
+            attrName: '模块2',
             editComponentType: 'SectionListVertical'
           }
         ],
@@ -486,6 +471,66 @@ export const usePlanTemplateStore = defineStore('planTemplate', () => {
     }
   }
 
+  /**
+   * 添加图片模块
+   */
+  const addImageModule = async () => {
+    try {
+      // 生成唯一的模块代码
+      const timestamp = Date.now()
+      const moduleCode = 'image-module'
+      const uniqueId = `image-module-${timestamp}`
+      
+      // 创建图片模块配置
+      const imageModule: IModule = {
+        moduleCode,
+        moduleType: '图片',
+        moduleName: `图片模块_${timestamp}`,
+        editable: true,
+        deletable: true,
+        templateAttrs: [
+          {
+            attrKey: 'images',
+            attrName: '背景图',
+            editComponentType: 'ImageList'
+          },
+        ],
+        moduleValue: {
+          images: [],
+        }
+      }
+      
+      // 添加到模块列表
+      state.modules.push(imageModule)
+      
+      // 初始化模块数据
+      state.moduleValueMap = {
+        ...state.moduleValueMap,
+        [moduleCode]: imageModule.moduleValue
+      }
+      
+      console.log('Image module added successfully:', moduleCode)
+      return imageModule
+    } catch (error) {
+      console.error('Failed to add image module:', error)
+      throw error
+    }
+  }
+
+  /**
+   * 重新排序模块
+   * @param newModules 新的模块顺序数组
+   */
+  const reorderModules = async (newModules: IModule[]) => {
+    try {
+      state.modules = [...newModules]
+      console.log('Modules reordered successfully')
+    } catch (error) {
+      console.error('Failed to reorder modules:', error)
+      throw error
+    }
+  }
+
   return {
     // 暴露状态
     ...toRefs(state),
@@ -494,6 +539,8 @@ export const usePlanTemplateStore = defineStore('planTemplate', () => {
     updateModule,
     updateModuleValue,
     updateModuleAttr,
+    addImageModule,
+    reorderModules,
     // 暴露数据管理方法
     initModuleValue,
     isModuleDataInitialized,

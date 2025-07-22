@@ -25,6 +25,11 @@ const routes = [
     path: '/user-list',
     name: 'TemplateDemo',
     component: () => import('@/views/user-management/UserList.vue')
+  },
+  {
+    path: '/image-list-demo',
+    name: 'ImageListDemo',
+    component: () => import('@/views/ImageListDemo.vue')
   }
 ]
 

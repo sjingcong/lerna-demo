@@ -46,7 +46,6 @@
           <div v-if="attr.editComponentType && hasEditComponent(attr.editComponentType)" class="attr-config-item">
             <div class="attr-header">
               <h5 class="attr-name">{{ attr.attrName }}</h5>
-              <span class="attr-key">{{ attr.attrKey }}</span>
             </div>
 
             <!-- 渲染对应的编辑组件 -->
@@ -244,7 +243,6 @@ const updateAttrData = async (attrKey: string, newData: any) => {
   margin-bottom: 24px;
   padding: 16px;
   background: #fafbfc;
-  border: 1px solid #e4e7ed;
   border-radius: 6px;
 }
 
@@ -254,7 +252,6 @@ const updateAttrData = async (attrKey: string, newData: any) => {
   justify-content: space-between;
   margin-bottom: 12px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #e4e7ed;
 }
 
 .attr-name {

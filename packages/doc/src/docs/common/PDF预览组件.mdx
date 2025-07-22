@@ -1,0 +1,257 @@
+---
+title: PDF预览组件
+description: 基于PDF.js和BetterScroll的高性能PDF预览组件
+---
+
+<div style={{ 
+  position: 'fixed', 
+  top: '200px', 
+  left: '400px', 
+  backgroundColor: 'white', 
+  border: '1px solid #e1e5e9', 
+  borderRadius: '8px', 
+  padding: '12px', 
+  boxShadow: '0 2px 8px rgba(0,0,0,0.1)', 
+  zIndex: 1000, 
+  fontSize: '14px', 
+  maxWidth: '200px' 
+}}> 
+  <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#1890ff' }}>📋 快速导航</div> 
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}> 
+    <a href="#特性" style={{ color: '#666', textDecoration: 'none' }}>✨ 特性</a> 
+    <a href="#基础用法" style={{ color: '#666', textDecoration: 'none' }}>🚀 基础用法</a> 
+    <a href="#本地文件预览" style={{ color: '#666', textDecoration: 'none' }}>📁 本地文件预览</a> 
+    <a href="#api" style={{ color: '#666', textDecoration: 'none' }}>📋 API</a> 
+    <div style={{ paddingLeft: '12px', display: 'flex', flexDirection: 'column', gap: '2px' }}> 
+      <a href="#props" style={{ color: '#999', textDecoration: 'none', fontSize: '12px' }}>Props</a> 
+      <a href="#events" style={{ color: '#999', textDecoration: 'none', fontSize: '12px' }}>Events</a> 
+    </div> 
+    <a href="#高级配置" style={{ color: '#666', textDecoration: 'none' }}>⚙️ 高级配置</a> 
+    <a href="#性能优化" style={{ color: '#666', textDecoration: 'none' }}>⚡ 性能优化</a> 
+    <a href="#技术实现" style={{ color: '#666', textDecoration: 'none' }}>🔧  技术实现</a> 
+    <a href="#注意事项" style={{ color: '#666', textDecoration: 'none' }}>⚠️ 注意事项</a> 
+  </div> 
+</div>
+
+# PDF预览组件
+
+基于 `PDF.js` 和 `BetterScroll` 实现的高性能PDF预览组件，支持分页浏览、缩放、滚动等功能。
+
+<h2 id="特性">特性</h2>
+
+- 📄 **高性能渲染**: 基于PDF.js的原生渲染能力
+- 🔍 **缩放功能**: 支持0.5x-3x缩放，手势缩放
+- 📱 **移动端优化**: 基于BetterScroll的流畅滚动体验
+- ⚡ **懒加载**: 智能的页面渲染策略，按需加载
+- 🎯 **精确定位**: 支持跳转到指定页面
+- 📥 **下载功能**: 可选的PDF下载功能
+- 🎨 **响应式设计**: 自适应容器宽度
+
+<h2 id="基础用法">基础用法</h2>
+
+```vue
+<template>
+  <div style="height: 600px;">
+    <PdfViewer
+      :src="pdfUrl"
+      :show-download="true"
+      @loaded="onPdfLoaded"
+      @page-change="onPageChange"
+      @error="onError"
+    />
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import PdfViewer from '@/components/PdfViewer.vue'
+
+const pdfUrl = ref('https://example.com/document.pdf')
+
+const onPdfLoaded = (totalPages) => {
+  console.log(`PDF加载完成，共${totalPages}页`)
+}
+
+const onPageChange = (currentPage) => {
+  console.log(`当前页面：${currentPage}`)
+}
+
+const onError = (error) => {
+  console.error('PDF加载失败：', error)
+}
+</script>
+```
+
+<h2 id="本地文件预览">本地文件预览</h2>
+
+```vue
+<template>
+  <div>
+    <input type="file" accept=".pdf" @change="handleFileSelect" />
+    <div style="height: 600px;" v-if="pdfSrc">
+      <PdfViewer :src="pdfSrc" />
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import PdfViewer from '@/components/PdfViewer.vue'
+
+const pdfSrc = ref('')
+
+const handleFileSelect = (event) => {
+  const file = event.target.files[0]
+  if (file && file.type === 'application/pdf') {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      pdfSrc.value = e.target.result
+    }
+    reader.readAsDataURL(file)
+  }
+}
+</script>
+```
+
+<h2 id="api">API</h2>
+
+<h3 id="props">Props</h3>
+
+| 属性名 | 类型 | 默认值 | 说明 |
+|--------|------|--------|------|
+| `src` | `string` | - | PDF文件URL或base64数据 |
+| `initialPage` | `number` | `1` | 初始显示页码 |
+| `initialScale` | `number` | `1` | 初始缩放比例 |
+| `renderBuffer` | `number` | `1000` | 预渲染缓冲区大小(px) |
+| `showDownload` | `boolean` | `false` | 是否显示下载按钮 |
+
+<h3 id="events">Events</h3>
+
+| 事件名 | 参数 | 说明 |
+|--------|------|------|
+| `loaded` | `(totalPages: number)` | PDF加载完成时触发 |
+| `pageChange` | `(page: number)` | 当前页面变化时触发 |
+| `error` | `(error: string)` | 加载或渲染错误时触发 |
+
+<h2 id="高级配置">高级配置</h2>
+
+### 自定义缓冲区大小
+
+```vue
+<template>
+  <PdfViewer
+    :src="pdfUrl"
+    :render-buffer="2000"
+  />
+</template>
+```
+
+`renderBuffer` 属性控制预渲染的缓冲区大小，值越大预加载的页面越多，但会消耗更多内存。
+
+### 初始化配置
+
+```vue
+<template>
+  <PdfViewer
+    :src="pdfUrl"
+    :initial-page="5"
+    :initial-scale="1.5"
+  />
+</template>
+```
+
+<h2 id="性能优化">性能优化</h2>
+
+### 懒加载机制
+
+组件采用智能的懒加载策略：
+
+1. **初始化**: 只创建Canvas元素，显示占位内容
+2. **可视区域检测**: 基于滚动位置动态渲染可见页面
+3. **预渲染**: 提前渲染即将进入可视区域的页面
+4. **并发控制**: 限制同时渲染的页面数量
+
+### 内存管理
+
+- 使用 `shallowRef` 避免PDF文档对象的深度代理
+- 及时清理渲染任务和Canvas引用
+- 智能的页面缓存策略
+
+<h2 id="技术实现">技术实现</h2>
+
+### 核心依赖
+
+- **PDF.js**: PDF文档解析和渲染
+- **BetterScroll**: 移动端滚动和缩放
+- **Vue 3**: 响应式框架
+
+### 架构设计
+
+```
+┌─────────────────┐
+│   PdfViewer     │
+├─────────────────┤
+│ • 工具栏        │
+│ • 页面导航      │
+│ • 缩放控制      │
+├─────────────────┤
+│ BetterScroll    │
+├─────────────────┤
+│ • 滚动容器      │
+│ • 缩放手势      │
+│ • 惯性滚动      │
+├─────────────────┤
+│ Canvas渲染层    │
+├─────────────────┤
+│ • 页面Canvas    │
+│ • 懒加载逻辑    │
+│ • 渲染队列      │
+└─────────────────┘
+```
+
+<h2 id="注意事项">注意事项</h2>
+
+### 浏览器兼容性
+
+- 现代浏览器（Chrome 60+, Firefox 55+, Safari 12+）
+- 需要支持Canvas 2D API
+- 移动端需要支持触摸事件
+
+### 性能建议
+
+1. **文件大小**: 建议PDF文件不超过50MB
+2. **页面数量**: 超过100页的文档可能影响性能
+3. **缓冲区设置**: 根据设备性能调整 `renderBuffer`
+4. **容器高度**: 确保容器有明确的高度设置
+
+### 常见问题
+
+**Q: PDF加载失败怎么办？**
+
+A: 检查以下几点：
+- PDF文件URL是否可访问
+- 是否存在跨域问题
+- PDF文件是否损坏
+- 浏览器是否支持PDF.js
+
+**Q: 缩放功能不工作？**
+
+A: 确保：
+- 容器有足够的空间
+- BetterScroll正确初始化
+- 没有CSS样式冲突
+
+**Q: 滚动性能差？**
+
+A: 尝试：
+- 减少 `renderBuffer` 值
+- 检查是否有其他性能瓶颈
+- 确保容器样式正确
+
+## 更新日志
+
+### v1.0.0
+- 初始版本发布
+- 支持基础PDF预览功能
+- 集成BetterScroll滚动
+- 实现懒加载机制

@@ -34,9 +34,11 @@
     "vue": "^3.3.0",
     "vue-router": "^4.5.1",
     "vue-scrollto": "^2.20.0",
+    "vuedraggable": "^4.1.0",
     "web-vitals": "^5.0.3"
   },
   "devDependencies": {
+    "@types/lodash-es": "^4.17.12",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",

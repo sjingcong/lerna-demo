@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JusTalk 浏览器端示例</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .status {
+            padding: 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.connected {
+            background: #10b981;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+        
+        .panel {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 25px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .panel h3 {
+            color: #1e293b;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 10px 20px rgba(107, 114, 128, 0.3);
+        }
+        
+        .demo-components {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .demo-component {
+            padding: 20px;
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+        
+        .demo-component:hover {
+            border-color: #4f46e5;
+            background: #f0f9ff;
+        }
+        
+        .demo-component.selected {
+            border-color: #4f46e5;
+            background: #ede9fe;
+            border-style: solid;
+        }
+        
+        .log-container {
+            grid-column: 1 / -1;
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 20px;
+            color: #e2e8f0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #374151;
+        }
+        
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 4px;
+            border-left: 3px solid #6b7280;
+        }
+        
+        .log-entry.info {
+            border-left-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .log-entry.success {
+            border-left-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        .log-entry.error {
+            border-left-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        .log-entry.warning {
+            border-left-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+        
+        .timestamp {
+            color: #9ca3af;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 JusTalk 浏览器端示例</h1>
+            <p>通过浏览器向 MCP 服务器发送组件编辑请求</p>
+        </div>
+        
+        <div class="status">
+            <div class="status-indicator">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">未连接</span>
+            </div>
+            <div>
+                <button class="btn btn-secondary" onclick="toggleConnection()" id="connectBtn">连接</button>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="panel">
+                <h3>📝 编辑请求</h3>
+                
+                <div class="form-group">
+                    <label for="instruction">编辑指令</label>
+                    <textarea 
+                        id="instruction" 
+                        placeholder="请描述你想要对组件进行的修改，例如：将按钮颜色改为蓝色，增加圆角效果"
+                    ></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="componentType">组件类型</label>
+                    <select id="componentType">
+                        <option value="button">按钮 (Button)</option>
+                        <option value="input">输入框 (Input)</option>
+                        <option value="card">卡片 (Card)</option>
+                        <option value="modal">弹窗 (Modal)</option>
+                        <option value="navbar">导航栏 (Navbar)</option>
+                    </select>
+                </div>
+                
+                <button class="btn" onclick="sendEditRequest()" id="editBtn" disabled>
+                    🚀 发送编辑请求
+                </button>
+            </div>
+            
+            <div class="panel">
+                <h3>🎨 示例组件</h3>
+                <p style="margin-bottom: 15px; color: #6b7280;">点击选择要编辑的组件</p>
+                
+                <div class="demo-components">
+                    <div class="demo-component" onclick="selectComponent(this, 'button')" data-type="button">
+                        <button style="background: #4f46e5; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
+                            示例按钮
+                        </button>
+                        <p style="margin-top: 10px; font-size: 12px; color: #6b7280;">Button</p>
+                    </div>
+                    
+                    <div class="demo-component" onclick="selectComponent(this, 'input')" data-type="input">
+                        <input type="text" placeholder="示例输入框" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
+                        <p style="margin-top: 10px; font-size: 12px; color: #6b7280;">Input</p>
+                    </div>
+                    
+                    <div class="demo-component" onclick="selectComponent(this, 'card')" data-type="card">
+                        <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <h4 style="margin: 0 0 8px 0; font-size: 14px;">示例卡片</h4>
+                            <p style="margin: 0; font-size: 12px; color: #6b7280;">卡片内容</p>
+                        </div>
+                        <p style="margin-top: 10px; font-size: 12px; color: #6b7280;">Card</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="log-container">
+                <div class="log-header">
+                    <h3 style="margin: 0; color: #f1f5f9;">📋 消息日志</h3>
+                    <button class="btn btn-secondary" onclick="clearLogs()" style="width: auto; padding: 6px 12px; font-size: 12px;">
+                        清空日志
+                    </button>
+                </div>
+                <div id="logContent">
+                    <div class="log-entry info">
+                        <span class="timestamp">[${new Date().toLocaleTimeString()}]</span>
+                        系统初始化完成，等待连接到 MCP 服务器...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="browser-sdk.js"></script>
+    <script>
+        let selectedComponent = null;
+        let sdk = null;
+        
+        // 初始化 SDK
+        function initSDK() {
+            sdk = new JusTalkBrowserSDK({
+                wsUrl: 'ws://localhost:3001',
+                onConnect: () => {
+                    updateStatus(true);
+                    addLog('success', '✅ 成功连接到 MCP 服务器');
+                    document.getElementById('editBtn').disabled = false;
+                },
+                onDisconnect: () => {
+                    updateStatus(false);
+                    addLog('warning', '⚠️ 与 MCP 服务器断开连接');
+                    document.getElementById('editBtn').disabled = true;
+                },
+                onError: (error) => {
+                    addLog('error', `❌ 连接错误: ${error.message}`);
+                },
+                onMessage: (message) => {
+                    addLog('info', `📨 收到消息: ${JSON.stringify(message, null, 2)}`);
+                    
+                    // 处理编辑完成消息
+                    if (message.type === 'EDIT_COMPLETE') {
+                        if (message.payload.success) {
+                            addLog('success', `✅ 编辑完成: ${message.payload.message || '组件已成功更新'}`);
+                        } else {
+                            addLog('error', `❌ 编辑失败: ${message.payload.message || '未知错误'}`);
+                        }
+                    }
+                    
+                    // 处理组件变更通知
+                    if (message.type === 'COMPONENT_CHANGED') {
+                        addLog('success', `🔄 组件已更新: ${message.payload.componentId}`);
+                        if (message.payload.changes) {
+                            addLog('info', `📝 变更详情: ${JSON.stringify(message.payload.changes, null, 2)}`);
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 更新连接状态
+        function updateStatus(connected) {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const connectBtn = document.getElementById('connectBtn');
+            
+            if (connected) {
+                statusDot.classList.add('connected');
+                statusText.textContent = '已连接';
+                connectBtn.textContent = '断开';
+            } else {
+                statusDot.classList.remove('connected');
+                statusText.textContent = '未连接';
+                connectBtn.textContent = '连接';
+            }
+        }
+        
+        // 切换连接状态
+        function toggleConnection() {
+            if (sdk && sdk.isConnected) {
+                sdk.disconnect();
+                addLog('info', '🔌 手动断开连接');
+            } else {
+                if (!sdk) {
+                    initSDK();
+                }
+                sdk.connect();
+                addLog('info', '🔄 正在连接到 MCP 服务器...');
+            }
+        }
+        
+        // 选择组件
+        function selectComponent(element, type) {
+            // 移除之前的选择
+            document.querySelectorAll('.demo-component').forEach(comp => {
+                comp.classList.remove('selected');
+            });
+            
+            // 选择当前组件
+            element.classList.add('selected');
+            selectedComponent = {
+                type: type,
+                element: element
+            };
+            
+            // 更新组件类型选择器
+            document.getElementById('componentType').value = type;
+            
+            addLog('info', `🎯 选择了组件: ${type}`);
+        }
+        
+        // 发送编辑请求
+        async function sendEditRequest() {
+            const instruction = document.getElementById('instruction').value.trim();
+            const componentType = document.getElementById('componentType').value;
+            
+            if (!instruction) {
+                addLog('error', '❌ 请输入编辑指令');
+                return;
+            }
+            
+            if (!sdk || !sdk.isConnected) {
+                addLog('error', '❌ 未连接到 MCP 服务器');
+                return;
+            }
+            
+            try {
+                addLog('info', `🚀 发送编辑请求: ${instruction}`);
+                
+                const component = {
+                    id: `demo-${componentType}-${Date.now()}`,
+                    name: componentType,
+                    type: componentType,
+                    props: {
+                        className: `demo-${componentType}`,
+                        children: `示例${componentType}`
+                    },
+                    sourceMap: {
+                        filePath: `/src/components/${componentType.charAt(0).toUpperCase() + componentType.slice(1)}.tsx`,
+                        lineNumber: 10,
+                        columnNumber: 5
+                    }
+                };
+                
+                const result = await sdk.editComponent({
+                    instruction: instruction,
+                    component: component,
+                    context: {
+                        framework: 'React',
+                        componentLibrary: 'Ant Design',
+                        styleFramework: 'Tailwind CSS',
+                        projectRoot: window.location.origin
+                    },
+                    pageContext: {
+                        url: window.location.href,
+                        title: document.title,
+                        viewport: {
+                            width: window.innerWidth,
+                            height: window.innerHeight
+                        }
+                    }
+                });
+                
+                addLog('success', `✅ 编辑请求已发送，等待 Cursor 处理...`);
+                
+            } catch (error) {
+                addLog('error', `❌ 发送编辑请求失败: ${error.message}`);
+            }
+        }
+        
+        // 添加日志
+        function addLog(type, message) {
+            const logContent = document.getElementById('logContent');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.innerHTML = `
+                <span class="timestamp">[${timestamp}]</span>
+                ${message}
+            `;
+            
+            logContent.appendChild(logEntry);
+            logContent.scrollTop = logContent.scrollHeight;
+        }
+        
+        // 清空日志
+        function clearLogs() {
+            const logContent = document.getElementById('logContent');
+            logContent.innerHTML = `
+                <div class="log-entry info">
+                    <span class="timestamp">[${new Date().toLocaleTimeString()}]</span>
+                    日志已清空
+                </div>
+            `;
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            addLog('info', '🎯 JusTalk 浏览器端示例已加载');
+            addLog('info', '💡 请先连接到 MCP 服务器，然后选择组件并输入编辑指令');
+        });
+    </script>
+</body>
+</html>

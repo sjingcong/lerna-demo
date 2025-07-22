@@ -1,5 +1,5 @@
 <template>
-  <div class="cover-template">
+  <ModuleContainer :back-image="props.data?.backImage">
     <!-- 企业保障计划书表单区域 -->
     <div class="form-section">
       <div class="form-container">
@@ -58,13 +58,14 @@
         </div>
       </div>
     </div>
-  </div>
+  </ModuleContainer>
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
+import { reactive, computed } from 'vue'
 import { Field as VanField } from 'vant'
-import type { IModule } from './types'
+import type { IModule } from '../types'
+import ModuleContainer from '../components/ModuleContainer.vue'
 
 // 表单数据接口
 interface FormData {
@@ -83,6 +84,10 @@ interface Props {
     serviceManager?: string
     phone?: string
     email?: string
+    backImage?: {
+      url?: string
+      ratio?: number
+    }
     [key: string]: any
   }
   config?: IModule
@@ -106,6 +111,8 @@ const formData = reactive<FormData>({
   email: props.data?.email || ''
 })
 
+
+
 // 处理字段变化
 const handleFieldChange = () => {
   emit('update', { ...formData })
@@ -113,68 +120,7 @@ const handleFieldChange = () => {
 </script>
 
 <style scoped>
-.cover-template {
-  width: 350px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  position: relative;
-  padding: 20px;
-  margin: 0 auto;
-}
 
-/* 企业保障计划书悬浮模块 */
-.cover-template > * {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  width: 100%;
-  display: flex;
-}
-
-/* 背景图片区域 */
-.background-section {
-  flex: 1;
-  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 40px;
-  color: white;
-}
-
-.company-logo {
-  text-align: left;
-}
-
-.logo-text {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 8px;
-  letter-spacing: 2px;
-}
-
-.logo-subtitle {
-  font-size: 14px;
-  opacity: 0.9;
-  letter-spacing: 1px;
-}
-
-.business-people {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex: 1;
-}
-
-.people-placeholder {
-  font-size: 80px;
-  opacity: 0.8;
-  text-align: center;
-}
 
 /* 表单区域 */
 .form-section {
@@ -184,6 +130,8 @@ const handleFieldChange = () => {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 
 .form-container {
@@ -242,29 +190,7 @@ const handleFieldChange = () => {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .cover-template {
-    padding: 10px;
-    min-height: 100vh;
-  }
-  
-  .cover-template > * {
-    flex-direction: column;
-    max-width: none;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .background-section {
-    min-height: 250px;
-    padding: 20px;
-  }
-  
-  .logo-text {
-    font-size: 20px;
-  }
-  
-  .people-placeholder {
-    font-size: 60px;
-  }
+
   
   .form-section {
     padding: 20px;

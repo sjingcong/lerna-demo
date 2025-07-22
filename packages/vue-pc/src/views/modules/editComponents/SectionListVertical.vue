@@ -2,55 +2,31 @@
   <div class="section-list-vertical">
     <!-- 标题部分 -->
     <div class="section-header">
-      <h3>{{ data.title }}</h3>
+      <a-input v-model:value="localData.title" size="large" class="title-input" placeholder="请输入标题"
+        @input="debouncedHandleDataChange" allow-clear />
     </div>
-    
+
     <!-- Tab组件 -->
     <div class="tabs-container">
-      <a-tabs 
-        v-model:activeKey="activeTabKey"
-        type="editable-card"
-        @edit="onTabEdit"
-        class="custom-tabs"
-      >
-        <a-tab-pane 
-          v-for="(item, itemIndex) in localData.items" 
-          :key="itemIndex.toString()"
-          :closable="localData.items.length > 1"
-        >
+      <a-tabs v-model:activeKey="activeTabKey" type="editable-card" @edit="onTabEdit" class="custom-tabs">
+        <a-tab-pane v-for="(item, itemIndex) in localData.items" :key="itemIndex.toString()"
+          :closable="localData.items.length > 1">
           <template #tab>
             <div class="tab-title-wrapper">
-              <a-input 
-                v-if="editingTabIndex === itemIndex"
-                ref="tabTitleInput"
-                v-model:value="item.title"
-                @blur="stopEditingTab"
-                @keyup.enter="stopEditingTab"
-                class="tab-title-input"
-                allow-clear
-              />
-              <span 
-                v-else 
-                class="tab-title-text"
-                @click="startEditingTab(itemIndex)"
-              >
+              <a-input v-if="editingTabIndex === itemIndex" ref="tabTitleInput" v-model:value="item.title"
+                @blur="stopEditingTab" @keyup.enter="stopEditingTab" class="tab-title-input" allow-clear />
+              <span v-else class="tab-title-text" @click="startEditingTab(itemIndex)">
                 {{ item.title }}
                 <EditOutlined class="edit-icon" />
               </span>
             </div>
           </template>
-          
+
           <!-- Tab内容 -->
           <div class="tab-content">
             <div class="item-content">
-              <a-textarea 
-                v-model:value="item.description"
-                placeholder="请输入描述内容"
-                :rows="6"
-                class="desc-textarea"
-                @input="debouncedHandleDataChange"
-                allow-clear
-              />
+              <a-textarea v-model:value="item.description" placeholder="请输入描述内容" :rows="6" class="desc-textarea"
+                @input="debouncedHandleDataChange" allow-clear />
             </div>
           </div>
         </a-tab-pane>
@@ -157,9 +133,9 @@ const onTabEdit: TabsProps['onEdit'] = (targetKey, action) => {
 // 删除项目
 const deleteItem = (itemIndex: number) => {
   if (localData.items.length <= 1) return // 至少保留一个tab
-  
+
   localData.items.splice(itemIndex, 1)
-  
+
   // 调整activeTabKey
   const currentActive = parseInt(activeTabKey.value)
   if (currentActive >= itemIndex && currentActive > 0) {
@@ -167,7 +143,7 @@ const deleteItem = (itemIndex: number) => {
   } else if (currentActive >= localData.items.length) {
     activeTabKey.value = (localData.items.length - 1).toString()
   }
-  
+
   debouncedHandleDataChange()
 }
 </script>
@@ -199,6 +175,16 @@ const deleteItem = (itemIndex: number) => {
 
 .custom-tabs {
   background: #fff;
+}
+
+.custom-tabs :deep(.ant-tabs-nav) {
+  margin-bottom: 0;
+}
+
+.custom-tabs :deep(.ant-tabs-content-holder) {
+  border: 1px solid #f0f0f0;
+  border-top: none;
+  padding: 8px;
 }
 
 .tab-title-wrapper {
@@ -275,11 +261,11 @@ const deleteItem = (itemIndex: number) => {
   .section-list-vertical {
     padding: 16px;
   }
-  
+
   .tab-title-wrapper {
     max-width: 80px;
   }
-  
+
   .tab-title-input {
     width: 80px;
   }
