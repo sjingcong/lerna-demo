@@ -71,10 +71,9 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
 import { usePlanTemplateStore } from '../../store/planTemplate'
-import { EyeOutlined, EditOutlined } from '@ant-design/icons-vue'
 import ModuleRender from './ModuleRender.vue'
 import ModuleDataConfig from './ModuleDataConfig.vue'
-import type { IModule } from './types'
+import type { IModule } from '@giom/shared/planBookComponents/types'
 import draggable from 'vuedraggable'
 
 // 使用store并确保类型正确

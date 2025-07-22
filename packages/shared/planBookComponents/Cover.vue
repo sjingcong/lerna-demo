@@ -64,8 +64,8 @@
 <script setup lang="ts">
 import { reactive, computed } from 'vue'
 import { Field as VanField } from 'vant'
-import type { IModule } from '../types'
-import ModuleContainer from '../components/ModuleContainer.vue'
+import type { IModule } from './types'
+import ModuleContainer from './ModuleContainer.vue'
 
 // 表单数据接口
 interface FormData {

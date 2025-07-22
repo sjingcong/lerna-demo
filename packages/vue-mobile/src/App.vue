@@ -5,6 +5,7 @@
       <router-link to="/pdf-demo" class="nav-link">PDF</router-link>
       <router-link to="/excel-demo" class="nav-link">Excel</router-link>
       <router-link to="/doc-demo" class="nav-link">Word</router-link>
+      <router-link to="/table-demo" class="nav-link">表格</router-link>
     </div>
     <router-view />
   </div>

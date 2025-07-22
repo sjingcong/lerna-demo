@@ -1,62 +1,59 @@
 <template>
-  <div class="service-promise-container">
-    <!-- 时效承诺部分 -->
-    <div class="section" v-if="props.data?.section1">
-      <h2 class="section-title">{{ props.data.section1.title }}</h2>
-      <div class="promise-grid">
-        <div 
-          v-for="(item, index) in props.data.section1.items" 
-          :key="index"
-          class="promise-card"
-        >
-          <div class="promise-header">
-            <div class="promise-icon">!</div>
-            <h3 class="promise-name">{{ item.title }}</h3>
-          </div>
-          <div class="promise-content">
-            <div v-for="(contentItem, contentIndex) in item.content" :key="contentIndex" class="promise-item">
-              <div class="promise-sub-item">
-                <span class="item-label">{{ contentItem.subTitle }}:</span>
-                <span class="item-desc">{{ contentItem.subDesc }}</span>
+  <ModuleContainer :back-image="props.data?.backImage">
+    <div class="service-promise-container">
+      <!-- 时效承诺部分 -->
+      <div class="section" v-if="props.data?.section1">
+        <h2 class="section-title">{{ props.data.section1.title }}</h2>
+        <div class="promise-grid">
+          <div v-for="(item, index) in props.data.section1.items" :key="index" class="promise-card">
+            <div class="promise-header">
+              <div class="promise-icon">!</div>
+              <h3 class="promise-name">{{ item.title }}</h3>
+            </div>
+            <div class="promise-content">
+              <div v-for="(contentItem, contentIndex) in item.content" :key="contentIndex" class="promise-item">
+                <div class="promise-sub-item">
+                  <span class="item-label">{{ contentItem.subTitle }}:</span>
+                  <span class="item-desc">{{ contentItem.subDesc }}</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="promise-actions">
-            <button class="action-btn delete-btn">🗑️ 删除</button>
-            <button class="action-btn edit-btn">✏️ 编辑</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 服务安排部分 -->
-    <div class="section" v-if="props.data?.section2">
-      <h2 class="section-title">{{ props.data.section2.title }}</h2>
-      <div class="service-list">
-        <div 
-          v-for="(item, index) in props.data.section2.items" 
-          :key="index"
-          class="service-card"
-        >
-          <div class="service-header">
-            <div class="service-icon">!</div>
-            <h3 class="service-name">{{ item.title }}</h3>
-            <div class="service-actions">
-              <button class="action-btn delete-btn">🗑️ 删除</button>
-              <button class="action-btn edit-btn">✏️ 编辑</button>
+            <div class="promise-actions" v-if="props.config?.editable || props.config?.deletable">
+              <button v-if="props.config?.deletable" class="action-btn delete-btn">🗑️ 删除</button>
+              <div v-if="props.config?.deletable && props.config?.editable" class="action-divider"></div>
+              <button v-if="props.config?.editable" class="action-btn edit-btn">✏️ 编辑</button>
             </div>
           </div>
-          <div class="service-description">
-            {{ item.description }}
+        </div>
+      </div>
+
+      <!-- 服务安排部分 -->
+      <div class="section" v-if="props.data?.section2">
+        <h2 class="section-title">{{ props.data.section2.title }}</h2>
+        <div class="service-list">
+          <div v-for="(item, index) in props.data.section2.items" :key="index" class="service-card">
+            <div class="service-header">
+              <div class="service-icon">!</div>
+              <h3 class="service-name">{{ item.title }}</h3>
+            </div>
+            <div class="service-description">
+              {{ item.description }}
+            </div>
+            <div class="service-actions positioned" v-if="props.config?.editable || props.config?.deletable">
+              <button v-if="props.config?.deletable" class="action-btn delete-btn">🗑️ 删除</button>
+              <div v-if="props.config?.deletable && props.config?.editable" class="action-divider"></div>
+              <button v-if="props.config?.editable" class="action-btn edit-btn">✏️ 编辑</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </ModuleContainer>
 </template>
 
 <script setup lang="ts">
-import type { IModule } from '../types'
+import type { IModule } from './types'
+import ModuleContainer from './ModuleContainer.vue'
 
 interface Props {
   data?: {
@@ -71,13 +68,13 @@ interface Props {
       }>
     }
     section2?: {
-       title: string
-       items: Array<{
-         title: string
-         description: string
-       }>
-     }
-     [key: string]: any
+      title: string
+      items: Array<{
+        title: string
+        description: string
+      }>
+    }
+    [key: string]: any
   }
   config?: IModule
 }
@@ -143,7 +140,6 @@ const handleUpdate = () => {
   background: white;
   border-radius: 12px;
   padding: 25px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid #e8ecf0;
 }
 
@@ -152,7 +148,6 @@ const handleUpdate = () => {
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 15px;
-  border-bottom: 2px solid #f0f2f5;
 }
 
 .promise-icon {
@@ -214,8 +209,19 @@ const handleUpdate = () => {
 
 .promise-actions {
   display: flex;
-  gap: 12px;
-  justify-content: flex-end;
+  align-items: center;
+  margin-top: 20px;
+  margin-left: -25px;
+  margin-right: -25px;
+  margin-bottom: -25px;
+  border-top: 1px solid #e8ecf0;
+  padding-top: 0;
+}
+
+.action-divider {
+  width: 1px;
+  height: 20px;
+  background-color: #e8ecf0;
 }
 
 /* 服务安排样式 */
@@ -226,20 +232,18 @@ const handleUpdate = () => {
 }
 
 .service-card {
+  position: relative;
   background: white;
   border-radius: 12px;
   padding: 30px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid #e8ecf0;
 }
 
 .service-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   margin-bottom: 20px;
   padding-bottom: 15px;
-  border-bottom: 2px solid #f0f2f5;
 }
 
 .service-header .service-icon {
@@ -265,7 +269,34 @@ const handleUpdate = () => {
 
 .service-actions {
   display: flex;
-  gap: 12px;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 0;
+}
+
+.service-actions.positioned {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: auto;
+  margin-top: 0;
+  border: 1px solid #e8ecf0;
+  border-bottom-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-top: none;
+  border-right: none;
+  background-color: #ffffff;
+  padding-top: 0;
+}
+
+.service-actions.positioned .action-btn {
+  padding: 6px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.service-actions.positioned .action-btn:last-child {
+  border-bottom-left-radius: 8px;
 }
 
 .service-description {
@@ -276,17 +307,24 @@ const handleUpdate = () => {
 
 /* 按钮样式 */
 .action-btn {
-  padding: 8px 16px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  flex: 1;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   background: white;
   color: #666;
   font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.action-btn:hover {
+  background-color: #f8f9fa;
 }
 
 .delete-btn {
@@ -312,26 +350,26 @@ const handleUpdate = () => {
     grid-template-columns: 1fr;
     gap: 15px;
   }
-  
+
   .service-promise-container {
     padding: 20px;
   }
-  
+
   .section-title {
     font-size: 1.6rem;
   }
-  
+
   .promise-card,
   .service-card {
     padding: 20px;
   }
-  
+
   .service-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
-  
+
   .service-actions {
     align-self: flex-end;
   }

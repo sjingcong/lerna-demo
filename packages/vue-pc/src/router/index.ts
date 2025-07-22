@@ -17,13 +17,13 @@ const routes = [
     component: () => import('@/views/about/About.vue')
   },
   {
-    path: '/template-demo',
-    name: 'TemplateDemo',
+    path: '/templatepage',
+    name: 'TemplatePage',
     component: () => import('@/views/modules/ModuleConfig.vue')
   },
   {
     path: '/user-list',
-    name: 'TemplateDemo',
+    name: 'UserList',
     component: () => import('@/views/user-management/UserList.vue')
   },
   {

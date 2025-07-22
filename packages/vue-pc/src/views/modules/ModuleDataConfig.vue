@@ -71,7 +71,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
-import type { IModule } from './types'
+import type { IModule } from '@giom/shared/planBookComponents/types'
 import { getEditComponent, hasEditComponent } from './editComponents'
 import { usePlanTemplateStore } from '@/store/planTemplate'
 

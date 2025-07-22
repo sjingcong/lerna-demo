@@ -1,33 +1,32 @@
 <template>
-  <div class="catalog-container">
-    <div class="catalog-header">
-      <h2 class="catalog-title">目录</h2>
-    </div>
-    <div class="catalog-content">
-      <ul class="catalog-list" v-if="props.data?.catalogList && props.data.catalogList.length > 0">
-        <li 
-          v-for="(item, index) in props.data.catalogList" 
-          :key="index" 
-          class="catalog-item"
-          @click="handleItemClick(item, index)"
-        >
-          <span class="catalog-number">{{ index + 1 }}.</span>
-          <span class="catalog-text">{{ typeof item === 'string' ? item : item.title }}</span>
-          <span class="catalog-dots"></span>
-          <span v-if="typeof item === 'object' && item.page" class="catalog-page">{{ item.page }}</span>
-        </li>
-      </ul>
-      <div v-else class="catalog-empty">
-        <p>暂无目录内容</p>
-        <p class="catalog-tip">请在编辑器中添加目录项</p>
+  <ModuleContainer :back-image="props.data?.backImage">
+    <div class="catalog-container">
+      <div class="catalog-header">
+        <h2 class="catalog-title">目录</h2>
+      </div>
+      <div class="catalog-content">
+        <ul class="catalog-list" v-if="props.data?.catalogList && props.data.catalogList.length > 0">
+          <li v-for="(item, index) in props.data.catalogList" :key="index" class="catalog-item"
+            @click="handleItemClick(item, index)">
+            <span class="catalog-number">{{ index + 1 }}.</span>
+            <span class="catalog-text">{{ typeof item === 'string' ? item : item.title }}</span>
+            <span class="catalog-dots"></span>
+            <span v-if="typeof item === 'object' && item.page" class="catalog-page">{{ item.page }}</span>
+          </li>
+        </ul>
+        <div v-else class="catalog-empty">
+          <p>暂无目录内容</p>
+          <p class="catalog-tip">请在编辑器中添加目录项</p>
+        </div>
       </div>
     </div>
-  </div>
+  </ModuleContainer>
 </template>
 
 <script setup lang="ts">
 import { defineProps, defineEmits, watch } from 'vue'
-import type { IModule } from '../types'
+import type { IModule } from './types'
+import ModuleContainer from './ModuleContainer.vue'
 
 interface Props {
   data?: {
@@ -139,13 +138,11 @@ const handleItemClick = (item: string | { title: string; page?: number }, index:
 .catalog-dots {
   flex: 1;
   height: 1px;
-  background-image: repeating-linear-gradient(
-    to right,
-    #bdc3c7 0,
-    #bdc3c7 4px,
-    transparent 4px,
-    transparent 8px
-  );
+  background-image: repeating-linear-gradient(to right,
+      #bdc3c7 0,
+      #bdc3c7 4px,
+      transparent 4px,
+      transparent 8px);
   margin: 0 15px;
   min-width: 50px;
 }
@@ -180,23 +177,23 @@ const handleItemClick = (item: string | { title: string; page?: number }, index:
     padding: 20px 15px;
     margin: 10px;
   }
-  
+
   .catalog-title {
     font-size: 2rem;
   }
-  
+
   .catalog-content {
     padding: 20px;
   }
-  
+
   .catalog-item {
     padding: 12px 0;
   }
-  
+
   .catalog-text {
     font-size: 1rem;
   }
-  
+
   .catalog-dots {
     margin: 0 10px;
     min-width: 30px;
@@ -209,6 +206,7 @@ const handleItemClick = (item: string | { title: string; page?: number }, index:
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -219,9 +217,23 @@ const handleItemClick = (item: string | { title: string; page?: number }, index:
   animation: fadeInUp 0.5s ease forwards;
 }
 
-.catalog-item:nth-child(1) { animation-delay: 0.1s; }
-.catalog-item:nth-child(2) { animation-delay: 0.2s; }
-.catalog-item:nth-child(3) { animation-delay: 0.3s; }
-.catalog-item:nth-child(4) { animation-delay: 0.4s; }
-.catalog-item:nth-child(5) { animation-delay: 0.5s; }
+.catalog-item:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.catalog-item:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.catalog-item:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.catalog-item:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+.catalog-item:nth-child(5) {
+  animation-delay: 0.5s;
+}
 </style>

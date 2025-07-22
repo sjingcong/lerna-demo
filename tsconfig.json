@@ -36,7 +36,7 @@
     "packages/*/src/**/*.vue",
     "packages/*/src/**/*.d.ts",
     "types/*.d.ts"
-, "packages/shared/components/ImageList.vue"  ],
+, "packages/shared/components/ImageList.vue", "packages/shared/planBookComponents/Catalog.vue", "packages/shared/planBookComponents/Cover.vue", "packages/shared/planBookComponents/ImageModule.vue", "packages/shared/planBookComponents/ServicePromise.vue", "packages/shared/planBookComponents/types.ts", "packages/shared/planBookComponents/ModuleContainer.vue"  ],
   "exclude": [
     "node_modules",
     "dist",

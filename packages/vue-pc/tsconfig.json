@@ -16,7 +16,7 @@
     "types/*.d.ts",
     "toast-monitor.js",
     "../shared/**/*.ts"
-, "../shared/components/ImageList.vue"  ],
+, "../shared/components/ImageList.vue", "../shared/planBookComponents/Catalog.vue", "../shared/planBookComponents/Cover.vue", "../shared/planBookComponents/ImageModule.vue", "../shared/planBookComponents/ServicePromise.vue", "../shared/planBookComponents/ModuleContainer.vue"  ],
   "exclude": [
     "node_modules",
     "dist"

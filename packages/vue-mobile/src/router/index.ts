@@ -25,6 +25,17 @@ const routes = [
     path: '/doc-demo',
     name: 'DocDemo',
     component: () => import('@/views/DocViewerDemo.vue')
+  },
+  {
+    path: '/table-demo',
+    name: 'TableDemo',
+    component: () => import('@/components/MobileTableDemo.vue')
+  },
+  {
+    path: '/plan-book/:id',
+    name: 'PlanBook',
+    component: () => import('@/views/planBook/ModuleConfig.vue'),
+    props: true
   }
 
 ]

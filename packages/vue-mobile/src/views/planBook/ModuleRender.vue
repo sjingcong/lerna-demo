@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { getTemplateComponent } from '@/store/planTemplate'
+import { getTemplateComponent } from '../../stores/planTemplateStore'
 import type { IModule } from '@giom/shared/planBookComponents/types'
 
 interface Props {
@@ -30,7 +30,6 @@ const props = withDefaults(defineProps<Props>(), {
 const currentComponent = computed(() => {
   return getTemplateComponent(props.templateComponent)
 })
-
 </script>
 
 <style scoped>
@@ -45,5 +44,13 @@ const currentComponent = computed(() => {
   color: #999;
   border: 1px dashed #ddd;
   border-radius: 4px;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .component-not-found {
+    padding: 15px;
+    font-size: 14px;
+  }
 }
 </style>
