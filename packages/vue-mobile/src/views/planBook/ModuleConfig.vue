@@ -12,7 +12,7 @@
             <ModuleRender 
               :template-component="currentModule.moduleCode" 
               :data="selectedModuleData.data"
-              :config="selectedModuleData.config" 
+              :config="selectedModuleData.config"
             />
           </div>
         </div>
@@ -25,6 +25,9 @@
         <p class="empty-text">暂无模块数据</p>
       </div>
     </div>
+    
+    <!-- 下一步按钮 -->
+    <NextButton @module-changed="handleModuleChanged" />
   </div>
 </template>
 
@@ -32,6 +35,7 @@
 import { computed, onMounted } from 'vue'
 import { usePlanTemplateStore } from '../../stores/planTemplateStore'
 import ModuleRender from './ModuleRender.vue'
+import NextButton from './components/NextButton.vue'
 import type { IModule } from '@giom/shared/planBookComponents/types'
 
 interface Props {
@@ -74,6 +78,11 @@ const selectedModuleData = computed(() => {
     config: currentModule.value
   }
 })
+
+// 处理模块切换事件
+const handleModuleChanged = (module: IModule) => {
+  console.log('模块已切换到:', module.moduleName)
+}
 
 // 组件挂载时初始化
 onMounted(async () => {

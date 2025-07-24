@@ -30,6 +30,11 @@ const routes = [
     path: '/image-list-demo',
     name: 'ImageListDemo',
     component: () => import('@/views/ImageListDemo.vue')
+  },
+  {
+    path: '/template-management',
+    name: 'TemplateManagement',
+    component: () => import('@/views/template-management/templateList.vue')
   }
 ]
 

@@ -8,6 +8,7 @@
         <router-link to="/List" class="nav-link">列表页面</router-link>
         <router-link to="/templatepage" class="nav-link">模板演示</router-link>
         <router-link to="/image-list-demo" class="nav-link">图片列表组件演示</router-link>
+        <router-link to="/template-management" class="nav-link">模板管理</router-link>
       </div>
     </div>
   
