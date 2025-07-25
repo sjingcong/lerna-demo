@@ -36,6 +36,11 @@ const routes = [
     name: 'PlanBook',
     component: () => import('@/views/planBook/ModuleConfig.vue'),
     props: true
+  },
+  {
+    path: '/area-selector-demo',
+    name: 'AreaSelectorDemo',
+    component: () => import('@/views/AreaSelectorDemo.vue')
   }
 
 ]

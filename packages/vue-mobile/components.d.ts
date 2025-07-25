@@ -7,6 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    AreaSelector: typeof import('./src/components/AreaSelector.vue')['default']
     DocViewer: typeof import('./src/components/DocViewer.vue')['default']
     ExcelViewer: typeof import('./src/components/ExcelViewer.vue')['default']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
@@ -15,5 +16,10 @@ declare module 'vue' {
     PdfViewer: typeof import('./src/components/PdfViewer.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    VanButton: typeof import('vant/es')['Button']
+    VanCascader: typeof import('vant/es')['Cascader']
+    VanField: typeof import('vant/es')['Field']
+    VanForm: typeof import('vant/es')['Form']
+    VanPopup: typeof import('vant/es')['Popup']
   }
 }
