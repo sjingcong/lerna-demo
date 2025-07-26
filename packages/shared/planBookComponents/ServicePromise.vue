@@ -46,6 +46,7 @@
               <button
                 v-if="props.config?.editable"
                 class="action-btn edit-btn"
+                @click="openEditDialog"
               >
                 ✏️ 编辑
               </button>
@@ -90,6 +91,7 @@
               <button
                 v-if="props.config?.editable"
                 class="action-btn edit-btn"
+                @click="openEditDialog"
               >
                 ✏️ 编辑
               </button>
@@ -98,12 +100,64 @@
         </div>
       </div>
     </div>
+
+    <!-- Vant 编辑弹框 -->
+    <van-dialog
+      v-model:show="editVisible"
+      title="编辑"
+      :show-confirm-button="false"
+      :show-cancel-button="false"
+      position="bottom"
+      class="edit-dialog"
+    >
+      <div class="edit-form">
+        <!-- 第一个分组 -->
+        <van-cell-group>
+          <van-field
+            v-model="formData.group1.field1"
+            label="标题1"
+            placeholder="正常件"
+          />
+          <van-field
+            v-model="formData.group1.field2"
+            label="内容1"
+            placeholder="xxx个工作日完成承保出单"
+          />
+        </van-cell-group>
+
+        <!-- 第二个分组 -->
+        <van-cell-group>
+          <van-field
+            v-model="formData.group2.field1"
+            label="标题1"
+            placeholder="问题件"
+          />
+          <van-field
+            v-model="formData.group2.field2"
+            label="内容1"
+            placeholder="xxx个工作日进行问题处理"
+          />
+        </van-cell-group>
+
+        <!-- 自定义按钮 -->
+        <div class="custom-buttons">
+          <button class="confirm-btn" @click="confirmEdit">
+            确认
+          </button>
+          <button class="add-btn" @click="addItem">
+            +添加
+          </button>
+        </div>
+      </div>
+    </van-dialog>
   </ModuleContainer>
 </template>
 
 <script setup lang="ts">
+  import { ref } from 'vue';
   import type { IModule } from './types';
   import ModuleContainer from './ModuleContainer.vue';
+  import { Dialog, CellGroup, Field } from 'vant';
 
   interface Props {
     data?: {
@@ -137,6 +191,43 @@
   const emit = defineEmits<{
     update: [data: any];
   }>();
+
+  // 响应式数据
+  const editVisible = ref(false);
+  const formData = ref({
+    group1: {
+      field1: '',
+      field2: ''
+    },
+    group2: {
+      field1: '',
+      field2: ''
+    }
+  });
+
+  // 打开编辑弹框
+  const openEditDialog = () => {
+    editVisible.value = true;
+  };
+
+  // 关闭编辑弹框
+  const closeEditDialog = () => {
+    editVisible.value = false;
+  };
+
+  // 确认编辑
+  const confirmEdit = () => {
+    // 处理表单数据
+    console.log('表单数据:', formData.value);
+    closeEditDialog();
+  };
+
+  // 添加项目
+  const addItem = () => {
+    // 处理添加逻辑
+    console.log('添加新项目');
+    // 可以在这里添加新的表单项或其他逻辑
+  };
 
   // 处理数据更新
   const handleUpdate = () => {
@@ -385,6 +476,77 @@
   .edit-btn {
     border-color: #5352ed;
     color: #5352ed;
+  }
+
+  /* 编辑弹框样式 */
+  .edit-dialog {
+    border-radius: 16px 16px 0 0;
+    max-height: 80vh;
+    overflow: hidden;
+  }
+
+  .edit-form {
+    padding: 16px;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  .edit-form .van-cell-group {
+    margin-bottom: 16px;
+  }
+
+  .edit-form .van-cell-group:last-child {
+    margin-bottom: 16px;
+  }
+
+  /* 自定义按钮样式 */
+  .custom-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    padding: 0 4px;
+  }
+
+  .confirm-btn {
+    flex: 1;
+    height: 44px;
+    background: #ff4757;
+    color: white;
+    border: none;
+    border-radius: 22px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .confirm-btn:hover {
+    background: #ff3742;
+  }
+
+  .confirm-btn:active {
+    background: #e63946;
+  }
+
+  .add-btn {
+    flex: 1;
+    height: 44px;
+    background: white;
+    color: #ff4757;
+    border: 1px solid #ff4757;
+    border-radius: 22px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .add-btn:hover {
+    background: #fff5f5;
+  }
+
+  .add-btn:active {
+    background: #ffe8e8;
   }
 
   /* 响应式设计 */

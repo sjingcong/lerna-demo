@@ -2,16 +2,17 @@
   <div class="mobile-table-wrapper">
     <vxe-table
       ref="tableRef"
-      :data="dataSource"
+      :data="data"
       headerRowClassName="header-row"
       :show-header="showHeader"
-      :border="true"
-      :stripe="false"
+      :border="border"
+      :stripe="stripe"
       :height="height"
       :max-height="maxHeight"
       :span-method="mergeFirstColumn ? spanMethod : undefined"
       class="mobile-table"
       :row-config="{ height: rowHeight }"
+      v-bind="attrs"
     >
       <vxe-column
         v-for="column in columns"
@@ -22,16 +23,22 @@
         :align="column.align || 'center'"
         :fixed="column.fixed"
       >
-        <template
-          #default="{ row, rowIndex }"
-          v-if="$slots[column.key]"
-        >
+        <template #default="{ row, rowIndex }">
           <slot
+            v-if="$slots[column.key]"
             :name="column.key"
             :record="row"
             :text="row[column.dataIndex]"
             :index="rowIndex"
           />
+          <slot
+            v-else-if="$slots['defaultcolumn']"
+            name="defaultcolumn"
+            :record="row"
+            :text="row[column.dataIndex]"
+            :index="rowIndex"
+          />
+          <span v-else>{{ row[column.dataIndex] }}</span>
         </template>
       </vxe-column>
     </vxe-table>
@@ -39,8 +46,13 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, defineProps, defineSlots } from 'vue';
-  import { VxeTable, VxeColumn } from 'vxe-table';
+  import { ref, defineProps, defineSlots, useAttrs } from 'vue';
+  import { VxeTable, VxeColumn, VxeTableProps } from 'vxe-table';
+
+  // 禁用自动继承属性到根元素
+  defineOptions({
+    inheritAttrs: false,
+  });
 
   interface Column {
     title: string;
@@ -51,13 +63,10 @@
     fixed?: 'left' | 'right';
   }
 
-  interface TableProps {
+  interface TableProps extends Partial<VxeTableProps> {
     columns: Column[];
-    dataSource: any[];
     showHeader?: boolean;
     mergeFirstColumn?: boolean;
-    height?: string | number;
-    maxHeight?: string | number;
     rowHeight?: number;
   }
 
@@ -65,7 +74,12 @@
     showHeader: true,
     mergeFirstColumn: true,
     rowHeight: 50,
+    border: true,
+    stripe: false,
   });
+
+  // 获取所有传递给组件的属性（除了已定义的props）
+  const attrs = useAttrs();
 
   defineSlots<{
     [key: string]: (props: { record: any; text: any; index: number }) => any;
@@ -87,8 +101,8 @@
     let colspan = 1;
 
     // 向下查找相同值的行数
-    for (let i = rowIndex + 1; i < props.dataSource.length; i++) {
-      if (props.dataSource[i][firstColumnKey] === currentValue) {
+    for (let i = rowIndex + 1; i < (props.data || []).length; i++) {
+      if ((props.data || [])[i][firstColumnKey] === currentValue) {
         rowspan++;
       } else {
         break;
@@ -97,7 +111,7 @@
 
     // 向上查找是否有相同值（如果有，则当前行应该被隐藏）
     for (let i = rowIndex - 1; i >= 0; i--) {
-      if (props.dataSource[i][firstColumnKey] === currentValue) {
+      if ((props.data || [])[i][firstColumnKey] === currentValue) {
         // 当前行应该被隐藏
         return { rowspan: 0, colspan: 0 };
       } else {

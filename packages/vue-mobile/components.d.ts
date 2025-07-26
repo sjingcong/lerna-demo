@@ -15,6 +15,7 @@ declare module 'vue' {
     ImageIcon: typeof import('./src/components/ImageIcon.vue')['default']
     MobileTable: typeof import('./src/components/MobileTable.vue')['default']
     MobileTableDemo: typeof import('./src/components/MobileTableDemo.vue')['default']
+    MobileTableExample: typeof import('./src/components/MobileTableExample.vue')['default']
     PdfViewer: typeof import('./src/components/PdfViewer.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

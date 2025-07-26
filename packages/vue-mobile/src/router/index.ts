@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router';
 
 const routes = [
   {
@@ -9,50 +9,49 @@ const routes = [
   {
     path: '/about',
     name: 'About',
-    component: () => import('@/views/about/About.vue')
+    component: () => import('@/views/about/About.vue'),
   },
   {
     path: '/pdf-demo',
     name: 'PdfDemo',
-    component: () => import('@/views/pdfDemo/PdfDemo.vue')
+    component: () => import('@/views/pdfDemo/PdfDemo.vue'),
   },
   {
     path: '/excel-demo',
     name: 'ExcelDemo',
-    component: () => import('@/views/ExcelViewerDemo.vue')
+    component: () => import('@/views/ExcelViewerDemo.vue'),
   },
   {
     path: '/doc-demo',
     name: 'DocDemo',
-    component: () => import('@/views/DocViewerDemo.vue')
+    component: () => import('@/views/DocViewerDemo.vue'),
   },
   {
     path: '/table-demo',
     name: 'TableDemo',
-    component: () => import('@/components/MobileTableDemo.vue')
+    component: () => import('@/views/MobileTableDemo.vue'),
   },
   {
     path: '/plan-book/:id',
     name: 'PlanBook',
     component: () => import('@/views/planBook/ModuleConfig.vue'),
-    props: true
+    props: true,
   },
   {
     path: '/area-selector-demo',
     name: 'AreaSelectorDemo',
-    component: () => import('@/views/AreaSelectorDemo.vue')
+    component: () => import('@/views/AreaSelectorDemo.vue'),
   },
   {
     path: '/icon-demo',
     name: 'IconDemo',
-    component: () => import('@/views/IconImageDemo.vue')
-  }
-
-]
+    component: () => import('@/views/IconImageDemo.vue'),
+  },
+];
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
-})
+  routes,
+});
 
-export default router
+export default router;

@@ -1,21 +1,21 @@
 <template>
   <div class="icon-demo-container">
-    <h1>ImageIcon 组件演示</h1>
+    <h1>IconImage 组件演示</h1>
     
     <div class="demo-section">
       <h2>基础用法</h2>
       <div class="demo-row">
         <div class="demo-item">
           <h3>首页图标 (32px)</h3>
-          <ImageIcon src="/icons/home.svg" :size="32" />
+          <IconImage src="/icons/home.svg" :size="32" />
         </div>
         <div class="demo-item">
           <h3>用户图标 (48px)</h3>
-          <ImageIcon src="/icons/user.svg" :size="48" />
+          <IconImage src="/icons/user.svg" :size="48" />
         </div>
         <div class="demo-item">
           <h3>设置图标 (64px)</h3>
-          <ImageIcon src="/icons/settings.svg" :size="64" />
+          <IconImage src="/icons/settings.svg" :size="64" />
         </div>
       </div>
     </div>
@@ -25,15 +25,15 @@
       <div class="demo-row">
         <div class="demo-item">
           <h3>圆形搜索图标</h3>
-          <ImageIcon src="/icons/search.svg" :size="40" circle />
+          <IconImage src="/icons/search.svg" :size="40" circle />
         </div>
         <div class="demo-item">
           <h3>圆形心形图标</h3>
-          <ImageIcon src="/icons/heart.svg" :size="60" circle />
+          <IconImage src="/icons/heart.svg" :size="60" circle />
         </div>
         <div class="demo-item">
           <h3>圆形星星图标</h3>
-          <ImageIcon src="/icons/star.svg" :size="80" circle />
+          <IconImage src="/icons/star.svg" :size="80" circle />
         </div>
       </div>
     </div>
@@ -43,15 +43,15 @@
       <div class="demo-row">
         <div class="demo-item">
           <h3>邮件图标 (100x60)</h3>
-          <ImageIcon src="/icons/mail.svg" :width="100" :height="60" />
+          <IconImage src="/icons/mail.svg" :width="100" :height="60" />
         </div>
         <div class="demo-item">
           <h3>购物车图标 (120x40)</h3>
-          <ImageIcon src="/icons/shopping-cart.svg" :width="120" :height="40" />
+          <IconImage src="/icons/shopping-cart.svg" :width="120" :height="40" />
         </div>
         <div class="demo-item">
           <h3>首页图标 (80x80)</h3>
-          <ImageIcon src="/icons/home.svg" :width="80" :height="80" />
+          <IconImage src="/icons/home.svg" :width="80" :height="80" />
         </div>
       </div>
     </div>
@@ -61,7 +61,7 @@
       <div class="demo-row">
         <div class="demo-item">
           <h3>带事件监听的图标</h3>
-          <ImageIcon 
+          <IconImage 
             src="/icons/user.svg" 
             :size="50" 
             @load="handleLoad" 
@@ -75,14 +75,14 @@
     <div class="demo-section">
       <h2>组合展示</h2>
       <div class="icon-grid">
-        <ImageIcon src="/icons/home.svg" :size="24" />
-        <ImageIcon src="/icons/user.svg" :size="32" circle />
-        <ImageIcon src="/icons/search.svg" :size="40" />
-        <ImageIcon src="/icons/heart.svg" :size="48" circle />
-        <ImageIcon src="/icons/star.svg" :size="56" />
-        <ImageIcon src="/icons/mail.svg" :size="64" circle />
-        <ImageIcon src="/icons/shopping-cart.svg" :size="72" />
-        <ImageIcon src="/icons/settings.svg" :size="80" circle />
+        <IconImage src="/icons/home.svg" :size="24" />
+        <IconImage src="/icons/user.svg" :size="32" circle />
+        <IconImage src="/icons/search.svg" :size="40" />
+        <IconImage src="/icons/heart.svg" :size="48" circle />
+        <IconImage src="/icons/star.svg" :size="56" />
+        <IconImage src="/icons/mail.svg" :size="64" circle />
+        <IconImage src="/icons/shopping-cart.svg" :size="72" />
+        <IconImage src="/icons/settings.svg" :size="80" circle />
       </div>
     </div>
   </div>
@@ -90,7 +90,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import ImageIcon from '@/components/ImageIcon.vue'
+import IconImage from '@/components/IconImage.vue'
 
 const eventMessage = ref('等待事件触发...')
 
