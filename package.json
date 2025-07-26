@@ -10,7 +10,7 @@
     "build": "lerna run build",
     "lint": "lerna run lint",
     "lint:fix": "lerna run lint:fix",
-    "format": "prettier --write \"packages/*/src/**/*.{ts,tsx,vue,js,jsx}\"",
+    "format": "prettier --write \"packages/shared/**/*.{ts,tsx,vue,js,jsx}\"",
     "type-check": "lerna run type-check",
     "vue-pc": "lerna run dev --scope=vue-pc",
     "vue-mobile": "lerna run dev --scope=vue-mobile",

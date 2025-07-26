@@ -41,6 +41,11 @@ const routes = [
     path: '/area-selector-demo',
     name: 'AreaSelectorDemo',
     component: () => import('@/views/AreaSelectorDemo.vue')
+  },
+  {
+    path: '/icon-demo',
+    name: 'IconDemo',
+    component: () => import('@/views/IconImageDemo.vue')
   }
 
 ]

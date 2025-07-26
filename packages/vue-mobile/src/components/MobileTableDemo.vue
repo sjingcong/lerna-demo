@@ -32,27 +32,28 @@ const columns = ref([
     title: '计划',
     dataIndex: 'category',
     key: 'category',
-    width: "auto",
-    fixed: 'left' // 固定在左侧
+    // align: 'left',
+    // width: "200",
+    // fixed: 'left' // 固定在左侧
   },
-  {
-    title: '分类',
-    dataIndex: 'type',
-    width: "auto",
-    key: 'type'
-  },
+  // {
+  //   title: '分类',
+  //   dataIndex: 'type',
+  //   width: "auto",
+  //   key: 'type'
+  // },
   {
     title: '单价',
     dataIndex: 'price',
     width: "auto",
     key: 'price'
   },
-  {
-    title: '人数',
-    dataIndex: 'count',
-    width: "auto",
-    key: 'count'
-  },
+  // {
+  //   title: '人数',
+  //   dataIndex: 'count',
+  //   width: "auto",
+  //   key: 'count'
+  // },
 ])
 
 

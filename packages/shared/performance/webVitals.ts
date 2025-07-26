@@ -20,20 +20,21 @@ export interface WebVitalsMetrics {
 const metrics: WebVitalsMetrics = {
   cls: 0,
   fcp: 0,
-  inp: 0,  // 注意：web-vitals v4+ 使用 INP 替代了 FID
+  inp: 0, // 注意：web-vitals v4+ 使用 INP 替代了 FID
   lcp: 0,
-  ttfb: 0
+  ttfb: 0,
 };
 
 let isInitialized = false;
-
 
 const init = () => {
   if (isInitialized) return;
 
   // 检查是否在浏览器环境
   if (typeof window === 'undefined') {
-    console.warn('initWebVitals: Web Vitals can only be measured in browser environment');
+    console.warn(
+      'initWebVitals: Web Vitals can only be measured in browser environment'
+    );
     return;
   }
 
@@ -41,19 +42,16 @@ const init = () => {
     onCLS((metric) => {
       metrics.cls = metric.value;
       console.log('CLS:', metric);
-
     });
 
     onFCP((metric) => {
       metrics.fcp = metric.value;
       console.log('FCP:', metric);
-
     });
 
     onINP((metric) => {
       metrics.inp = metric.value;
       console.log('INP:', metric);
-
     });
 
     onLCP((metric) => {
@@ -71,8 +69,6 @@ const init = () => {
     console.error('initWebVitals: Failed to initialize Web Vitals:', error);
   }
 };
-
-
 
 // 自动初始化
 init();

@@ -5,7 +5,7 @@ declare module '*.vue' {
 }
 
 declare module '@bundled-es-modules/axios' {
-  import { AxiosStatic } from 'axios'
-  const axios: AxiosStatic
-  export {axios}
+  import { AxiosStatic } from 'axios';
+  const axios: AxiosStatic;
+  export { axios };
 }

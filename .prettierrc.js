@@ -7,5 +7,19 @@ module.exports = {
   useTabs: false,
   endOfLine: 'lf',
   // Vue 特定配置
-  vueIndentScriptAndStyle: true
+  vueIndentScriptAndStyle: true,
+  // HTML 属性换行配置
+  htmlWhitespaceSensitivity: 'css',
+  singleAttributePerLine: true,
+  // Vue 模板格式化
+  overrides: [
+    {
+      files: '*.vue',
+      options: {
+        parser: 'vue',
+        singleAttributePerLine: true,
+        htmlWhitespaceSensitivity: 'ignore'
+      }
+    }
+  ]
 };

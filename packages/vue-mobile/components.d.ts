@@ -11,6 +11,8 @@ declare module 'vue' {
     DocViewer: typeof import('./src/components/DocViewer.vue')['default']
     ExcelViewer: typeof import('./src/components/ExcelViewer.vue')['default']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
+    IconImage: typeof import('./src/components/IconImage.vue')['default']
+    ImageIcon: typeof import('./src/components/ImageIcon.vue')['default']
     MobileTable: typeof import('./src/components/MobileTable.vue')['default']
     MobileTableDemo: typeof import('./src/components/MobileTableDemo.vue')['default']
     PdfViewer: typeof import('./src/components/PdfViewer.vue')['default']
