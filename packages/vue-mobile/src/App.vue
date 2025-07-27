@@ -8,7 +8,7 @@
       <router-link to="/table-demo" class="nav-link">表格</router-link>
       <router-link to="/icon-demo" class="nav-link">图标</router-link>
     </div>
-    <router-view />
+    <router-view :key="$route.fullPath" />
   </div>
 </template>
 

@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { usePlanTemplateStore } from '../../stores/planTemplateStore'
 import ModuleRender from './ModuleRender.vue'
 import NextButton from './components/NextButton.vue'
@@ -104,6 +104,24 @@ onMounted(async () => {
     console.error('初始化模块配置失败:', error)
   }
 })
+
+// 监听路由参数变化
+watch(
+  () => props.id,
+  async (newId, oldId) => {
+    // 当路由参数id变化时，切换到对应的模块
+    if (newId && newId !== oldId && store.modules.length > 0) {
+      try {
+        await store.selectModuleByCode(newId)
+        console.log('路由参数变化，切换到模块:', newId)
+      } catch (error) {
+        console.error('切换模块失败:', error)
+      }
+    }
+  },
+  { immediate: false } // 不立即执行，因为onMounted已经处理了初始化
+)
+
 </script>
 
 <style scoped>
