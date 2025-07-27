@@ -1,0 +1,148 @@
+@startuml PageSpy工作流程时序图
+!theme plain
+title PageSpy 远程调试框架工作流程
+
+actor "开发者" as Dev
+participant "客户端应用" as App
+participant "PageSpyManager" as Manager
+participant "DebugController" as Controller
+participant "配置服务" as ConfigSvc
+participant "规则引擎" as RuleEngine
+participant "PageSpy服务" as PageSpyServer
+participant "调试控制台" as Console
+
+== 初始化阶段 ==
+Dev -> App: 启动应用
+App -> Manager: init(projectConfig, userContext)
+note right
+  projectConfig: {
+    id: 'mobile-app-001',
+    environment: 'production',
+    allowedRoles: ['admin', 'developer']
+  }
+  userContext: {
+    userId: 'user123',
+    role: 'admin',
+    phone: '13800138000'
+  }
+end note
+
+Manager -> Controller: checkDebugRules(projectId, userContext)
+Controller -> ConfigSvc: getProjectConfig(projectId)
+ConfigSvc --> Controller: 返回项目配置
+
+Controller -> RuleEngine: shouldEnableDebug(projectId, userContext)
+RuleEngine -> RuleEngine: 匹配用户规则
+note right
+  检查规则:
+  - phones: ['13800138000']
+  - roles: ['admin', 'developer']
+  - 环境权限验证
+end note
+RuleEngine --> Controller: true (匹配成功)
+
+Controller --> Manager: 启用调试
+Manager -> Manager: enablePageSpy()
+note right
+  根据environment自动选择:
+  - API地址
+  - 功能配置
+  - 安全设置
+end note
+
+Manager -> PageSpyServer: 建立WebSocket连接
+PageSpyServer --> Manager: 连接成功
+Manager -> Manager: 启动配置轮询(20秒间隔)
+
+== 调试阶段 ==
+App -> PageSpyServer: 发送日志数据
+PageSpyServer -> Console: 实时推送日志
+Dev -> Console: 查看调试信息
+
+App -> PageSpyServer: 发送网络请求数据
+PageSpyServer -> Console: 实时推送网络数据
+
+Dev -> Console: 执行调试命令
+Console -> PageSpyServer: 发送调试指令
+PageSpyServer -> App: 执行调试操作
+App --> PageSpyServer: 返回执行结果
+PageSpyServer --> Console: 显示结果
+
+== 配置变更检查 ==
+loop 每20秒轮询
+  Manager -> Controller: checkAndUpdateDebugStatus()
+  Controller -> ConfigSvc: 获取最新配置
+  ConfigSvc --> Controller: 返回配置
+  
+  Controller -> RuleEngine: 重新检查规则
+  RuleEngine --> Controller: 返回匹配结果
+  
+  alt 规则变更 - 需要禁用
+    Controller --> Manager: 禁用调试
+    Manager -> Manager: disablePageSpy()
+    Manager -> PageSpyServer: 断开连接
+    Manager -> Console: 调试会话结束
+  else 规则变更 - 需要启用
+    Controller --> Manager: 启用调试
+    Manager -> Manager: enablePageSpy()
+    Manager -> PageSpyServer: 建立新连接
+  else 无变更
+    Controller --> Manager: 保持当前状态
+  end
+end
+
+== 用户登录状态变更 ==
+App -> Manager: onUserLogin(newUserContext)
+Manager -> Manager: destroy() // 清理旧实例
+Manager -> Controller: 重新初始化
+Controller -> RuleEngine: 检查新用户规则
+RuleEngine --> Controller: 返回匹配结果
+
+alt 新用户有权限
+  Manager -> PageSpyServer: 建立新连接
+  PageSpyServer --> Console: 新调试会话
+else 新用户无权限
+  Manager -> Manager: 保持禁用状态
+end
+
+== 应用退出 ==
+App -> Manager: destroy()
+Manager -> Manager: 清理定时器
+Manager -> PageSpyServer: 断开连接
+Manager -> Console: 调试会话结束
+
+== 管理后台操作 ==
+Dev -> ConfigSvc: 更新项目配置
+ConfigSvc -> ConfigSvc: 保存配置变更
+note right
+  配置变更示例:
+  - 添加/移除用户手机号
+  - 修改角色权限
+  - 启用/禁用项目调试
+end note
+
+ConfigSvc -> RuleEngine: 通知规则变更
+RuleEngine -> RuleEngine: 更新规则缓存
+
+note over Manager, RuleEngine
+  下次轮询时(最多20秒)
+  客户端会自动应用新配置
+end note
+
+== 错误处理 ==
+alt 配置服务异常
+  Controller -> ConfigSvc: 请求配置
+  ConfigSvc --> Controller: 服务异常
+  Controller -> Controller: 使用缓存配置
+  Controller --> Manager: 降级处理
+else 网络连接异常
+  Manager -> PageSpyServer: 连接请求
+  PageSpyServer --> Manager: 连接失败
+  Manager -> Manager: 重试机制
+else 权限验证失败
+  Controller -> RuleEngine: 权限检查
+  RuleEngine --> Controller: 权限不足
+  Controller --> Manager: 禁用调试
+end
+
+@enduml

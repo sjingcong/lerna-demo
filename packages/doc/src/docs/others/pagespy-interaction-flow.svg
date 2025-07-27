@@ -1,0 +1,165 @@
+<svg width="1300" height="650" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- 定义简约渐变色 -->
+    <linearGradient id="adminGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E3F2FD;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#BBDEFB;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="clientGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F8F9FA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E9ECEF;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="serverGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E8F5E8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#C8E6C9;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF3E0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFE0B2;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- 定义箭头标记 -->
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#495057" />
+    </marker>
+    <marker id="arrowheadPrimary" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#343A40" />
+    </marker>
+    <marker id="arrowheadSecondary" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6C757D" />
+    </marker>
+    <marker id="arrowheadTertiary" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#ADB5BD" />
+    </marker>
+  </defs>
+  
+  <!-- 背景 -->
+  <rect width="1300" height="650" fill="#FAFAFA" stroke="none"/>
+  
+  <!-- 标题 -->
+  <text x="650" y="35" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="normal" fill="#333">PageSpy 用户端到服务端交互流程图</text>
+  
+  <!-- 后台配置区域 -->
+  <g id="adminArea">
+    <rect x="50" y="60" width="1200" height="120" rx="10" ry="10" fill="url(#adminGradient)" stroke="#1976D2" stroke-width="2"/>
+    <text x="70" y="85" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="#333">后台配置管理</text>
+    
+    <!-- 项目管理 -->
+    <rect x="100" y="100" width="200" height="60" rx="5" ry="5" fill="#FFFFFF" stroke="#1976D2" stroke-width="1"/>
+    <text x="200" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#333">项目管理</text>
+    <text x="200" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#333">• 项目注册</text>
+    
+    <!-- 规则配置 -->
+    <rect x="350" y="100" width="200" height="60" rx="5" ry="5" fill="#FFFFFF" stroke="#1976D2" stroke-width="1"/>
+    <text x="450" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#333">规则配置</text>
+    <text x="450" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#333">• 白名单配置</text>
+    
+    <!-- 权限管理 -->
+    <rect x="600" y="100" width="200" height="60" rx="5" ry="5" fill="#FFFFFF" stroke="#1976D2" stroke-width="1"/>
+    <text x="700" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#333">权限管理</text>
+    <text x="700" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#333">• 访问控制</text>
+    
+    <!-- 监控告警 -->
+    <rect x="830" y="100" width="200" height="60" rx="5" ry="5" fill="#FFFFFF" stroke="#1976D2" stroke-width="1"/>
+    <text x="930" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#333">监控告警</text>
+    <text x="930" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#333">• 使用统计</text>
+    
+    <!-- 调试控制台 -->
+    <rect x="1050" y="100" width="150" height="60" rx="5" ry="5" fill="#FFFFFF" stroke="#1976D2" stroke-width="1"/>
+    <text x="1125" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#333">调试控制台</text>
+    <text x="1125" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#333">• 实时调试</text>
+    <text x="1125" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#333">• 日志查看</text>
+  </g>
+  
+  <!-- 用户端区域 -->
+  <g id="clientArea">
+    <rect x="50" y="220" width="450" height="380" rx="10" ry="10" fill="url(#clientGradient)" stroke="#6C757D" stroke-width="2"/>
+    <text x="70" y="245" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="#333">用户端 (Client Side)</text>
+    
+    <!-- 应用层 -->
+    <rect x="80" y="270" width="400" height="70" rx="5" ry="5" fill="#FFFFFF" stroke="#6C757D" stroke-width="1"/>
+    <text x="90" y="290" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#333">应用层 (Application Layer)</text>
+
+    
+    <!-- 业务应用 -->
+    <rect x="160" y="305" width="220" height="30" rx="3" ry="3" fill="#FFFFFF" stroke="#6C757D" stroke-width="1"/>
+    <text x="270" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#333">业务应用 (移动端App / Web应用)</text>
+    
+    <!-- PageSpy SDK 核心层 -->
+    <rect x="80" y="360" width="400" height="220" rx="5" ry="5" fill="#FFFFFF" stroke="#6C757D" stroke-width="3"/>
+    <text x="90" y="385" font-family="Arial, sans-serif" font-size="14" font-weight="normal" fill="#333">PageSpy SDK 核心层</text>
+    <text x="90" y="405" font-family="Arial, sans-serif" font-size="10" fill="#333">业务应用通过SDK接入调试能力，包含完整的数据处理流程</text>
+    
+    <!-- SDK管理模块 -->
+    <rect x="100" y="430" width="360" height="60" rx="3" ry="3" fill="#FFFFFF" stroke="#6C757D" stroke-width="2"/>
+    <text x="280" y="455" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#333">SDK 管理模块</text>
+    <text x="280" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#333">初始化 • 生命周期管理 • 开关规则控制</text>
+    
+    <!-- SDK传输层 -->
+    <rect x="100" y="510" width="360" height="60" rx="5" ry="5" fill="#FFFFFF" stroke="#6C757D" stroke-width="2"/>
+    <text x="110" y="535" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#333">SDK 传输层</text>
+    <text x="110" y="555" font-family="Arial, sans-serif" font-size="10" fill="#333">WebSocket连接 • 数据压缩 • 加密传输 • 断线重连</text>
+    
+    <!-- SDK内部连接线 -->
+      <text x="290" y="353" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#333">集成</text>
+      <text x="290" y="503" font-family="Arial, sans-serif" font-size="10" fill="#333">数据传输</text>
+    <g stroke="#6C757D"  fill="none">
+      <!-- 应用层到SDK -->
+      <line x1="280" y1="340" x2="280" y2="360" stroke-dasharray="3,3"/>
+      
+      <!-- SDK管理模块到传输层 -->
+      <line x1="280" y1="490" x2="280" y2="510" stroke-dasharray="3,3"/>
+     </g>
+  </g>
+  
+  <!-- 服务端区域 -->
+  <g id="serverArea">
+    <rect x="850" y="220" width="400" height="380" rx="10" ry="10" fill="url(#serverGradient)" stroke="#388E3C" stroke-width="2"/>
+    <text x="870" y="245" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="#333">服务端 (Server Side)</text>
+    
+    <!-- PageSpy API服务 -->
+    <g id="pagespyAPI">
+      <rect x="870" y="280" width="360" height="120" rx="8" ry="8" fill="#FFFFFF" stroke="#4CAF50" stroke-width="2"/>
+      <text x="890" y="310" font-family="Arial, sans-serif" font-size="14" font-weight="normal" fill="#333">PageSpy API 服务</text>
+      <text x="890" y="335" font-family="Arial, sans-serif" font-size="11" fill="#333">• 调试端和SDK的"中间人"</text>
+      <text x="890" y="355" font-family="Arial, sans-serif" font-size="11" fill="#333">• 负责中转两端之间的通信消息</text>
+      <text x="890" y="375" font-family="Arial, sans-serif" font-size="11" fill="#333">• 提供WebSocket实时通信</text>
+    </g>
+    
+    <!-- 简单存储 -->
+    <g id="simpleStorage">
+      <rect x="870" y="430" width="360" height="100" rx="8" ry="8" fill="#FFFFFF" stroke="#4CAF50" stroke-width="2"/>
+      <text x="890" y="460" font-family="Arial, sans-serif" font-size="14" font-weight="normal" fill="#333">临时数据存储</text>
+      <text x="890" y="485" font-family="Arial, sans-serif" font-size="11" fill="#333">• 会话信息临时存储</text>
+      <text x="890" y="505" font-family="Arial, sans-serif" font-size="11" fill="#333">• 消息缓存（内存/Redis可选）</text>
+    </g>
+    
+    <text x="1000" y="580" font-family="Arial, sans-serif" font-size="12" fill="#333">环境：开发 / 生产</text>
+  </g>
+  
+  <!-- 交互流程箭头 -->
+  <g id="interactions" fill="none">
+    <!-- 1. SDK传输层到PageSpy API服务 (直角线) -->
+    <path d="M 480 495 L 650 495 L 650 310 L 848 310" stroke="#4CAF50" stroke-width="3" marker-end="url(#arrowhead)"/>
+    <text x="650" y="400" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="normal" fill="#333">1. 数据传输</text>
+    <text x="650" y="415" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#333">(WebSocket实时传输调试数据)</text>
+    
+    <!-- 2. PageSpy API服务到SDK传输层 (直角线) -->
+    <path d="M 850 340 L 730 340 L 730 515 L 480 515" stroke="#795548" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#arrowhead)"/>
+    <text x="730" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="normal" fill="#333">2. 调试交互</text>
+    <text x="730" y="445" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#333">(实时调试指令 + 数据查看)</text>
+    
+    <!-- 后台配置到用户端SDK (直角线) -->
+    <path d="M 450 180 L 450 200 L 450 200 L 450 360" stroke="#3F51B5" stroke-width="2" stroke-dasharray="10,5" marker-end="url(#arrowhead)"/>
+    <text x="405" y="195" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#333">配置下发</text>
+    <text x="405" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#333">(开关规则控制)</text>
+    
+    <!-- 后台调试控制台到用户端 (直角线) -->
+    <path d="M 1125 180 L 1125 200 L 520 200 L 520 495 L 480 495" stroke="#3F51B5" stroke-width="2" stroke-dasharray="10,5" marker-end="url(#arrowhead)"/>
+    <text x="822" y="195" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#333">远程调试</text>
+    <text x="822" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#333">(直接控制SDK)</text>
+  </g>
+  
+
+  
+</svg>
