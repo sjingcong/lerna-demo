@@ -52,6 +52,11 @@ const routes = [
     name: 'orderList',
     component: () => import('@/views/OrderList/index.vue'),
   },
+  {
+    path: '/protection',
+    name: 'Protection',
+    component: () => import('@/views/Protection/index.vue'),
+  },
 ];
 
 const router = createRouter({
