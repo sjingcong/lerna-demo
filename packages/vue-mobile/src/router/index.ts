@@ -47,6 +47,11 @@ const routes = [
     name: 'IconDemo',
     component: () => import('@/views/IconImageDemo.vue'),
   },
+  {
+    path: '/orderList',
+    name: 'orderList',
+    component: () => import('@/views/OrderList/index.vue'),
+  },
 ];
 
 const router = createRouter({

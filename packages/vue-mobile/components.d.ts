@@ -23,6 +23,11 @@ declare module 'vue' {
     VanCascader: typeof import('vant/es')['Cascader']
     VanField: typeof import('vant/es')['Field']
     VanForm: typeof import('vant/es')['Form']
+    VanList: typeof import('vant/es')['List']
     VanPopup: typeof import('vant/es')['Popup']
+    VanPullRefresh: typeof import('vant/es')['PullRefresh']
+    VanSearch: typeof import('vant/es')['Search']
+    VanTab: typeof import('vant/es')['Tab']
+    VanTabs: typeof import('vant/es')['Tabs']
   }
 }
