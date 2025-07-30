@@ -28,8 +28,8 @@
     </div>
 
     <!-- PDF渲染区域 -->
-    <div class="pdf-container" ref="scrollWrapper">
-      <div class="pdf-scroll-content" ref="scrollContent">
+    <div class="pdf-container" ref="scrollWrapper" @scroll="handleScroll">
+      <div class="pdf-scroll-content" ref="scrollContent" :style="{ transform: `scale(${scale})`, transformOrigin: 'top center' }">
         <div v-if="loading" class="loading">
           加载中...
         </div>
@@ -47,11 +47,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, nextTick, shallowRef } from 'vue'
 import * as pdfjsLib from 'pdfjs-dist'
-import BScroll from '@better-scroll/core'
-import Zoom from '@better-scroll/zoom'
-
-// 注册better-scroll插件
-BScroll.use(Zoom)
 
 // 设置PDF.js worker - 兼容3.x版本
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.js?url'
@@ -101,6 +96,11 @@ const pageContainerRefs = new Map<number, HTMLDivElement>()
 // 懒加载配置
 const loadedPageCount = ref(0) // 已加载的页数
 const isMounted = ref(false)
+
+// 原生滚动相关
+const scrollWrapper = ref<HTMLDivElement>()
+const scrollContent = ref<HTMLDivElement>()
+
 // 取消所有渲染任务的公共函数
 const cancelAllRenderTasks = () => {
   renderTasks.forEach((task) => {
@@ -139,7 +139,7 @@ const createAllCanvasElements = async () => {
     try {
       // 获取页面信息以计算尺寸
       const page = await pdfDoc.value.getPage(pageNum)
-      const viewport = page.getViewport({ scale: scale.value })
+      const viewport = page.getViewport({ scale: 1 })
 
       // 计算适合的缩放比例
       const scaleToFit = containerWidth / viewport.width
@@ -234,13 +234,7 @@ const createAllCanvasElements = async () => {
       console.error(`创建页面 ${pageNum} canvas失败:`, err)
     }
   }
-
 }
-
-// better-scroll实例
-const bscroll = ref<BScroll | null>(null)
-const scrollWrapper = ref<HTMLDivElement>()
-const scrollContent = ref<HTMLDivElement>()
 
 // 加载PDF文档
 const loadPdf = async () => {
@@ -269,9 +263,6 @@ const loadPdf = async () => {
     await nextTick()
     await initializePdfDisplay()
     loading.value = false
-    await nextTick(() => {
-      refreshBetterScroll()
-    })
   } catch (err: any) {
     loading.value = false
     error.value = `PDF加载失败: ${err.message}`
@@ -397,28 +388,18 @@ const nextPage = () => {
   }
 }
 
-// 缩放功能 - 使用BetterScroll的缩放能力
+// 缩放功能 - 使用原生 CSS transform
 const zoomIn = () => {
-  if (bscroll.value && scale.value < 3) {
-    const newScale = Math.min(scale.value + 0.5, 3)
-    // 立即更新scale值以确保UI显示同步
+  if (scale.value < 3) {
+    const newScale = Math.min(scale.value + 0.2, 3)
     scale.value = newScale
-    // 使用BetterScroll的zoomTo方法，在当前视口中心进行缩放
-    const centerX = scrollWrapper.value ? scrollWrapper.value.clientWidth / 2 : 0
-    const centerY = scrollWrapper.value ? scrollWrapper.value.clientHeight / 2 : 0
-    bscroll.value.zoomTo(newScale, centerX, centerY, 300)
   }
 }
 
 const zoomOut = () => {
-  if (bscroll.value && scale.value > 0.5) {
-    const newScale = Math.max(scale.value - 0.2, 1)
-    // 立即更新scale值以确保UI显示同步
+  if (scale.value > 0.5) {
+    const newScale = Math.max(scale.value - 0.2, 0.5)
     scale.value = newScale
-    // 使用BetterScroll的zoomTo方法，在当前视口中心进行缩放
-    const centerX = scrollWrapper.value ? scrollWrapper.value.clientWidth / 2 : 0
-    const centerY = scrollWrapper.value ? scrollWrapper.value.clientHeight / 2 : 0
-    bscroll.value.zoomTo(newScale, centerX, centerY, 300)
   }
 }
 
@@ -432,73 +413,26 @@ const downloadPdf = () => {
   document.body.removeChild(link)
 }
 
-// 初始化better-scroll
-const initBetterScroll = () => {
-  if (!scrollWrapper.value) {
-    console.error('scrollWrapper.value 不存在，无法初始化 BetterScroll')
+// 原生滚动处理函数
+const handleScroll = () => {
+  throttledUpdateCurrentPage()
+}
+
+// 滚动到指定页面
+const scrollToPage = (pageNum: number) => {
+  if (!scrollWrapper.value || pageNum < 1 || pageNum > totalPages.value) {
     return
   }
 
-  bscroll.value = new BScroll(scrollWrapper.value, {
-    scrollY: true,
-    scrollX: true, // 启用横向滚动
-    click: true,
-    probeType: 3, // 关键配置：实时触发scroll事件
-    zoom: {
-      start: scale.value,
-      min: 0.5,
-      max: 3
-    },
-    momentum: true,
-    bounce: {
-      top: true,
-      bottom: true,
-      left: true, // 启用左右弹性
-      right: true
-    },
-    mouseWheel: {
-      speed: 20,
-      invert: false,
-      easeTime: 300
-    }
-  })
-
-  // 监听滚动事件 - 使用节流优化性能
-  bscroll.value.on('scroll', () => {
-    throttledUpdateCurrentPage()
-  })
-
-  // 监听缩放过程中的实时更新
-  bscroll.value.on('zoom', (newScale: number) => {
-    // 实时更新缩放比例显示
-    if (typeof newScale === 'number' && !isNaN(newScale) && newScale > 0) {
-      scale.value = newScale
-    }
-  })
-
-  // 监听缩放结束事件
-  bscroll.value.on('zoomEnd', (newScale: number) => {
-    // 更新缩放比例，但不触发watch重新渲染
-    // 确保scale值有效，避免NaN
-    if (typeof newScale === 'number' && !isNaN(newScale) && newScale > 0) {
-      scale.value = newScale
-    }
-  })
-}
-
-
-// 刷新better-scroll
-const refreshBetterScroll = () => {
-  if (bscroll.value) {
-    bscroll.value.refresh()
-  }
-}
-
-// 销毁better-scroll
-const destroyBetterScroll = () => {
-  if (bscroll.value) {
-    bscroll.value.destroy()
-    bscroll.value = null
+  const pageContainer = pageContainerRefs.get(pageNum)
+  if (pageContainer) {
+    const containerTop = pageContainer.offsetTop
+    // 考虑缩放比例的影响
+    const scaledTop = containerTop * scale.value
+    scrollWrapper.value.scrollTo({
+      top: scaledTop,
+      behavior: 'smooth'
+    })
   }
 }
 
@@ -522,14 +456,14 @@ const createRAFThrottle = (func: Function) => {
 
 // 根据滚动位置更新当前页面并动态渲染
 const updateCurrentPageByScroll = () => {
-  if (!bscroll.value || !scrollWrapper.value) {
+  if (!scrollWrapper.value) {
     return
   }
 
-  const { y } = bscroll.value
+  const scrollTop = scrollWrapper.value.scrollTop
   const containerHeight = scrollWrapper.value.clientHeight
-  const centerY = Math.abs(y) + containerHeight / 2
-  const viewportTop = Math.abs(y)
+  const centerY = scrollTop + containerHeight / 2
+  const viewportTop = scrollTop
   const viewportBottom = viewportTop + containerHeight
 
   // 找到最接近中心的页面并触发动态渲染
@@ -542,9 +476,9 @@ const updateCurrentPageByScroll = () => {
     const canvas = canvasRefs.get(i)
     const pageContainer = pageContainerRefs.get(i)
     if (canvas && pageContainer) {
-      // 使用pageContainer的位置，因为canvas被包裹在pageContainer中
-      const containerTop = pageContainer.offsetTop
-      const containerHeight = pageContainer.offsetHeight
+      // 考虑缩放比例的影响
+      const containerTop = pageContainer.offsetTop * scale.value
+      const containerHeight = pageContainer.offsetHeight * scale.value
       const containerCenter = containerTop + containerHeight / 2
       const containerBottom = containerTop + containerHeight
 
@@ -572,11 +506,9 @@ const updateCurrentPageByScroll = () => {
     }
   }
 
-
   // 限制同时渲染的页面数量，避免一次性渲染过多页面
   const maxConcurrentRenders = 2
   const toRender = renderQueue.slice(0, maxConcurrentRenders)
-
 
   toRender.forEach(pageNum => {
     console.log(`动态渲染页面 ${pageNum}`)
@@ -591,8 +523,6 @@ const updateCurrentPageByScroll = () => {
   }
 }
 
-
-
 // 创建基于requestAnimationFrame的页面更新函数
 const throttledUpdateCurrentPage = createRAFThrottle(updateCurrentPageByScroll)
 
@@ -606,51 +536,32 @@ watch(currentPage, (newPage, oldPage) => {
   }
 })
 
-// 注意：缩放由better-scroll处理，不需要重新渲染页面
-
-// 滚动到指定页面
-const scrollToPage = (pageNum: number) => {
-  const pageContainer = pageContainerRefs.get(pageNum)
-  if (pageContainer && bscroll.value) {
-    const containerTop = pageContainer.offsetTop
-    bscroll.value.scrollTo(0, -containerTop, 300)
-  }
-}
 // 重置组件状态
 const resetComponentState = () => {
-  // 取消所有渲染任务
+  // 取消所有未完成的渲染任务
   cancelAllRenderTasks()
 
-  // 重置状态变量
-  loading.value = true
-  error.value = ''
+  // 重置状态
   currentPage.value = props.initialPage
   totalPages.value = 0
   scale.value = props.initialScale
-  isUserTriggered.value = false
+  loading.value = true
+  error.value = ''
   loadedPageCount.value = 0
 
-  // 清空所有缓存和引用
+  // 清空缓存
   canvasRefs.clear()
   renderedPages.clear()
   pageInfoCache.clear()
   pageLoadingStates.clear()
   pageContainerRefs.clear()
 
-  // 清空PDF文档引用
-  pdfDoc.value = null
-
   // 清空容器内容
   if (pagesContainerRef.value) {
     pagesContainerRef.value.innerHTML = ''
   }
-
-  // 重置BetterScroll到初始状态
-  if (bscroll.value) {
-    bscroll.value.scrollTo(0, 0, 0)
-    bscroll.value.zoomTo(props.initialScale, 0, 0, 0)
-  }
 }
+
 // 监听src变化
 watch(() => props.src, () => {
   if (props.src && isMounted.value) {
@@ -661,28 +572,14 @@ watch(() => props.src, () => {
 
 // 组件挂载
 onMounted(async () => {
-  // 初始化better-scroll
   isMounted.value = true
-  initBetterScroll()
   if (props.src) {
     await loadPdf()
-  }
-
-
-
-  // 确保初始缩放比例正确显示
-  if (bscroll.value) {
-    await nextTick()
-    bscroll.value.zoomTo(props.initialScale, 0, 0, 0)
-    scale.value = props.initialScale
   }
 })
 
 // 组件卸载时清理资源
 onUnmounted(() => {
-  // 销毁better-scroll实例
-  destroyBetterScroll()
-
   // 取消所有未完成的渲染任务
   cancelAllRenderTasks()
 })
@@ -745,16 +642,45 @@ onUnmounted(() => {
 .pdf-container {
   flex: 1;
   position: relative;
-  overflow: hidden;
+  overflow: auto;
   background-color: #f5f5f5;
+  /* 原生滚动优化 */
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  /* Safari 触摸优化 */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  /* 触摸操作优化 */
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
+.pdf-scroll-content {
+  min-height: 100%;
+  transition: transform 0.3s ease;
+  /* 硬件加速 */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
 
 .pdf-pages-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   min-height: 100%;
+  /* 触摸优化 */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
 }
 
 .pdf-canvas {
@@ -766,6 +692,13 @@ onUnmounted(() => {
   background-color: #fff;
   border-radius: 4px;
   object-fit: contain;
+  /* 触摸优化 */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
 }
 
 .loading,
