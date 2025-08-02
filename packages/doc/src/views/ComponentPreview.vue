@@ -404,14 +404,15 @@
   // 加载组件配置
   const loadComponentConfig = async () => {
     const componentName = route.params.component;
+    const componentType = route.params.type || 'h5-components'; // 默认为h5-components
 
     try {
       // 动态导入组件配置
       const propsModule = await import(
-        `../../../shared/h5-components/${componentName}/props.json`
+        `../../../shared/${componentType}/${componentName}/props.json`
       );
       const previewModule = await import(
-        `../../../shared/h5-components/${componentName}/preview.vue`
+        `../../../shared/${componentType}/${componentName}/preview.vue`
       );
 
       componentConfig.value = propsModule.default;

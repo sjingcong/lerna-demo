@@ -1,6 +1,6 @@
 {
   "componentName": "Select",
-  "componentTitle": "选择器组件",
+  "componentTitle": "选择器",
   "importDesc": "import Select from '@shared/h5-components/Select'",
   "description": "支持单选、多选，Grid和Scroll两种布局模式的选择器组件",
   "props": [

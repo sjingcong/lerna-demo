@@ -1,0 +1,152 @@
+{
+  "componentName": "EmailField",
+  "componentTitle": "邮箱输入框",
+  "importDesc": "import { EmailField } from '@shared/h5-field'",
+  "description": "专用于邮箱输入的表单组件，支持格式校验、域名识别等功能",
+  "props": [
+    {
+      "name": "modelValue",
+      "title": "绑定值",
+      "type": "string",
+      "required": false,
+      "description": "邮箱地址值",
+      "default": "",
+      "control": "input"
+    },
+    {
+      "name": "label",
+      "title": "标签文本",
+      "type": "string",
+      "required": false,
+      "description": "输入框的标签",
+      "default": "邮箱",
+      "control": "input"
+    },
+    {
+      "name": "placeholder",
+      "title": "占位符",
+      "type": "string",
+      "required": false,
+      "description": "输入框占位符文本",
+      "default": "请输入邮箱地址",
+      "control": "input"
+    },
+    {
+      "name": "required",
+      "title": "是否必填",
+      "type": "boolean",
+      "required": false,
+      "description": "是否为必填项",
+      "default": false,
+      "control": "switch",
+      "options": [true, false]
+    },
+    {
+      "name": "readonly",
+      "title": "是否只读",
+      "type": "boolean",
+      "required": false,
+      "description": "是否为只读状态",
+      "default": false,
+      "control": "switch",
+      "options": [true, false]
+    },
+    {
+      "name": "disabled",
+      "title": "是否禁用",
+      "type": "boolean",
+      "required": false,
+      "description": "是否禁用输入框",
+      "default": false,
+      "control": "switch",
+      "options": [true, false]
+    },
+    {
+      "name": "clearable",
+      "title": "显示清除按钮",
+      "type": "boolean",
+      "required": false,
+      "description": "是否显示清除按钮",
+      "default": true,
+      "control": "switch",
+      "options": [true, false]
+    },
+    {
+      "name": "name",
+      "title": "字段名称",
+      "type": "string",
+      "required": false,
+      "description": "表单字段名称，van-form 必需",
+      "default": "email",
+      "control": "input"
+    },
+    {
+      "name": "enableBuiltInValidation",
+      "title": "启用内置校验",
+      "type": "boolean",
+      "required": false,
+      "description": "是否启用内置校验规则",
+      "default": true,
+      "control": "switch",
+      "options": [true, false]
+    },
+    {
+      "name": "trigger",
+      "title": "校验触发时机",
+      "type": "string",
+      "required": false,
+      "description": "校验规则的触发时机",
+      "default": "onBlur",
+      "control": "radio",
+      "options": [
+        { "label": "默认", "value": "" },
+        { "label": "失焦时校验", "value": "onBlur" },
+        { "label": "输入时校验", "value": "onChange" }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "update:modelValue",
+      "description": "值变化时触发",
+      "params": "(value: string)"
+    },
+    {
+      "name": "input",
+      "description": "输入时触发",
+      "params": "(value: string)"
+    },
+    {
+      "name": "blur",
+      "description": "失焦时触发",
+      "params": "(event: Event)"
+    },
+    {
+      "name": "focus",
+      "description": "聚焦时触发",
+      "params": "(event: Event)"
+    }
+  ],
+  "expose": [
+    {
+      "name": "isValid",
+      "description": "是否有效（基础格式校验）",
+      "type": "ComputedRef<boolean>"
+    },
+    {
+      "name": "domain",
+      "description": "邮箱域名",
+      "type": "ComputedRef<string>"
+    },
+    {
+      "name": "value",
+      "description": "当前值",
+      "type": "ComputedRef<string>"
+    },
+    {
+      "name": "getDomain",
+      "description": "获取邮箱域名",
+      "type": "() => string"
+    }
+  ]
+}

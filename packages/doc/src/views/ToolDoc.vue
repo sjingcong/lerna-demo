@@ -7,6 +7,10 @@
           <Icon icon="mdi:home" />
           <span>首页</span>
         </router-link>
+        <router-link to="/overall" class="overview-link">
+          <Icon icon="mdi:apps" />
+          <span>总览</span>
+        </router-link>
       </div>
 
       <div class="menu-tree">
@@ -472,9 +476,13 @@ onMounted(() => {
   padding: 1rem;
   border-bottom: 1px solid #e1e4e8;
   background: white;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.home-link {
+.home-link,
+.overview-link {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -486,7 +494,8 @@ onMounted(() => {
   transition: background-color 0.2s;
 }
 
-.home-link:hover {
+.home-link:hover,
+.overview-link:hover {
   background: #f1f8ff;
 }
 
