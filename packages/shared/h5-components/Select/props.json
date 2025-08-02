@@ -1,0 +1,113 @@
+{
+  "componentName": "Select",
+  "componentTitle": "选择器组件",
+  "importDesc": "import Select from '@shared/h5-components/Select'",
+  "description": "支持单选、多选，Grid和Scroll两种布局模式的选择器组件",
+  "props": [
+    {
+      "name": "options",
+      "title": "选项列表",
+      "type": "array",
+      "required": true,
+      "description": "选择器的选项数据",
+      "default": [
+        { "label": "选项1", "value": "option1" },
+        { "label": "选项2", "value": "option2" },
+        { "label": "选项3", "value": "option3" }
+      ]
+    },
+    {
+      "name": "modelValue",
+      "title": "绑定值",
+      "type": "string | number | array",
+      "required": false,
+      "description": "当前选中的值，多选时为数组",
+      "default": "undefined"
+    },
+    {
+      "name": "multiple",
+      "title": "多选模式",
+      "type": "boolean",
+      "required": false,
+      "description": "是否支持多选",
+      "default": false,
+      "control": "switch",
+      "options": [true, false]
+    },
+    {
+      "name": "layoutType",
+      "title": "布局类型",
+      "type": "string",
+      "required": false,
+      "description": "选择器的布局模式",
+      "default": "grid",
+      "control": "radio",
+      "options": [
+        { "label": "网格布局", "value": "grid" },
+        { "label": "滚动布局", "value": "scroll" }
+      ]
+    },
+    {
+      "name": "itemsPerRow",
+      "title": "每行列数",
+      "type": "number",
+      "required": false,
+      "description": "每行显示的选项数量（仅在Grid布局时生效）",
+      "default": "2",
+      "control": "select",
+      "options": [
+        { "label": "无", "value": null },
+        { "label": "1列", "value": 1 },
+        { "label": "2列", "value": 2 },
+        { "label": "3列", "value": 3 },
+        { "label": "4列", "value": 4 },
+        { "label": "5列", "value": 5 }
+      ],
+      "dependsOn": {
+        "layoutType": "grid"
+      }
+    },
+    {
+      "name": "itemWidth",
+      "title": "项目宽度",
+      "type": "number",
+      "required": false,
+      "description": "固定项目宽度（仅在Scroll布局时生效）",
+      "default": "",
+      "control": "input",
+      "placeholder": "如：120px 或 120",
+      "dependsOn": {
+        "layoutType": "scroll"
+      }
+    },
+    {
+      "name": "disabled",
+      "title": "禁用状态",
+      "type": "boolean",
+      "required": false,
+      "description": "是否禁用整个选择器",
+      "default": false,
+      "control": "switch",
+      "options": [true, false]
+    }
+  ],
+  "events": [
+    {
+      "name": "update:modelValue",
+      "description": "绑定值更新事件",
+      "params": "value: string | number | array"
+    },
+    {
+      "name": "change",
+      "description": "选择变化事件",
+      "params": "value: string | number | array"
+    }
+  ],
+  "slots": [
+    {
+      "name": "option",
+      "description": "自定义选项内容",
+      "params": "{ option: SelectOption, selected: boolean, disabled: boolean }"
+    }
+  ]
+}

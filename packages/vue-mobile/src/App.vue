@@ -8,6 +8,7 @@
       <router-link to="/table-demo" class="nav-link">表格</router-link>
       <router-link to="/icon-demo" class="nav-link">图标</router-link>
       <router-link to="/protection" class="nav-link">保障方案</router-link>
+      <router-link to="/select-demo" class="nav-link">选择组件</router-link>
     </div>
     <router-view :key="$route.fullPath" />
   </div>

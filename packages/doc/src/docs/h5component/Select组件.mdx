@@ -1,0 +1,142 @@
+---
+title: Select 选择器组件
+description: 支持单选、多选，Grid和Scroll两种布局模式的选择器组件
+---
+
+# Select 选择器组件
+
+支持单选、多选，Grid和Scroll两种布局模式的选择器组件。
+
+## 属性说明
+
+| 属性名      | 类型                | 默认值 | 说明                                  |
+| ----------- | ------------------- | ------ | ------------------------------------- |
+| options     | Array               | []     | 选项列表，每个选项包含 label 和 value |
+| modelValue  | String/Number/Array | -      | 绑定值，多选时为数组                  |
+| multiple    | Boolean             | false  | 是否支持多选                          |
+| layoutType  | String              | 'grid' | 布局类型：'grid' 或 'scroll'          |
+| itemsPerRow | Number              | -      | 每行显示的选项数量（仅Grid布局）      |
+| itemWidth   | String/Number       | -      | 固定项目宽度（仅Scroll布局）          |
+| disabled    | Boolean             | false  | 是否禁用                              |
+
+## 事件说明
+
+| 事件名            | 说明       | 参数              |
+| ----------------- | ---------- | ----------------- |
+| update:modelValue | 绑定值更新 | value: 当前选中值 |
+| change            | 选择变化   | value: 当前选中值 |
+
+## 插槽说明
+
+| 插槽名 | 说明           | 参数                       |
+| ------ | -------------- | -------------------------- |
+| option | 自定义选项内容 | option, selected, disabled |
+
+## 基础用法
+
+### 单选模式
+
+```vue
+<template>
+  <Select
+    v-model="singleValue"
+    :options="options"
+  />
+</template>
+
+<script setup>
+  import { ref } from 'vue';
+  import Select from '@/components/Select/index.vue';
+
+  const singleValue = ref('');
+  const options = [
+    { label: '选项1', value: 'option1' },
+    { label: '选项2', value: 'option2' },
+    { label: '选项3', value: 'option3' },
+  ];
+</script>
+```
+
+### 多选模式
+
+```vue
+<template>
+  <Select
+    v-model="multipleValue"
+    :options="options"
+    multiple
+  />
+</template>
+
+<script setup>
+  import { ref } from 'vue';
+  import Select from '@/components/Select/index.vue';
+
+  const multipleValue = ref([]);
+  const options = [
+    { label: '选项1', value: 'option1' },
+    { label: '选项2', value: 'option2' },
+    { label: '选项3', value: 'option3' },
+  ];
+</script>
+```
+
+### Grid布局 - 指定列数
+
+```vue
+<template>
+  <Select
+    v-model="gridValue"
+    :options="options"
+    layout-type="grid"
+    :items-per-row="3"
+  />
+</template>
+```
+
+### Scroll布局 - 固定宽度
+
+```vue
+<template>
+  <Select
+    v-model="scrollValue"
+    :options="options"
+    layout-type="scroll"
+    :item-width="120"
+  />
+</template>
+```
+
+### 自定义选项1内容
+
+```vue
+<template>
+  <Select
+    v-model="customValue"
+    :options="customOptions"
+  >
+    <template #option="{ option, selected }">
+      <div class="custom-option">
+        <span class="icon">{{ option.icon }}</span>
+        <span class="text">{{ option.label }}</span>
+        <span
+          v-if="selected"
+          class="check"
+          >✓</span
+        >
+      </div>
+    </template>
+  </Select>
+</template>
+
+<script setup>
+  import { ref } from 'vue';
+
+  const customValue = ref('');
+  const customOptions = [
+    { label: '首页', value: 'home', icon: '🏠' },
+    { label: '用户', value: 'user', icon: '👤' },
+    { label: '设置', value: 'settings', icon: '⚙️' },
+  ];
+</script>
+```

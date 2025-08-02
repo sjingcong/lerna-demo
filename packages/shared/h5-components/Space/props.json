@@ -1,0 +1,50 @@
+{
+  "componentName": "Space",
+  "componentTitle": "间距组件",
+  "description": "设置组件之间的间距，支持水平和垂直排列",
+  "props": [
+    {
+      "name": "size",
+      "title": "间距大小",
+      "type": "string",
+      "control": "radio",
+      "default": "medium",
+      "options": [
+        { "label": "小", "value": "small" },
+        { "label": "中", "value": "medium" },
+        { "label": "大", "value": "large" }
+      ]
+    },
+    {
+      "name": "direction",
+      "title": "排列方向",
+      "type": "string",
+      "control": "radio",
+      "default": "horizontal",
+      "options": [
+        { "label": "水平", "value": "horizontal" },
+        { "label": "垂直", "value": "vertical" }
+      ]
+    },
+    {
+      "name": "align",
+      "title": "对齐方式",
+      "type": "string",
+      "control": "radio",
+      "default": "start",
+      "options": [
+        { "label": "起始", "value": "start" },
+        { "label": "居中", "value": "center" },
+        { "label": "末尾", "value": "end" },
+        { "label": "基线", "value": "baseline" }
+      ]
+    },
+    {
+      "name": "wrap",
+      "title": "自动换行",
+      "type": "boolean",
+      "control": "switch",
+      "default": false
+    }
+  ]
+}

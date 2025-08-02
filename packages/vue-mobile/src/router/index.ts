@@ -57,6 +57,11 @@ const routes = [
     name: 'Protection',
     component: () => import('@/views/Protection/index.vue'),
   },
+  {
+    path: '/select-demo',
+    name: 'SelectDemo',
+    component: () => import('@/views/Form/Field/Select/demo.vue'),
+  },
 ];
 
 const router = createRouter({

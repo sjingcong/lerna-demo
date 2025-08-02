@@ -21,6 +21,11 @@ const routes = [
     path: '/tools/:category/:subcategory/:tool',
     name: 'ToolDetailWithSubcategory',
     component: () => import('./views/ToolDoc.vue')
+  },
+  {
+    path: '/preview/:component',
+    name: 'ComponentPreview',
+    component: () => import('./views/ComponentPreview.vue')
   }
 ]
 
