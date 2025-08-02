@@ -6,7 +6,7 @@
           @click="goBack"
           class="back-btn"
         >
-          ← 返回文档
+          ← 返回
         </button>
         <div class="title-section">
           <h1>{{ componentConfig?.componentTitle || '组件预览' }}</h1>
@@ -59,98 +59,22 @@
         <div class="config-section">
           <div class="config-panel">
             <h3>属性配置</h3>
-            <div class="config-form">
-              <div
-                v-for="prop in visibleProps"
-                :key="prop.name"
-                class="config-item"
-              >
-                <label class="config-label">{{ prop.title }}</label>
-                <div class="config-control">
-                  <!-- Switch控件 -->
-                  <a-switch
-                    v-if="prop.control === 'switch'"
-                    :checked="config[prop.name]"
-                    @change="(checked) => updateConfig(prop.name, checked)"
-                  />
-
-                  <!-- Radio控件 -->
-                  <a-radio-group
-                    v-else-if="prop.control === 'radio'"
-                    :value="config[prop.name]"
-                    @change="(e) => updateConfig(prop.name, e.target.value)"
-                  >
-                    <a-radio
-                      v-for="option in prop.options"
-                      :key="option.value"
-                      :value="option.value"
-                    >
-                      {{ option.label }}
-                    </a-radio>
-                  </a-radio-group>
-
-                  <!-- Select控件 -->
-                  <a-select
-                    v-else-if="prop.control === 'select'"
-                    :value="config[prop.name]"
-                    @change="(value) => updateConfig(prop.name, value)"
-                    style="width: 100%"
-                  >
-                    <a-select-option
-                      v-for="option in prop.options"
-                      :key="option.value"
-                      :value="option.value"
-                    >
-                      {{ option.label }}
-                    </a-select-option>
-                  </a-select>
-
-                  <!-- Input控件 -->
-                  <a-input-number
-                    v-if="prop.control === 'input' && prop.type === 'number'"
-                    :value="config[prop.name]"
-                    @change="(value) => updateConfig(prop.name, value)"
-                    style="width: 100%"
-                  />
-                  <a-input
-                    v-else-if="prop.control === 'input'"
-                    :value="config[prop.name]"
-                    @input="(e) => updateConfig(prop.name, e.target.value)"
-                  />
-                </div>
-                <div
-                  v-if="prop.description"
-                  class="config-description"
-                >
-                  {{ prop.description }}
-                </div>
-              </div>
-            </div>
+            <PropertyConfig
+              :component-config="componentConfig"
+              :config="config"
+              @update:config="updateConfig"
+            />
           </div>
         </div>
 
         <!-- 左侧移动端预览 -->
         <div class="mobile-preview">
-          <div class="mobile-frame">
-            <div class="mobile-screen">
-              <component
-                :is="componentInstance"
-                v-bind="mergedProps"
-                v-model="modelValue"
-                @update:modelValue="handleModelUpdate"
-                @change="handleChange"
-                v-if="componentInstance"
-              />
-
-              <!-- 交互结果显示 -->
-              <div class="interaction-result">
-                <div class="result-item">
-                  <span class="label">当前值:</span>
-                  <span class="value">{{ displayValue }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <H5Preview
+            :component="componentInstance"
+            :props="mergedProps"
+            :config="componentConfig"
+            :show-result="true"
+          />
         </div>
 
         <!-- 右侧代码预览 -->
@@ -189,16 +113,9 @@
 <script setup>
   import { ref, computed, watch, onMounted } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
-  import {
-    Switch as ASwitch,
-    RadioGroup as ARadioGroup,
-    Radio as ARadio,
-    Select as ASelect,
-    SelectOption as ASelectOption,
-    Input as AInput,
-    InputNumber as AInputNumber,
-    message,
-  } from 'ant-design-vue';
+  import { message } from 'ant-design-vue';
+  import PropertyConfig from '../components/PropertyConfig.vue';
+  import H5Preview from '../components/H5Preview.vue';
 
   const route = useRoute();
   const router = useRouter();
@@ -220,57 +137,25 @@
     };
   });
 
-  // 示例数据
-  const sampleData = ref({
-    options: [
-      { label: '选项1', value: 'option1' },
-      { label: '选项2', value: 'option2' },
-      { label: '选项3', value: 'option3' },
-    ],
-  });
-
-  // 可见属性
-  const visibleProps = computed(() => {
-    if (!componentConfig.value?.props) return [];
-
-    return componentConfig.value.props.filter((prop) => {
-      if (!prop.dependsOn) return true;
-
-      return Object.entries(prop.dependsOn).every(([key, value]) => {
-        return config.value[key] === value;
-      });
-    });
-  });
-
   // 合并后的属性
   const mergedProps = computed(() => {
     const merged = { ...config.value };
-
-    // 合并示例数据
-    Object.keys(sampleData.value).forEach((key) => {
-      if (merged[key] === undefined) {
-        merged[key] = sampleData.value[key];
-      }
-    });
-
     return merged;
   });
 
-  // 显示值
-  const displayValue = computed(() => {
-    if (modelValue.value === undefined || modelValue.value === null) {
-      return '未选择';
-    }
-    if (Array.isArray(modelValue.value)) {
-      return modelValue.value.length > 0
-        ? JSON.stringify(modelValue.value)
-        : '[]';
-    }
-    return modelValue.value;
-  });
-
   // 更新配置
-  const updateConfig = (key, value) => {
+  const updateConfig = (newConfig) => {
+    const oldMultiple = config.value.multiple;
+    config.value = newConfig;
+
+    // 当multiple属性变化时，重置modelValue
+    if (oldMultiple !== newConfig.multiple) {
+      modelValue.value = newConfig.multiple ? [] : '';
+    }
+  };
+
+  // 单个属性更新（保留兼容性）
+  const updateSingleConfig = (key, value) => {
     config.value[key] = value;
 
     // 当multiple属性变化时，重置modelValue
@@ -556,8 +441,8 @@
     color: #1e293b;
   }
   .config-section {
+    flex: 0 0 600px;
     background: white;
-    width: 400px;
     border-radius: 12px;
     padding: 1.5rem;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
@@ -645,38 +530,6 @@
     margin-left: 20px;
   }
 
-  .preview-header {
-    padding: 0;
-    margin-bottom: 0.5rem;
-  }
-
-  .preview-header h4 {
-    margin: 0;
-    font-size: 1.125rem;
-    color: #1e293b;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .mobile-frame {
-    width: 375px;
-    margin: 0 auto;
-    background: white;
-    border-radius: 16px;
-    box-shadow:
-      0 10px 25px -3px rgba(0, 0, 0, 0.1),
-      0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
-    border: 1px solid #f1f5f9;
-  }
-
-  .mobile-screen {
-    height: 812px;
-    background: #fafafa;
-  }
-
   .desktop-preview {
     padding: 2rem;
   }
@@ -684,52 +537,6 @@
   .desktop-container {
     max-width: 600px;
     margin: 0 auto;
-  }
-
-  .interaction-result {
-    margin: 1.5rem;
-    padding: 1.5rem;
-    background: white;
-    border-radius: 12px;
-    border: 1px solid #f1f5f9;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  }
-
-  .result-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.75rem;
-    padding: 0.5rem 0;
-  }
-
-  .result-item:last-child {
-    margin-bottom: 0;
-  }
-
-  .result-item.options-result {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-    padding: 0.75rem 0;
-  }
-
-  .label {
-    font-weight: 500;
-    color: #64748b;
-    font-size: 0.875rem;
-  }
-
-  .value {
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    font-size: 0.875rem;
-    color: #1e293b;
-    background: white;
-    padding: 0.25rem 0.5rem;
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   .options-preview {

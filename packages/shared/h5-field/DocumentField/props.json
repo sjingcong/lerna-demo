@@ -1,16 +1,16 @@
 {
-  "componentName": "IdCardField",
-  "componentTitle": "身份证输入框",
-  "importDesc": "import { IdCardField } from '@shared/h5-field/IdCardField'",
-  "description": "专用于身份证号码输入的表单组件，支持15位和18位身份证校验、信息解析等功能",
+  "componentName": "DocumentField",
+  "componentTitle": "证件输入框",
+  "importDesc": "import { DocumentField } from '@shared/h5-field/DocumentField'",
+  "description": "专用于证件信息输入的表单组件，支持身份证、护照、港澳台通行证等多种证件类型的选择和输入验证",
   "props": [
     {
       "name": "modelValue",
       "title": "绑定值",
-      "type": "string",
+      "type": "object",
       "required": false,
-      "description": "身份证号码值",
-      "default": "",
+      "description": "证件信息对象，包含type和value字段",
+      "default": "{\"type\": \"idcard\", \"value\": \"\"}",
       "control": "input"
     },
     {
@@ -19,7 +19,7 @@
       "type": "string",
       "required": false,
       "description": "输入框的标签",
-      "default": "身份证号码",
+      "default": "证件信息",
       "control": "input"
     },
     {
@@ -27,8 +27,8 @@
       "title": "占位符",
       "type": "string",
       "required": false,
-      "description": "输入框占位符文本",
-      "default": "请输入身份证号码",
+      "description": "输入框占位符文本，为空时使用证件类型默认占位符",
+      "default": "",
       "control": "input"
     },
     {
@@ -63,108 +63,99 @@
     },
     {
       "name": "clearable",
-      "title": "显示清除按钮",
+      "title": "是否可清空",
       "type": "boolean",
       "required": false,
-      "description": "是否显示清除按钮",
+      "description": "是否显示清空按钮",
       "default": true,
       "control": "switch",
       "options": [true, false]
     },
     {
       "name": "name",
-      "title": "字段名称",
+      "title": "表单项名称",
       "type": "string",
       "required": false,
-      "description": "表单字段名称，van-form 必需",
-      "default": "idCard",
+      "description": "表单项的name属性",
+      "default": "document",
       "control": "input"
     },
     {
       "name": "enableBuiltInValidation",
-      "title": "启用内置校验",
+      "title": "启用内置验证",
       "type": "boolean",
       "required": false,
-      "description": "是否启用内置身份证格式校验",
+      "description": "是否启用内置的证件格式验证",
       "default": true,
       "control": "switch",
       "options": [true, false]
     },
     {
       "name": "trigger",
-      "title": "校验触发时机",
+      "title": "验证触发时机",
       "type": "string",
       "required": false,
-      "description": "校验规则的触发时机",
+      "description": "验证触发的时机",
       "default": "onBlur",
       "control": "radio",
       "options": [
-        { "label": "默认", "value": "" },
-        { "label": "失焦时校验", "value": "onBlur" },
-        { "label": "输入时校验", "value": "onChange" }
+        { "label": "输入时", "value": "onChange" },
+        { "label": "失焦时", "value": "onBlur" }
       ]
     },
     {
-      "name": "supportedLengths",
-      "title": "支持的身份证位数",
+      "name": "supportedTypes",
+      "title": "支持的证件类型",
       "type": "array",
       "required": false,
-      "description": "支持的身份证位数",
-      "default": [15, 18],
+      "description": "支持选择的证件类型列表",
+      "default": "[\"idcard\", \"passport\", \"hkmacaotaiwan\"]",
       "control": "checkbox",
       "options": [
-        { "label": "15位", "value": 15 },
-        { "label": "18位", "value": 18 }
+        { "label": "身份证", "value": "idcard" },
+        { "label": "护照", "value": "passport" },
+        { "label": "港澳台通行证", "value": "hkmacaotaiwan" }
       ]
     }
   ],
   "events": [
     {
       "name": "update:modelValue",
-      "description": "值变化时触发",
-      "params": "(value: string)"
+      "description": "值更新时触发",
+      "params": "value: DocumentValue"
     },
     {
       "name": "input",
       "description": "输入时触发",
-      "params": "(value: string)"
+      "params": "value: DocumentValue"
     },
     {
       "name": "blur",
       "description": "失焦时触发",
-      "params": "(event: Event)"
+      "params": "event: Event"
     },
     {
       "name": "focus",
       "description": "聚焦时触发",
-      "params": "(event: Event)"
+      "params": "event: Event"
     },
     {
-      "name": "id-parsed",
-      "description": "身份证号码变为有效时触发，抛出身份证信息",
-      "params": "(info: IdCardInfo)"
+      "name": "document-parsed",
+      "description": "证件信息解析完成时触发",
+      "params": "info: DocumentInfo"
+    },
+    {
+      "name": "type-change",
+      "description": "证件类型变化时触发",
+      "params": "type: DocumentType"
     }
   ],
-  "expose": [
+  "methods": [
     {
-      "name": "value",
-      "description": "当前输入的身份证号码",
-      "type": "ComputedRef<string>"
-    },
-    {
-      "name": "isValid",
-      "description": "身份证号码是否有效",
-      "type": "ComputedRef<boolean>"
-    },
-    {
-      "name": "idCardInfo",
-      "description": "身份证信息对象，包含地区、出生日期、年龄、性别等",
-      "type": "ComputedRef<IdCardInfo>"
-    },
-    {
-      "name": "getIdCardInfo",
-      "description": "获取身份证信息的方法",
-      "type": "() => IdCardInfo"
+      "name": "getDocumentInfo",
+      "description": "获取当前证件信息",
+      "returns": "DocumentInfo"
     }
-  ]
+  ],
+  "slots": []
 }

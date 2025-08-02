@@ -1,7 +1,7 @@
 {
   "componentName": "EmailField",
   "componentTitle": "邮箱输入框",
-  "importDesc": "import { EmailField } from '@shared/h5-field'",
+  "importDesc": "import { EmailField } from '@shared/h5-field/EmailField'",
   "description": "专用于邮箱输入的表单组件，支持格式校验、域名识别等功能",
   "props": [
     {

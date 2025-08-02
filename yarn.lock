@@ -5746,6 +5746,11 @@ iconv-lite@0.6.3, iconv-lite@^0.6.2, iconv-lite@^0.6.3:
   dependencies:
     safer-buffer ">= 2.1.2 < 3.0.0"
 
+id-validator@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.npmmirror.com/id-validator/-/id-validator-1.3.0.tgz#5e0546803c0d17f4680c31f2c8c8194c582d695a"
+  integrity sha512-f/5FfaCBqdnLmDN3mYDHhZIHlnV6Xk6M6Ef2INT9Ng/IEvwMQYRIgj12ANdvUoaWz3o7SRb39z/fFC4dB64gHA==
+
 ieee754@^1.1.13:
   version "1.2.1"
   resolved "https://registry.npmjs.org/ieee754/-/ieee754-1.2.1.tgz"

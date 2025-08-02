@@ -50,10 +50,11 @@
         if (merged[prop.name] === undefined && prop.default !== undefined) {
           // 处理数组和对象类型的默认值
           try {
-            merged[prop.name] = typeof prop.default === 'string' && 
+            merged[prop.name] =
+              typeof prop.default === 'string' &&
               (prop.type === 'array' || prop.type === 'object')
-              ? JSON.parse(prop.default)
-              : prop.default;
+                ? JSON.parse(prop.default)
+                : prop.default;
           } catch {
             merged[prop.name] = prop.default;
           }
@@ -72,10 +73,13 @@
 
 <style scoped lang="less">
   .quick-preview {
-    border: 1px solid #e2e8f0;
     border-radius: 6px;
     overflow: hidden;
     background: white;
+    border-radius: 16px;
+    box-shadow:
+      0 10px 25px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05);
     &.h5-preview {
       width: 375px;
     }

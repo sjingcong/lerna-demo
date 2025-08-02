@@ -16,53 +16,8 @@
     </div>
 
     <div class="page-content">
-      <div class="component-list">
-        <div
-          v-for="componentData in components"
-          :key="componentData.name"
-          class="component-item"
-        >
-          <div class="component-content">
-            <div class="component-info">
-              <span class="component-name">
-                {{ componentData.config?.componentTitle || componentData.name }}
-              </span>
-              <span
-                class="component-description"
-                v-if="componentData.config?.description"
-              >
-                {{ componentData.config.description }}
-              </span>
-            </div>
-
-            <div class="component-preview">
-              <QuickPreview
-                :component="componentData.component"
-                :config="componentData.config"
-                size="small"
-                :is-h5="true"
-              />
-            </div>
-            <router-link
-              :to="`/preview/h5-field/${componentData.name}`"
-              class="preview-link"
-            >
-              <Icon icon="mdi:eye" />
-              详细配置
-            </router-link>
-          </div>
-        </div>
-      </div>
-
-      <!-- 空状态 -->
-      <div
-        v-if="components.length === 0"
-        class="empty-state"
-      >
-        <div class="empty-icon">📱</div>
-        <h3>暂无 Field 组件</h3>
-        <p>正在开发更多表单组件...</p>
-      </div>
+      <!-- 表单构建器 -->
+      <FormBuilder :components="components" />
     </div>
   </div>
 </template>
@@ -70,7 +25,7 @@
 <script setup lang="ts">
   import { ref, onMounted } from 'vue';
   import { Icon } from '@iconify/vue';
-  import QuickPreview from '@/components/QuickPreview.vue';
+  import FormBuilder from '../../components/FormBuilder.vue';
   import type { Component } from 'vue';
 
   interface ComponentData {
@@ -193,111 +148,7 @@
   }
 
   .page-content {
-    max-width: 1200px;
     margin: 0 auto;
     padding: 2rem;
-  }
-
-  .component-list {
-    display: grid;
-    gap: 1.5rem;
-  }
-
-  .component-item {
-    background: white;
-    border: 1px solid #e1e4e8;
-    border-radius: 8px;
-    overflow: hidden;
-    transition: all 0.2s ease;
-  }
-
-  .component-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  }
-
-  .component-content {
-    display: grid;
-    grid-template-columns: 1fr auto auto;
-    align-items: center;
-    padding: 1.5rem;
-    gap: 1.5rem;
-  }
-
-  .component-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .component-name {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #2c3e50;
-  }
-
-  .component-description {
-    font-size: 0.875rem;
-    color: #6a737d;
-    line-height: 1.4;
-  }
-
-  .component-preview {
-    min-width: 200px;
-    display: flex;
-    justify-content: center;
-  }
-
-  .preview-link {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: #007acc;
-    color: white;
-    text-decoration: none;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: background-color 0.2s;
-    white-space: nowrap;
-  }
-
-  .preview-link:hover {
-    background: #005a9e;
-    color: white;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    color: #6a737d;
-  }
-
-  .empty-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-  }
-
-  .empty-state h3 {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-    color: #2c3e50;
-  }
-
-  .empty-state p {
-    font-size: 1rem;
-    margin: 0;
-  }
-
-  @media (max-width: 768px) {
-    .component-content {
-      grid-template-columns: 1fr;
-      text-align: center;
-    }
-
-    .component-preview {
-      order: -1;
-    }
   }
 </style>

@@ -1,7 +1,7 @@
 {
   "componentName": "PhoneField",
   "componentTitle": "手机号输入框",
-  "importDesc": "import { PhoneField } from '@shared/h5-field'",
+  "importDesc": "import { PhoneField } from '@shared/h5-field/PhoneField'",
   "description": "专用于手机号输入的表单组件，支持格式校验、运营商识别等功能",
   "props": [
     {
