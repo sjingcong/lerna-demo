@@ -109,6 +109,7 @@
     name: string;
     title: string;
     type: string;
+    visible?: boolean;
     control: string;
     description?: string;
     options?: Array<{ label: string; value: any }>;
@@ -131,6 +132,9 @@
     return props.componentConfig.props.filter((prop: PropConfig) => {
       // 过滤掉一些不需要在配置面板中显示的属性
       const excludeProps = ['modelValue', 'rules'];
+      if (prop.visible === false) {
+        return false;
+      }
       return !excludeProps.includes(prop.name);
     });
   });

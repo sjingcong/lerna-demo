@@ -1,199 +1,137 @@
 <template>
   <div class="certification-field-preview">
-    <div class="preview-section">
-      <h3>基础用法</h3>
+    <van-form ref="formRef">
       <CertificationField
-        v-model="basicValue"
-        label="证件信息"
-        @certification-parsed="handleCertificationParsed"
+        v-model="props.modelValue"
+        v-model:cert-type="props.certType"
+        v-bind="$attrs"
+        @cert-parsed="handleCertificationParsed"
         @type-change="handleTypeChange"
+        @blur="handleBlur"
+        @focus="handleFocus"
       />
-      <div class="result-display">
-        <p>
-          <strong>当前值:</strong>
-          {{ JSON.stringify(basicValue, null, 2) }}
-        </p>
-        <p v-if="parsedInfo">
-          <strong>解析信息:</strong>
-          {{ JSON.stringify(parsedInfo, null, 2) }}
-        </p>
+    </van-form>
+
+    <div class="preview-info">
+      <div class="info-item">
+        <span class="label">当前值:</span>
+        <span class="value">
+          {{ JSON.stringify(props.modelValue, null, 2) }}
+        </span>
       </div>
-    </div>
-
-    <div class="preview-section">
-      <h3>必填状态</h3>
-      <CertificationField
-        v-model="requiredValue"
-        label="证件信息"
-        required
-        :rules="requiredRules"
-      />
-    </div>
-
-    <div class="preview-section">
-      <h3>只读状态</h3>
-      <CertificationField
-        v-model="readonlyValue"
-        label="证件信息"
-        readonly
-      />
-    </div>
-
-    <div class="preview-section">
-      <h3>禁用状态</h3>
-      <CertificationField
-        v-model="disabledValue"
-        label="证件信息"
-        disabled
-      />
-    </div>
-
-    <div class="preview-section">
-      <h3>限制证件类型</h3>
-      <CertificationField
-        v-model="limitedValue"
-        label="证件信息"
-        :supported-types="['idcard', 'passport']"
-      />
-    </div>
-
-    <div class="preview-section">
-      <h3>自定义验证规则</h3>
-      <CertificationField
-        v-model="customValue"
-        label="证件信息"
-        :rules="customRules"
-      />
-    </div>
-
-    <div class="preview-section">
-      <h3>实时验证</h3>
-      <CertificationField
-        v-model="realtimeValue"
-        label="证件信息"
-        trigger="onChange"
-      />
+      <div
+        v-if="parsedInfo"
+        class="info-item"
+      >
+        <span class="label">解析信息:</span>
+        <span class="value">{{ JSON.stringify(parsedInfo, null, 2) }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">证件类型:</span>
+        <span class="value">{{ props.certType || '未选择' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">证件号码:</span>
+        <span class="value">{{ props.modelValue || '未输入' }}</span>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ref } from 'vue';
+  import { ref, onMounted } from 'vue';
+  import { Form as VanForm } from 'vant';
   import CertificationField from './index.vue';
-  import type {
-    CertificationValue,
-    CertificationInfo,
-    CertificationType,
-  } from './types';
 
-  // 响应式数据
-  const basicValue = ref<CertificationValue>({
-    type: 'idcard' as CertificationType,
-    value: '',
-  });
-
-  const requiredValue = ref<CertificationValue>({
-    type: 'idcard' as CertificationType,
-    value: '',
-  });
-
-  const readonlyValue = ref<CertificationValue>({
-    type: 'idcard' as CertificationType,
-    value: '110101199001011234',
-  });
-
-  const disabledValue = ref<CertificationValue>({
-    type: 'passport' as CertificationType,
-    value: 'G12345678',
-  });
-
-  const limitedValue = ref<CertificationValue>({
-    type: 'idcard' as CertificationType,
-    value: '',
-  });
-
-  const customValue = ref<CertificationValue>({
-    type: 'idcard' as CertificationType,
-    value: '',
-  });
-
-  const realtimeValue = ref<CertificationValue>({
-    type: 'idcard' as CertificationType,
-    value: '',
-  });
-
-  const parsedInfo = ref<CertificationInfo | null>(null);
-
-  // 验证规则
-  const requiredRules = [
-    {
-      required: true,
-      message: '请输入证件信息',
-      trigger: 'onBlur',
+  // 定义props和emits
+  const props = defineProps({
+    modelValue: {
+      type: String,
+      default: '',
     },
-  ];
-
-  const customRules = [
-    {
-      validator: (value: string) => {
-        if (value && value.length < 6) {
-          return '证件号码长度不能少于6位';
-        }
-        return true;
-      },
-      message: '证件号码长度不能少于6位',
-      trigger: 'onBlur',
+    certType: {
+      type: String,
+      default: '',
     },
-  ];
+  });
 
-  // 事件处理
-  const handleCertificationParsed = (info: CertificationInfo) => {
+  const formRef = ref();
+  const certFieldRef = ref();
+  const parsedInfo = ref<any | null>(null);
+
+  const handleBlur = (event: Event) => {
+    console.log('失焦:', event);
+  };
+
+  const handleFocus = (event: Event) => {
+    console.log('聚焦:', event);
+  };
+
+  const handleCertificationParsed = (info: any) => {
     parsedInfo.value = info;
     console.log('证件解析结果:', info);
   };
 
-  const handleTypeChange = (type: CertificationType) => {
+  const handleTypeChange = (type: any) => {
     console.log('证件类型变化:', type);
   };
+
+  onMounted(() => {
+    // 获取CertificationField组件实例
+    certFieldRef.value =
+      formRef.value?.$el?.querySelector(
+        '.van-field'
+      )?.__vueParentComponent?.exposed;
+  });
 </script>
 
 <style scoped>
   .certification-field-preview {
-    padding: 20px;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-
-  .preview-section {
-    margin-bottom: 40px;
-    padding: 20px;
-    border: 1px solid #ebedf0;
+    padding: 16px;
+    background: #f8f9fa;
     border-radius: 8px;
-    background: #fff;
   }
 
-  .preview-section h3 {
-    margin: 0 0 20px 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: #323233;
-  }
-
-  .result-display {
+  .preview-info {
     margin-top: 16px;
     padding: 12px;
-    background: #f7f8fa;
+    background: white;
     border-radius: 6px;
-    font-size: 12px;
-    color: #646566;
+    border: 1px solid #e1e5e9;
   }
 
-  .result-display p {
-    margin: 8px 0;
+  .info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+  }
+
+  .info-item:not(:last-child) {
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+  }
+
+  .label {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+  }
+
+  .value {
+    font-size: 14px;
+    color: #333;
     word-break: break-all;
+    max-width: 60%;
+    text-align: right;
   }
 
-  .result-display strong {
-    color: #323233;
+  .value.valid {
+    color: #52c41a;
+  }
+
+  .value.invalid {
+    color: #ff4d4f;
   }
 </style>

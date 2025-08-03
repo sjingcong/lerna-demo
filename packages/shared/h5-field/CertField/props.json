@@ -1,34 +1,34 @@
 {
-  "componentName": "CertificationField",
+  "componentName": "CertField",
   "componentTitle": "证件输入框",
-  "importDesc": "import { CertificationField } from '@shared/h5-field/CertificationField'",
+  "importDesc": "import { CertField } from '@shared/h5-field/CertField'",
   "description": "专用于证件信息输入的表单组件，支持身份证、护照、港澳台通行证等多种证件类型的选择和输入验证",
   "props": [
     {
       "name": "modelValue",
-      "title": "绑定值",
-      "type": "object",
+      "title": "证件号码",
+      "type": "string",
       "required": false,
-      "description": "证件信息对象，包含type和value字段",
-      "default": "{\"type\": \"idcard\", \"value\": \"\"}",
+      "description": "证件号码值",
+      "default": "",
       "control": "input"
     },
     {
-      "name": "label",
-      "title": "标签文本",
+      "name": "v-model:cert-type",
+      "title": "证件类型",
       "type": "string",
       "required": false,
-      "description": "输入框的标签",
-      "default": "证件信息",
-      "control": "input"
+      "description": "当前选中的证件类型",
+      "default": "certType",
+      "visible": false
     },
     {
       "name": "placeholder",
       "title": "占位符",
       "type": "string",
       "required": false,
-      "description": "输入框占位符文本，为空时使用证件类型默认占位符",
-      "default": "",
+      "description": "输入框占位符文本",
+      "default": "请输入证件号码",
       "control": "input"
     },
     {
@@ -72,13 +72,40 @@
       "options": [true, false]
     },
     {
-      "name": "name",
-      "title": "表单项名称",
+      "name": "certValueName",
+      "title": "证件号码字段名",
       "type": "string",
       "required": false,
-      "description": "表单项的name属性",
-      "default": "certification",
+      "description": "证件号码表单项的name属性",
+      "default": "",
       "control": "input"
+    },
+    {
+      "name": "certTypeName",
+      "title": "证件类型字段名",
+      "type": "string",
+      "required": true,
+      "description": "证件类型表单项的name属性",
+      "default": "",
+      "control": "input"
+    },
+    {
+      "name": "rules",
+      "title": "验证规则",
+      "type": "array",
+      "required": false,
+      "description": "证件号码的验证规则",
+      "default": "[]",
+      "control": "input"
+    },
+    {
+      "name": "certTypeRules",
+      "title": "证件类型验证规则",
+      "type": "array",
+      "required": false,
+      "description": "证件类型的验证规则，参考van-form的rules",
+      "default": "[]",
+      "control": ""
     },
     {
       "name": "enableBuiltInValidation",
@@ -100,7 +127,8 @@
       "control": "radio",
       "options": [
         { "label": "输入时", "value": "onChange" },
-        { "label": "失焦时", "value": "onBlur" }
+        { "label": "失焦时", "value": "onBlur" },
+        { "label": "提交时", "value": "onSubmit" }
       ]
     },
     {
@@ -109,25 +137,35 @@
       "type": "array",
       "required": false,
       "description": "支持选择的证件类型列表",
-      "default": "[\"idcard\", \"passport\", \"hkmacaotaiwan\"]",
+      "default": "[\"1\", \"2\"]",
       "control": "checkbox",
       "options": [
-        { "label": "身份证", "value": "idcard" },
-        { "label": "护照", "value": "passport" },
-        { "label": "港澳台通行证", "value": "hkmacaotaiwan" }
+        { "label": "身份证", "value": "1" },
+        { "label": "护照", "value": "2" },
+        { "label": "港澳台回乡证", "value": "6" },
+        { "label": "出生证", "value": "A" },
+        { "label": "户口本", "value": "L" },
+        { "label": "军事证", "value": "3" },
+        { "label": "司机执照", "value": "7" },
+        { "label": "外国永久居民身份证", "value": "o" }
       ]
     }
   ],
   "events": [
     {
       "name": "update:modelValue",
-      "description": "值更新时触发",
-      "params": "value: CertificationValue"
+      "description": "证件号码更新时触发",
+      "params": "value: string"
+    },
+    {
+      "name": "update:certType",
+      "description": "证件类型更新时触发",
+      "params": "type: CertType"
     },
     {
       "name": "input",
       "description": "输入时触发",
-      "params": "value: CertificationValue"
+      "params": "value: string"
     },
     {
       "name": "blur",
@@ -140,14 +178,9 @@
       "params": "event: Event"
     },
     {
-      "name": "certification-parsed",
+      "name": "cert-parsed",
       "description": "证件信息解析完成时触发",
       "params": "info: CertificationInfo"
-    },
-    {
-      "name": "type-change",
-      "description": "证件类型变化时触发",
-      "params": "type: CertificationType"
     }
   ],
   "methods": [

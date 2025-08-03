@@ -96,7 +96,7 @@
       "type": "string",
       "required": false,
       "description": "校验规则的触发时机",
-      "default": "onlur",
+      "default": "onBlur",
       "control": "radio",
       "options": [
         { "label": "默认", "value": "" },

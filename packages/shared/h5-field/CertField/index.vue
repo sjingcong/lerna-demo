@@ -41,13 +41,12 @@
             :placeholder="currentPlaceholder"
             :disabled="disabled"
             :readonly="readonly"
-            :clearable="false"
+            :clearable="clearable"
             :required="false"
             :rules="[]"
             :enable-built-in-validation="false"
             :trigger="trigger"
             @update:model-value="handleValueChange"
-            @input="handleInput"
             @blur="handleInputBlur"
             @focus="handleInputFocus"
           />
@@ -105,7 +104,7 @@
     input: [value: string];
     blur: [event: Event];
     focus: [event: Event];
-    'certification-parsed': [info: any];
+    'cert-parsed': [info: any];
   }
 
   // Emits
@@ -237,16 +236,13 @@
     emit('update:modelValue', value);
   };
 
-  const handleInput = (value: string) => {
-    emit('input', value);
-  };
-
   const handleInputBlur = (event: Event) => {
     emit('blur', event);
     // 手动触发van-field的验证
     if (fieldRef.value && props.trigger === 'onBlur') {
       fieldRef.value.validate();
     }
+    emit('cert-parsed', getCertInfo());
   };
 
   const handleInputFocus = (event: Event) => {
