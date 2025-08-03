@@ -23,20 +23,16 @@ class PassportValidator implements CertificationValidator {
   /**
    * 获取van-form兼容的校验规则
    */
-  getRules(
-    required: boolean,
-    trigger: 'onChange' | 'onBlur' | 'onSubmit'
-  ): any[] {
+  getRules(): any[] {
     return [
       {
-        required,
-        message: '请输入中国护照号码',
-        trigger,
-      },
-      {
-        pattern: reg1,
+        validator(value: string) {
+          if (reg1.test(value)) {
+            return true;
+          }
+          return false;
+        },
         message: '护照号码格式不正确',
-        trigger,
       },
     ];
   }

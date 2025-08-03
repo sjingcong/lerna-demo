@@ -43,6 +43,11 @@ const routes = [
     name: 'ComponentPreview',
     component: () => import('./views/ComponentPreview.vue'),
   },
+  {
+    path: '/preview/cert',
+    name: 'cert',
+    component: () => import('../../shared/h5-field/CertField/example.vue'),
+  },
 ];
 
 const router = createRouter({

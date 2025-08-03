@@ -3,15 +3,15 @@
  */
 
 import type { CertificationValidator, ParseResult } from './types';
-//@ts-ignore
-import { default as Validator } from 'id-validator';
+import Validator from 'id-validator';
 /**
  * 尝试使用 id-validator 库进行校验
  */
+const validateInstance = new Validator();
 function tryIdValidator(value: string): { isValid: boolean; info?: any } {
   try {
-    const isValid = Validator.isValid(value);
-    const info = isValid ? Validator.getInfo(value) : null;
+    const isValid = validateInstance.isValid(value);
+    const info = isValid ? validateInstance.getInfo(value) : null;
     return { isValid, info };
   } catch {
     return { isValid: false };
@@ -61,16 +61,8 @@ class IdCardValidator implements CertificationValidator {
   /**
    * 获取van-form兼容的校验规则
    */
-  getRules(
-    required: boolean,
-    trigger: 'onChange' | 'onBlur' | 'onSubmit'
-  ): any[] {
+  getRules(): any[] {
     return [
-      {
-        required,
-        message: '请输入身份证号码',
-        trigger,
-      },
       {
         validator: (value: string) => {
           if (!value) return true;
@@ -80,7 +72,6 @@ class IdCardValidator implements CertificationValidator {
           return result.isValid;
         },
         message: '身份证号码格式不正确',
-        trigger,
       },
     ];
   }

@@ -20,8 +20,5 @@ export interface CertificationValidator {
   format?(value: string): string;
   validate?(value: string): boolean;
   /** 获取van-form兼容的校验规则 */
-  getRules(
-    required: boolean,
-    trigger?: 'onChange' | 'onBlur' | 'onSubmit'
-  ): any[];
+  getRules(): any[];
 }

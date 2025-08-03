@@ -6,7 +6,6 @@
     :readonly="readonly"
     :clearable="clearable"
     :maxlength="currentMaxlength"
-    :rules="mergedRules"
     @update:model-value="handleInput"
     @blur="handleBlur"
     @focus="handleFocus"
@@ -16,28 +15,20 @@
 
 <script setup lang="ts">
   import { ref, computed, watch } from 'vue';
-  import {
-    CertificationType,
-    CertificationOptions,
-    CertificationValidateMap,
-  } from '../constants';
+  import { CertType, CertValidateMap } from '../constants';
 
   // Props
-  interface CertificationInputProps {
+  interface CertInputProps {
     modelValue?: string;
-    type: CertificationType;
+    type: CertType | '';
     placeholder?: string;
     disabled?: boolean;
     readonly?: boolean;
     clearable?: boolean;
-    required?: boolean;
-    rules?: any[];
-    enableBuiltInValidation?: boolean;
-    trigger?: 'onChange' | 'onBlur';
   }
 
   // Emits
-  interface CertificationInputEmits {
+  interface CertInputEmits {
     'update:modelValue': [value: string];
     input: [value: string];
     blur: [event: Event];
@@ -45,18 +36,15 @@
   }
 
   // Props
-  const props = withDefaults(defineProps<CertificationInputProps>(), {
+  const props = withDefaults(defineProps<CertInputProps>(), {
     placeholder: '请输入证件号码',
     disabled: false,
     readonly: false,
     clearable: true,
-    rules: () => [],
-    enableBuiltInValidation: true,
-    trigger: 'onBlur',
   });
 
   // Emits
-  const emit = defineEmits<CertificationInputEmits>();
+  const emit = defineEmits<CertInputEmits>();
 
   // 响应式数据
   const inputValue = ref(props.modelValue || '');
@@ -65,9 +53,7 @@
   watch(
     () => props.modelValue,
     (newValue) => {
-      if (newValue !== inputValue.value) {
-        inputValue.value = newValue || '';
-      }
+      inputValue.value = newValue || '';
     }
   );
 
@@ -80,13 +66,8 @@
     }
   );
 
-  // 计算属性
-  const currentTypeOption = computed(() => {
-    return CertificationOptions.find((option) => option.value === props.type);
-  });
-
   const currentValidator = computed(() => {
-    return CertificationValidateMap[props.type];
+    return props.type ? CertValidateMap[props.type] : undefined;
   });
 
   const currentPlaceholder = computed(() => {
@@ -94,18 +75,7 @@
   });
 
   const currentMaxlength = computed(() => {
-    return currentValidator.value?.maxLength || undefined;
-  });
-
-  // 内置校验规则
-  const builtInRules = computed(() => {
-    if (!props.enableBuiltInValidation || !currentValidator.value) return [];
-    return currentValidator.value.getRules(props.required, props.trigger);
-  });
-
-  // 合并验证规则
-  const mergedRules = computed(() => {
-    return [...builtInRules.value, ...props.rules];
+    return currentValidator?.value?.maxLength || undefined;
   });
 
   // 处理输入事件
@@ -113,7 +83,7 @@
     let formattedValue = value;
 
     // 如果有格式化方法，则进行格式化
-    if (currentValidator.value?.format) {
+    if (currentValidator?.value?.format) {
       formattedValue = currentValidator.value.format(value);
     }
 

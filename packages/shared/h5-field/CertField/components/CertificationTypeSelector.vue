@@ -20,7 +20,7 @@
       position="bottom"
     >
       <van-picker
-        :model-value="[currentType]"
+        :model-value="currentType"
         :columns="pickerColumns"
         @cancel="showPicker = false"
         @confirm="onConfirm"
@@ -31,26 +31,26 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed } from 'vue';
-  import { CertificationType, CertificationOptions } from '../constants';
+  import { ref, computed, watch } from 'vue';
+  import { CertType, CertOptions } from '../constants';
 
   // Props
   interface CertificationTypeSelectorProps {
-    modelValue: CertificationType;
+    modelValue: CertType | '';
     disabled?: boolean;
     readonly?: boolean;
-    supportedTypes?: CertificationType[];
+    supportedTypes?: CertType[];
   }
 
   // Emits
   interface CertificationTypeSelectorEmits {
-    'update:modelValue': [value: CertificationType];
+    'update:modelValue': [value: CertType];
   }
 
   const props = withDefaults(defineProps<CertificationTypeSelectorProps>(), {
     disabled: false,
     readonly: false,
-    supportedTypes: () => Object.values(CertificationType),
+    supportedTypes: () => Object.values(CertType),
   });
 
   // Emits
@@ -58,19 +58,24 @@
 
   // 响应式数据
   const showPicker = ref(false);
-  const currentType = ref(props.modelValue);
+  const currentType = ref([props.modelValue]);
+
+  watch(
+    () => props.modelValue,
+    (newValue: any) => {
+      currentType.value = [newValue];
+    }
+  );
 
   // 显示文本
   const displayText = computed(() => {
-    const option = CertificationOptions.find(
-      (opt) => opt.value === props.modelValue
-    );
-    return option?.label || '请选择证件类型';
+    const option = CertOptions.find((opt) => opt.value === props.modelValue);
+    return option?.label || '请选择';
   });
 
   // 过滤支持的证件类型选项
   const filteredOptions = computed(() => {
-    return CertificationOptions.filter((option) =>
+    return CertOptions.filter((option) =>
       props.supportedTypes.includes(option.value)
     );
   });
@@ -91,12 +96,12 @@
 
   // 处理选择器变化
   const onChange = (values: any[]) => {
-    currentType.value = values[0];
+    currentType.value = values;
   };
 
   // 处理确认选择
-  const onConfirm = (values: any[]) => {
-    const selectedType = values[0] as CertificationType;
+  const onConfirm = (values: any) => {
+    const selectedType = values.selectedValues[0] as CertType;
     emit('update:modelValue', selectedType);
     showPicker.value = false;
   };
@@ -105,16 +110,12 @@
 <style scoped>
   .certification-type-selector {
     display: inline-block;
-    min-width: 100px;
   }
 
   .selector-trigger {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 12px;
-    background: #f7f8fa;
-    border: 1px solid #ebedf0;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.3s;
