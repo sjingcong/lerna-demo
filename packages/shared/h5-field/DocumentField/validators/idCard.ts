@@ -2,10 +2,9 @@
  * 身份证校验器
  */
 
-import type { DocumentValidator, ParseResult } from './types';
+import type { CertificationValidator, ParseResult } from './types';
 //@ts-ignore
 import { default as Validator } from 'id-validator';
-
 /**
  * 尝试使用 id-validator 库进行校验
  */
@@ -22,7 +21,11 @@ function tryIdValidator(value: string): { isValid: boolean; info?: any } {
 /**
  * 身份证校验器实现
  */
-class IdCardValidator implements DocumentValidator {
+class IdCardValidator implements CertificationValidator {
+  maxLength = 18;
+  format(value: string) {
+    return value;
+  }
   /**
    * 解析身份证信息
    */
@@ -54,7 +57,7 @@ class IdCardValidator implements DocumentValidator {
       };
     }
   }
-
+  validate = (value: string) => Validator.isValid(value);
   /**
    * 获取van-form兼容的校验规则
    */

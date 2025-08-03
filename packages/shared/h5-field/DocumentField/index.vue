@@ -1,10 +1,10 @@
 <template>
-  <div class="document-field">
-    <div class="document-field-content">
+  <div class="certification-field">
+    <div class="certification-field-content">
       <!-- 证件类型选择器 -->
-      <div class="document-type-section">
-        <DocumentTypeSelector
-          v-model="currentDocumentType"
+      <div class="certification-type-section">
+        <CertificationTypeSelector
+          v-model="currentCertificationType"
           :disabled="disabled"
           :readonly="readonly"
           :supported-types="supportedTypes"
@@ -13,10 +13,10 @@
       </div>
 
       <!-- 证件号码输入框 -->
-      <div class="document-input-section">
-        <DocumentInput
-          v-model="currentDocumentValue"
-          :type="currentDocumentType"
+      <div class="certification-input-section">
+        <CertificationInput
+          v-model="currentCertificationValue"
+          :type="currentCertificationType"
           :placeholder="placeholder"
           :disabled="disabled"
           :readonly="readonly"
@@ -29,188 +29,198 @@
           @input="handleInput"
           @blur="handleBlur"
           @focus="handleFocus"
-          @document-parsed="handleDocumentParsed"
         />
       </div>
     </div>
 
     <!-- 标签显示 -->
-    <div v-if="label" class="document-field-label">
+    <div
+      v-if="label"
+      class="certification-field-label"
+    >
       {{ label }}
-      <span v-if="required" class="required-mark">*</span>
+      <span
+        v-if="required"
+        class="required-mark"
+      >
+        *
+      </span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
   import { ref, computed, watch } from 'vue';
-  import DocumentTypeSelector from './components/DocumentTypeSelector.vue';
-  import DocumentInput from './components/DocumentInput.vue';
-  import {
-    DocumentType,
-    type DocumentFieldProps,
-    type DocumentFieldEmits,
-    type DocumentFieldExpose,
-    type DocumentValue,
-    type DocumentInfo
-  } from './types';
-  import { DEFAULT_DOCUMENT_TYPE, DEFAULT_SUPPORTED_TYPES } from './constants';
+  import CertificationTypeSelector from './components/CertificationTypeSelector.vue';
+  import CertificationInput from './components/CertificationInput.vue';
+  import { CertificationType, CertificationValidateMap } from './constants';
+
+  // 定义Props
+  interface CertificationFieldProps {
+    modelValue?: string;
+    certType?: CertificationType;
+    label?: string;
+    placeholder?: string;
+    required?: boolean;
+    readonly?: boolean;
+    disabled?: boolean;
+    clearable?: boolean;
+    name?: string;
+    rules?: any[];
+    enableBuiltInValidation?: boolean;
+    trigger?: 'onChange' | 'onBlur';
+    supportedTypes?: CertificationType[];
+  }
 
   // Props
-  const props = withDefaults(defineProps<DocumentFieldProps>(), {
+  const props = withDefaults(defineProps<CertificationFieldProps>(), {
+    modelValue: '',
+    certType: CertificationType.ID_CARD,
     label: '证件信息',
     placeholder: '',
     required: false,
     readonly: false,
     disabled: false,
     clearable: true,
-    name: 'document',
+    name: 'certification',
     rules: () => [],
     enableBuiltInValidation: true,
     trigger: 'onBlur',
-    supportedTypes: () => DEFAULT_SUPPORTED_TYPES
+    supportedTypes: () => Object.values(CertificationType),
   });
+
+  // 定义Emits
+  interface CertificationFieldEmits {
+    (e: 'update:modelValue', value: string): void;
+    (e: 'update:certType', type: CertificationType): void;
+    (e: 'input', value: string): void;
+    (e: 'blur', event: Event): void;
+    (e: 'focus', event: Event): void;
+    (e: 'certification-parsed', info: any): void;
+  }
 
   // Emits
-  const emit = defineEmits<DocumentFieldEmits>();
+  const emit = defineEmits<CertificationFieldEmits>();
 
   // 响应式数据
-  const currentDocumentType = ref<DocumentType>(
-    props.modelValue?.type || DEFAULT_DOCUMENT_TYPE
-  );
-  const currentDocumentValue = ref<string>(
-    props.modelValue?.value || ''
-  );
-  const documentInfo = ref<DocumentInfo>({
-    isValid: false,
-    type: currentDocumentType.value,
-    value: currentDocumentValue.value
-  });
+  const currentCertificationType = ref<CertificationType>(props.certType);
+  const currentCertificationValue = ref<string>(props.modelValue);
 
   // 监听外部值变化
   watch(
     () => props.modelValue,
     (newValue) => {
-      if (newValue) {
-        if (newValue.type !== currentDocumentType.value) {
-          currentDocumentType.value = newValue.type;
-        }
-        if (newValue.value !== currentDocumentValue.value) {
-          currentDocumentValue.value = newValue.value;
-        }
-      } else {
-        currentDocumentType.value = DEFAULT_DOCUMENT_TYPE;
-        currentDocumentValue.value = '';
+      if (newValue !== currentCertificationValue.value) {
+        currentCertificationValue.value = newValue;
       }
-    },
-    { deep: true }
+    }
   );
 
-  // 计算属性
-  const currentValue = computed<DocumentValue>(() => ({
-    type: currentDocumentType.value,
-    value: currentDocumentValue.value
-  }));
+  watch(
+    () => props.certType,
+    (newType) => {
+      if (newType !== currentCertificationType.value) {
+        currentCertificationType.value = newType;
+      }
+    }
+  );
 
-  const isValid = computed(() => documentInfo.value.isValid);
-
-  // 输入框验证规则（排除类型相关的规则，由DocumentInput处理）
+  // 输入框验证规则（排除类型相关的规则，由CertificationInput处理）
   const inputRules = computed(() => {
-    return props.rules.filter(rule => {
+    return props.rules.filter((rule) => {
       // 过滤掉可能与证件类型冲突的规则
       return !rule.pattern || typeof rule.pattern === 'string';
     });
   });
 
-  // 处理证件类型变化
-  const handleTypeChange = (type: DocumentType) => {
-    currentDocumentType.value = type;
-    // 类型变化时清空证件值
-    currentDocumentValue.value = '';
-    
-    const newValue: DocumentValue = {
-      type,
-      value: ''
-    };
-    
-    emit('update:modelValue', newValue);
-    emit('type-change', type);
+  // 事件处理方法
+  const handleTypeChange = (type: CertificationType) => {
+    currentCertificationType.value = type;
+    // 清空当前值，因为类型改变了
+    currentCertificationValue.value = '';
   };
 
-  // 处理证件值变化
   const handleValueChange = (value: string) => {
-    currentDocumentValue.value = value;
-    
-    const newValue: DocumentValue = {
-      type: currentDocumentType.value,
-      value
-    };
-    
-    emit('update:modelValue', newValue);
+    currentCertificationValue.value = value;
   };
 
-  // 处理输入事件
   const handleInput = (value: string) => {
-    const newValue: DocumentValue = {
-      type: currentDocumentType.value,
-      value
-    };
-    
-    emit('input', newValue);
+    emit('input', value);
   };
 
-  // 处理失焦事件
   const handleBlur = (event: Event) => {
+    const info = getCertificationInfo();
+    if (info) {
+      emit('certification-parsed', info);
+    }
     emit('blur', event);
   };
 
-  // 处理聚焦事件
   const handleFocus = (event: Event) => {
     emit('focus', event);
   };
 
-  // 处理证件解析事件
-  const handleDocumentParsed = (info: DocumentInfo) => {
-    documentInfo.value = info;
-    emit('document-parsed', info);
-  };
+  // 获取证件信息的方法
+  const getCertificationInfo = () => {
+    if (!currentCertificationValue.value || !currentCertificationType.value) {
+      return null;
+    }
 
-  // 获取证件信息
-  const getDocumentInfo = (): DocumentInfo => {
-    return documentInfo.value;
+    const validator = CertificationValidateMap[currentCertificationType.value];
+    const isValid = currentCertificationValue.value?.trim?.()
+      ? validator.validate(currentCertificationValue.value.trim())
+      : false;
+
+    try {
+      const info =
+        isValid && validator.parse
+          ? validator.parse(currentCertificationValue.value)
+          : {};
+      return {
+        type: currentCertificationType.value,
+        value: currentCertificationValue.value,
+        isValid,
+        ...info,
+      };
+    } catch (error) {
+      return {
+        type: currentCertificationType.value,
+        value: currentCertificationValue.value,
+        isValid: false,
+        error: error.message,
+      };
+    }
   };
 
   // 暴露给父组件的方法和属性
-  defineExpose<DocumentFieldExpose>({
-    value: currentValue,
-    isValid,
-    documentInfo,
-    getDocumentInfo
+  defineExpose({
+    value: currentCertificationValue,
+    getCertificationInfo,
   });
 </script>
 
 <style scoped>
-  .document-field {
+  .certification-field {
     width: 100%;
   }
 
-  .document-field-content {
+  .certification-field-content {
     display: flex;
     gap: 8px;
     align-items: stretch;
   }
 
-  .document-type-section {
+  .certification-type-section {
     flex: 0 0 auto;
     min-width: 100px;
   }
 
-  .document-input-section {
+  .certification-input-section {
     flex: 1;
     min-width: 0;
   }
 
-  .document-field-label {
+  .certification-field-label {
     font-size: 14px;
     color: #646566;
     margin-bottom: 8px;
@@ -224,12 +234,12 @@
 
   /* 响应式设计 */
   @media (max-width: 480px) {
-    .document-field-content {
+    .certification-field-content {
       flex-direction: column;
       gap: 12px;
     }
 
-    .document-type-section {
+    .certification-type-section {
       min-width: auto;
     }
   }

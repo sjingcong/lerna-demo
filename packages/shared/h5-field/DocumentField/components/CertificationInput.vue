@@ -16,23 +16,47 @@
 
 <script setup lang="ts">
   import { ref, computed, watch } from 'vue';
-  import { DocumentType, type DocumentInputProps, type DocumentInputEmits, type DocumentInfo } from '../types';
-  import { getDocumentTypeOption } from '../constants';
-  import { parseDocumentInfo, formatDocument, getDocumentRules } from '../utils/validation';
+  import {
+    CertificationType,
+    CertificationOptions,
+    CertificationValidateMap,
+  } from '../constants';
 
   // Props
-  const props = withDefaults(defineProps<DocumentInputProps>(), {
+  interface CertificationInputProps {
+    modelValue?: string;
+    type: CertificationType;
+    placeholder?: string;
+    disabled?: boolean;
+    readonly?: boolean;
+    clearable?: boolean;
+    required?: boolean;
+    rules?: any[];
+    enableBuiltInValidation?: boolean;
+    trigger?: 'onChange' | 'onBlur';
+  }
+
+  // Emits
+  interface CertificationInputEmits {
+    'update:modelValue': [value: string];
+    input: [value: string];
+    blur: [event: Event];
+    focus: [event: Event];
+  }
+
+  // Props
+  const props = withDefaults(defineProps<CertificationInputProps>(), {
     placeholder: '请输入证件号码',
     disabled: false,
     readonly: false,
     clearable: true,
     rules: () => [],
     enableBuiltInValidation: true,
-    trigger: 'onBlur'
+    trigger: 'onBlur',
   });
 
   // Emits
-  const emit = defineEmits<DocumentInputEmits>();
+  const emit = defineEmits<CertificationInputEmits>();
 
   // 响应式数据
   const inputValue = ref(props.modelValue || '');
@@ -58,28 +82,25 @@
 
   // 计算属性
   const currentTypeOption = computed(() => {
-    return getDocumentTypeOption(props.type);
+    return CertificationOptions.find((option) => option.value === props.type);
+  });
+
+  const currentValidator = computed(() => {
+    return CertificationValidateMap[props.type];
   });
 
   const currentPlaceholder = computed(() => {
-    return props.placeholder || currentTypeOption.value?.placeholder || '请输入证件号码';
+    return props.placeholder || '请输入证件号码';
   });
 
   const currentMaxlength = computed(() => {
-    return currentTypeOption.value?.maxlength || 20;
+    return currentValidator.value?.maxLength || undefined;
   });
 
-  // 内置验证规则
+  // 内置校验规则
   const builtInRules = computed(() => {
-    if (!props.type) return []
-    
-    const rules = getDocumentRules(props.type, 'onBlur')
-    // 更新第一个规则的required状态
-    if (rules.length > 0 && rules[0]) {
-      rules[0].required = props.required
-    }
-    
-    return rules
+    if (!props.enableBuiltInValidation || !currentValidator.value) return [];
+    return currentValidator.value.getRules(props.required, props.trigger);
   });
 
   // 合并验证规则
@@ -89,45 +110,26 @@
 
   // 处理输入事件
   const handleInput = (value: string) => {
-    // 格式化输入值
-    const formattedValue = formatValue(value);
-    
+    let formattedValue = value;
+
+    // 如果有格式化方法，则进行格式化
+    if (currentValidator.value?.format) {
+      formattedValue = currentValidator.value.format(value);
+    }
+
     inputValue.value = formattedValue;
     emit('update:modelValue', formattedValue);
     emit('input', formattedValue);
-
-    // 实时验证和解析（如果启用）
-    if (props.trigger === 'onChange') {
-      validateAndParse(formattedValue);
-    }
   };
 
   // 处理失焦事件
   const handleBlur = (event: Event) => {
     emit('blur', event);
-    
-    // 失焦时验证和解析
-    if (props.trigger === 'onBlur') {
-      validateAndParse(inputValue.value);
-    }
   };
 
   // 处理聚焦事件
   const handleFocus = (event: Event) => {
     emit('focus', event);
-  };
-
-  // 验证和解析证件信息
-  const validateAndParse = async (value: string) => {
-    if (!value.trim()) return;
-
-    const documentInfo = await parseDocumentInfo(props.type, value);
-    emit('document-parsed', documentInfo);
-  };
-
-  // 格式化证件号码
-  const formatValue = (value: string) => {
-    return formatDocument(props.type, value);
   };
 </script>
 

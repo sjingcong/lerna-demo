@@ -1,7 +1,7 @@
 {
-  "componentName": "DocumentField",
+  "componentName": "CertificationField",
   "componentTitle": "证件输入框",
-  "importDesc": "import { DocumentField } from '@shared/h5-field/DocumentField'",
+  "importDesc": "import { CertificationField } from '@shared/h5-field/CertificationField'",
   "description": "专用于证件信息输入的表单组件，支持身份证、护照、港澳台通行证等多种证件类型的选择和输入验证",
   "props": [
     {
@@ -77,7 +77,7 @@
       "type": "string",
       "required": false,
       "description": "表单项的name属性",
-      "default": "document",
+      "default": "certification",
       "control": "input"
     },
     {
@@ -122,12 +122,12 @@
     {
       "name": "update:modelValue",
       "description": "值更新时触发",
-      "params": "value: DocumentValue"
+      "params": "value: CertificationValue"
     },
     {
       "name": "input",
       "description": "输入时触发",
-      "params": "value: DocumentValue"
+      "params": "value: CertificationValue"
     },
     {
       "name": "blur",
@@ -140,21 +140,21 @@
       "params": "event: Event"
     },
     {
-      "name": "document-parsed",
+      "name": "certification-parsed",
       "description": "证件信息解析完成时触发",
-      "params": "info: DocumentInfo"
+      "params": "info: CertificationInfo"
     },
     {
       "name": "type-change",
       "description": "证件类型变化时触发",
-      "params": "type: DocumentType"
+      "params": "type: CertificationType"
     }
   ],
   "methods": [
     {
-      "name": "getDocumentInfo",
+      "name": "getCertificationInfo",
       "description": "获取当前证件信息",
-      "returns": "DocumentInfo"
+      "returns": "CertificationInfo"
     }
   ],
   "slots": []

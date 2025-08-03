@@ -1,4 +1,4 @@
-# DocumentField 证件输入框
+# CertificationField 证件输入框
 
 专用于证件信息输入的表单组件，支持身份证、护照、港澳台通行证等多种证件类型的选择和输入验证。
 
@@ -15,25 +15,25 @@
 
 ```vue
 <template>
-  <DocumentField
-    v-model="documentValue"
+  <CertificationField
+    v-model="certificationValue"
     label="证件信息"
-    @document-parsed="handleDocumentParsed"
+    @certification-parsed="handleCertificationParsed"
   />
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { DocumentField } from '@shared/h5-field/DocumentField'
+  import { ref } from 'vue';
+  import { CertificationField } from '@shared/h5-field/CertificationField';
 
-const documentValue = ref({
-  type: 'idcard',
-  value: ''
-})
+  const certificationValue = ref({
+    type: 'idcard',
+    value: '',
+  });
 
-const handleDocumentParsed = (info) => {
-  console.log('解析结果:', info)
-}
+  const handleCertificationParsed = (info) => {
+    console.log('解析结果:', info);
+  };
 </script>
 ```
 
@@ -42,8 +42,8 @@ const handleDocumentParsed = (info) => {
 ### 限制证件类型
 
 ```vue
-<DocumentField
-  v-model="documentValue"
+<CertificationField
+  v-model="certificationValue"
   label="证件信息"
   :supported-types="['idcard', 'passport']"
 />
@@ -52,14 +52,14 @@ const handleDocumentParsed = (info) => {
 ### 自定义验证规则
 
 ```vue
-<DocumentField
-  v-model="documentValue"
+<CertificationField
+  v-model="certificationValue"
   label="证件信息"
   :rules="[
     {
       validator: (value) => value.length >= 6,
-      message: '证件号码长度不能少于6位'
-    }
+      message: '证件号码长度不能少于6位',
+    },
   ]"
 />
 ```
@@ -67,8 +67,8 @@ const handleDocumentParsed = (info) => {
 ### 实时验证
 
 ```vue
-<DocumentField
-  v-model="documentValue"
+<CertificationField
+  v-model="certificationValue"
   label="证件信息"
   trigger="onChange"
   :enable-built-in-validation="true"
@@ -79,67 +79,67 @@ const handleDocumentParsed = (info) => {
 
 ### Props
 
-| 参数 | 说明 | 类型 | 默认值 |
-|------|------|------|--------|
-| modelValue | 绑定值 | `DocumentValue` | `{type: 'idcard', value: ''}` |
-| label | 标签文本 | `string` | `'证件信息'` |
-| placeholder | 占位符 | `string` | `''` |
-| required | 是否必填 | `boolean` | `false` |
-| readonly | 是否只读 | `boolean` | `false` |
-| disabled | 是否禁用 | `boolean` | `false` |
-| clearable | 是否可清空 | `boolean` | `true` |
-| name | 表单项名称 | `string` | `'document'` |
-| enableBuiltInValidation | 启用内置验证 | `boolean` | `true` |
-| trigger | 验证触发时机 | `'onChange' \| 'onBlur'` | `'onBlur'` |
-| supportedTypes | 支持的证件类型 | `DocumentType[]` | `['idcard', 'passport', 'hkmacaotaiwan']` |
-| rules | 自定义验证规则 | `FieldRule[]` | `[]` |
+| 参数                    | 说明           | 类型                     | 默认值                                    |
+| ----------------------- | -------------- | ------------------------ | ----------------------------------------- |
+| modelValue              | 绑定值         | `CertificationValue`     | `{type: 'idcard', value: ''}`             |
+| label                   | 标签文本       | `string`                 | `'证件信息'`                              |
+| placeholder             | 占位符         | `string`                 | `''`                                      |
+| required                | 是否必填       | `boolean`                | `false`                                   |
+| readonly                | 是否只读       | `boolean`                | `false`                                   |
+| disabled                | 是否禁用       | `boolean`                | `false`                                   |
+| clearable               | 是否可清空     | `boolean`                | `true`                                    |
+| name                    | 表单项名称     | `string`                 | `'certification'`                         |
+| enableBuiltInValidation | 启用内置验证   | `boolean`                | `true`                                    |
+| trigger                 | 验证触发时机   | `'onChange' \| 'onBlur'` | `'onBlur'`                                |
+| supportedTypes          | 支持的证件类型 | `CertificationType[]`    | `['idcard', 'passport', 'hkmacaotaiwan']` |
+| rules                   | 自定义验证规则 | `FieldRule[]`            | `[]`                                      |
 
 ### Events
 
-| 事件名 | 说明 | 回调参数 |
-|--------|------|----------|
-| update:modelValue | 值更新时触发 | `value: DocumentValue` |
-| input | 输入时触发 | `value: DocumentValue` |
-| blur | 失焦时触发 | `event: Event` |
-| focus | 聚焦时触发 | `event: Event` |
-| document-parsed | 证件信息解析完成时触发 | `info: DocumentInfo` |
-| type-change | 证件类型变化时触发 | `type: DocumentType` |
+| 事件名               | 说明                   | 回调参数                    |
+| -------------------- | ---------------------- | --------------------------- |
+| update:modelValue    | 值更新时触发           | `value: CertificationValue` |
+| input                | 输入时触发             | `value: CertificationValue` |
+| blur                 | 失焦时触发             | `event: Event`              |
+| focus                | 聚焦时触发             | `event: Event`              |
+| certification-parsed | 证件信息解析完成时触发 | `info: CertificationInfo`   |
+| type-change          | 证件类型变化时触发     | `type: CertificationType`   |
 
 ### Methods
 
-| 方法名 | 说明 | 参数 | 返回值 |
-|--------|------|------|--------|
-| getDocumentInfo | 获取当前证件信息 | - | `DocumentInfo` |
+| 方法名               | 说明             | 参数 | 返回值              |
+| -------------------- | ---------------- | ---- | ------------------- |
+| getCertificationInfo | 获取当前证件信息 | -    | `CertificationInfo` |
 
 ## 类型定义
 
-### DocumentValue
+### CertificationValue
 
 ```typescript
-interface DocumentValue {
-  type: DocumentType
-  value: string
+interface CertificationValue {
+  type: CertificationType;
+  value: string;
 }
 ```
 
-### DocumentType
+### CertificationType
 
 ```typescript
-type DocumentType = 'idcard' | 'passport' | 'hkmacaotaiwan'
+type CertificationType = 'idcard' | 'passport' | 'hkmacaotaiwan';
 ```
 
-### DocumentInfo
+### CertificationInfo
 
 ```typescript
-interface DocumentInfo {
-  type: DocumentType
-  value: string
-  isValid: boolean
+interface CertificationInfo {
+  type: CertificationType;
+  value: string;
+  isValid: boolean;
   // 身份证特有字段
-  region?: string
-  birthDate?: string
-  age?: number
-  gender?: 'male' | 'female'
+  region?: string;
+  birthDate?: string;
+  age?: number;
+  gender?: 'male' | 'female';
   // 其他证件类型的扩展字段...
 }
 ```
@@ -147,16 +147,19 @@ interface DocumentInfo {
 ## 证件类型说明
 
 ### 身份证 (idcard)
+
 - **格式**: 18位数字
 - **验证**: 校验位验证、地区代码验证、出生日期验证
 - **解析**: 可解析出地区、出生日期、年龄、性别等信息
 
 ### 护照 (passport)
+
 - **格式**: 字母+数字组合，通常8-9位
 - **验证**: 基本格式验证
 - **解析**: 基础信息验证
 
 ### 港澳台通行证 (hkmacaotaiwan)
+
 - **格式**: 字母+数字组合，通常8-10位
 - **验证**: 基本格式验证
 - **解析**: 基础信息验证
@@ -164,13 +167,13 @@ interface DocumentInfo {
 ## 🏗️ 组件架构
 
 ```
-DocumentField/
+CertificationField/
 ├── index.vue                    # 主组件
 ├── types.ts                     # 类型定义
 ├── constants.ts                 # 常量配置
 ├── components/                  # 子组件
-│   ├── DocumentTypeSelector.vue # 证件类型选择器
-│   └── DocumentInput.vue        # 证件输入框
+│   ├── CertificationTypeSelector.vue # 证件类型选择器
+│   └── CertificationInput.vue        # 证件输入框
 ├── validators/                  # 证件校验器（新架构）
 │   ├── index.ts                 # 统一导出
 │   ├── types.ts                 # 校验器类型定义
@@ -188,14 +191,16 @@ DocumentField/
 ### 🔧 新架构特点
 
 **模块化设计**: 每种证件类型都有独立的校验器文件，包含：
+
 - 证件配置（格式、长度、正则等）
 - 校验逻辑（格式验证、业务规则验证）
 - 信息解析（提取证件中的个人信息）
 - 格式化功能（统一显示格式）
 
-**统一接口**: 所有校验器都实现 `DocumentValidator` 接口，确保一致性
+**统一接口**: 所有校验器都实现 `CertificationValidator` 接口，确保一致性
 
 **易于扩展**: 新增证件类型只需：
+
 1. 创建新的校验器文件
 2. 在 `validators/index.ts` 中导出
 3. 在 `utils/validation.ts` 中添加映射
@@ -233,6 +238,7 @@ npm install id-validator --save
 ## 更新日志
 
 ### v1.0.0
+
 - 初始版本
 - 支持身份证、护照、港澳台通行证
 - 提供完整的验证和解析功能

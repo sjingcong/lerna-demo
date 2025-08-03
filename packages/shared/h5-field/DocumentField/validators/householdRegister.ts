@@ -2,12 +2,23 @@
  * 户口本校验器
  */
 
-import type { DocumentValidator } from './types';
-
+import type { CertificationValidator } from './types';
+const reg1 = /^\d{15,18}$/;
 /**
  * 户口本校验器实现
  */
-class HouseholdRegisterValidator implements DocumentValidator {
+class HouseholdRegisterValidator implements CertificationValidator {
+  maxLength = 18;
+  parse = undefined;
+  format(value: string) {
+    return value;
+  }
+  validate(value: string): boolean {
+    if (reg1.test(value)) {
+      return true;
+    }
+    return false;
+  }
   /**
    * 获取van-form兼容的校验规则
    */
@@ -22,7 +33,7 @@ class HouseholdRegisterValidator implements DocumentValidator {
         trigger,
       },
       {
-        pattern: /^\d{15,18}$/,
+        pattern: reg1,
         message: '户口本编号格式不正确',
         trigger,
       },

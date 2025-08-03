@@ -1,25 +1,25 @@
 /**
- * 护照校验器
+ * 出生证校验器
  */
 
 import type { CertificationValidator } from './types';
-const reg1 = /^[0-9a-zA-Z]{7,13}$/;
+
+const reg1 = /^[A-Za-z]\d{9}$/;
 /**
- * 中国护照校验器实现
+ * 出生证校验器实现
  */
-class PassportValidator implements CertificationValidator {
-  maxLength = 13;
-  parse = undefined;
+class BirthCertificationValidator implements CertificationValidator {
+  maxLength = 10;
   format(value: string) {
     return value;
   }
+  parse = undefined;
   validate(value: string): boolean {
     if (reg1.test(value)) {
       return true;
     }
     return false;
   }
-
   /**
    * 获取van-form兼容的校验规则
    */
@@ -30,16 +30,16 @@ class PassportValidator implements CertificationValidator {
     return [
       {
         required,
-        message: '请输入中国护照号码',
+        message: '请输入出生证编号',
         trigger,
       },
       {
         pattern: reg1,
-        message: '护照号码格式不正确',
+        message: '出生证编号格式不正确',
         trigger,
       },
     ];
   }
 }
 
-export default new PassportValidator();
+export default new BirthCertificationValidator();

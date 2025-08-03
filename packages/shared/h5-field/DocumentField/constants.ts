@@ -1,5 +1,5 @@
 import {
-  BirthCertificateValidator,
+  BirthCertificationValidator,
   DriverLicenseValidator,
   ForeignerPermanentResidentValidator,
   HkMacaoTaiwanValidator,
@@ -9,7 +9,7 @@ import {
   PassportValidator,
 } from './validators';
 
-export enum CertificateType {
+export enum CertificationType {
   ID_CARD = '1',
   PASSPORT = '2',
   HK_MACAO_TAIWAN = '6',
@@ -20,49 +20,49 @@ export enum CertificateType {
   FOREIGNER_PERMANENT_RESIDENT = 'o',
 }
 
-export const CertificateOptions = [
+export const CertificationOptions = [
   {
     label: '身份证',
-    value: CertificateType.ID_CARD,
+    value: CertificationType.ID_CARD,
   },
   {
     label: '护照',
-    value: CertificateType.PASSPORT,
+    value: CertificationType.PASSPORT,
   },
   {
     label: '港澳台回乡证',
-    value: CertificateType.HK_MACAO_TAIWAN,
+    value: CertificationType.HK_MACAO_TAIWAN,
   },
   {
     label: '出生证',
-    value: CertificateType.BIRTH_CERTIFICATE,
+    value: CertificationType.BIRTH_CERTIFICATE,
   },
   {
     label: '户口本',
-    value: CertificateType.HOUSEHOLD_REGISTER,
+    value: CertificationType.HOUSEHOLD_REGISTER,
   },
   {
     label: '军事证',
-    value: CertificateType.MILITARY_ID,
+    value: CertificationType.MILITARY_ID,
   },
   {
     label: '司机执照',
-    value: CertificateType.DRIVER_LICENSE,
+    value: CertificationType.DRIVER_LICENSE,
   },
   {
     label: '外国永久居民身份证',
-    value: CertificateType.FOREIGNER_PERMANENT_RESIDENT,
+    value: CertificationType.FOREIGNER_PERMANENT_RESIDENT,
   },
 ];
 
-export const CertificateValidateMap = {
-  [CertificateType.ID_CARD]: IdCardValidator,
-  [CertificateType.PASSPORT]: PassportValidator,
-  [CertificateType.HK_MACAO_TAIWAN]: HkMacaoTaiwanValidator,
-  [CertificateType.BIRTH_CERTIFICATE]: BirthCertificateValidator,
-  [CertificateType.HOUSEHOLD_REGISTER]: HouseholdRegisterValidator,
-  [CertificateType.MILITARY_ID]: MilitaryIdValidator,
-  [CertificateType.DRIVER_LICENSE]: DriverLicenseValidator,
-  [CertificateType.FOREIGNER_PERMANENT_RESIDENT]:
+export const CertificationValidateMap = {
+  [CertificationType.ID_CARD]: IdCardValidator,
+  [CertificationType.PASSPORT]: PassportValidator,
+  [CertificationType.HK_MACAO_TAIWAN]: HkMacaoTaiwanValidator,
+  [CertificationType.BIRTH_CERTIFICATE]: BirthCertificationValidator,
+  [CertificationType.HOUSEHOLD_REGISTER]: HouseholdRegisterValidator,
+  [CertificationType.MILITARY_ID]: MilitaryIdValidator,
+  [CertificationType.DRIVER_LICENSE]: DriverLicenseValidator,
+  [CertificationType.FOREIGNER_PERMANENT_RESIDENT]:
     ForeignerPermanentResidentValidator,
 };

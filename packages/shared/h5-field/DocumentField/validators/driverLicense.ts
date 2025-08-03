@@ -2,12 +2,23 @@
  * 驾驶证校验器
  */
 
-import type { DocumentValidator } from './types';
-
+import type { CertificationValidator } from './types';
+const reg1 = /^\d{18}$/;
 /**
  * 驾驶证校验器实现
  */
-class DriverLicenseValidator implements DocumentValidator {
+class DriverLicenseValidator implements CertificationValidator {
+  maxLength = 18;
+  parse = undefined;
+  format(value: string) {
+    return value;
+  }
+  validate(value: string): boolean {
+    if (reg1.test(value)) {
+      return true;
+    }
+    return false;
+  }
   /**
    * 获取van-form兼容的校验规则
    */
@@ -22,7 +33,7 @@ class DriverLicenseValidator implements DocumentValidator {
         trigger,
       },
       {
-        pattern: /^\d{18}$/,
+        pattern: reg1,
         message: '驾驶证号码格式不正确',
         trigger,
       },

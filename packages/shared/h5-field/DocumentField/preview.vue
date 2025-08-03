@@ -1,22 +1,28 @@
 <template>
-  <div class="document-field-preview">
+  <div class="certification-field-preview">
     <div class="preview-section">
       <h3>基础用法</h3>
-      <DocumentField
+      <CertificationField
         v-model="basicValue"
         label="证件信息"
-        @document-parsed="handleDocumentParsed"
+        @certification-parsed="handleCertificationParsed"
         @type-change="handleTypeChange"
       />
       <div class="result-display">
-        <p><strong>当前值:</strong> {{ JSON.stringify(basicValue, null, 2) }}</p>
-        <p v-if="parsedInfo"><strong>解析信息:</strong> {{ JSON.stringify(parsedInfo, null, 2) }}</p>
+        <p>
+          <strong>当前值:</strong>
+          {{ JSON.stringify(basicValue, null, 2) }}
+        </p>
+        <p v-if="parsedInfo">
+          <strong>解析信息:</strong>
+          {{ JSON.stringify(parsedInfo, null, 2) }}
+        </p>
       </div>
     </div>
 
     <div class="preview-section">
       <h3>必填状态</h3>
-      <DocumentField
+      <CertificationField
         v-model="requiredValue"
         label="证件信息"
         required
@@ -26,7 +32,7 @@
 
     <div class="preview-section">
       <h3>只读状态</h3>
-      <DocumentField
+      <CertificationField
         v-model="readonlyValue"
         label="证件信息"
         readonly
@@ -35,7 +41,7 @@
 
     <div class="preview-section">
       <h3>禁用状态</h3>
-      <DocumentField
+      <CertificationField
         v-model="disabledValue"
         label="证件信息"
         disabled
@@ -44,7 +50,7 @@
 
     <div class="preview-section">
       <h3>限制证件类型</h3>
-      <DocumentField
+      <CertificationField
         v-model="limitedValue"
         label="证件信息"
         :supported-types="['idcard', 'passport']"
@@ -53,7 +59,7 @@
 
     <div class="preview-section">
       <h3>自定义验证规则</h3>
-      <DocumentField
+      <CertificationField
         v-model="customValue"
         label="证件信息"
         :rules="customRules"
@@ -62,7 +68,7 @@
 
     <div class="preview-section">
       <h3>实时验证</h3>
-      <DocumentField
+      <CertificationField
         v-model="realtimeValue"
         label="证件信息"
         trigger="onChange"
@@ -73,54 +79,58 @@
 
 <script setup lang="ts">
   import { ref } from 'vue';
-  import DocumentField from './index.vue';
-  import type { DocumentValue, DocumentInfo, DocumentType } from './types';
+  import CertificationField from './index.vue';
+  import type {
+    CertificationValue,
+    CertificationInfo,
+    CertificationType,
+  } from './types';
 
   // 响应式数据
-  const basicValue = ref<DocumentValue>({
-    type: 'idcard' as DocumentType,
-    value: ''
+  const basicValue = ref<CertificationValue>({
+    type: 'idcard' as CertificationType,
+    value: '',
   });
 
-  const requiredValue = ref<DocumentValue>({
-    type: 'idcard' as DocumentType,
-    value: ''
+  const requiredValue = ref<CertificationValue>({
+    type: 'idcard' as CertificationType,
+    value: '',
   });
 
-  const readonlyValue = ref<DocumentValue>({
-    type: 'idcard' as DocumentType,
-    value: '110101199001011234'
+  const readonlyValue = ref<CertificationValue>({
+    type: 'idcard' as CertificationType,
+    value: '110101199001011234',
   });
 
-  const disabledValue = ref<DocumentValue>({
-    type: 'passport' as DocumentType,
-    value: 'G12345678'
+  const disabledValue = ref<CertificationValue>({
+    type: 'passport' as CertificationType,
+    value: 'G12345678',
   });
 
-  const limitedValue = ref<DocumentValue>({
-    type: 'idcard' as DocumentType,
-    value: ''
+  const limitedValue = ref<CertificationValue>({
+    type: 'idcard' as CertificationType,
+    value: '',
   });
 
-  const customValue = ref<DocumentValue>({
-    type: 'idcard' as DocumentType,
-    value: ''
+  const customValue = ref<CertificationValue>({
+    type: 'idcard' as CertificationType,
+    value: '',
   });
 
-  const realtimeValue = ref<DocumentValue>({
-    type: 'idcard' as DocumentType,
-    value: ''
+  const realtimeValue = ref<CertificationValue>({
+    type: 'idcard' as CertificationType,
+    value: '',
   });
 
-  const parsedInfo = ref<DocumentInfo | null>(null);
+  const parsedInfo = ref<CertificationInfo | null>(null);
 
   // 验证规则
   const requiredRules = [
     {
       required: true,
       message: '请输入证件信息',
-      trigger: 'onBlur'
-    }
+      trigger: 'onBlur',
+    },
   ];
 
   const customRules = [
@@ -132,23 +142,23 @@
         return true;
       },
       message: '证件号码长度不能少于6位',
-      trigger: 'onBlur'
-    }
+      trigger: 'onBlur',
+    },
   ];
 
   // 事件处理
-  const handleDocumentParsed = (info: DocumentInfo) => {
+  const handleCertificationParsed = (info: CertificationInfo) => {
     parsedInfo.value = info;
     console.log('证件解析结果:', info);
   };
 
-  const handleTypeChange = (type: DocumentType) => {
+  const handleTypeChange = (type: CertificationType) => {
     console.log('证件类型变化:', type);
   };
 </script>
 
 <style scoped>
-  .document-field-preview {
+  .certification-field-preview {
     padding: 20px;
     max-width: 800px;
     margin: 0 auto;

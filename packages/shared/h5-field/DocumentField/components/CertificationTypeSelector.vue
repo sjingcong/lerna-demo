@@ -1,25 +1,28 @@
 <template>
-  <div class="document-type-selector">
-    <div 
+  <div class="certification-type-selector">
+    <div
       class="selector-trigger"
       :class="{ disabled: disabled || readonly }"
       @click="handleClick"
     >
-      <span class="selector-text">{{ selectedTypeText }}</span>
-      <van-icon name="arrow-down" class="selector-icon" />
+      <span class="selector-text">{{ displayText }}</span>
+      <van-icon
+        name="arrow-down"
+        class="selector-icon"
+      />
     </div>
 
     <!-- 证件类型选择弹框 -->
-    <van-popup 
-      v-model:show="showPicker" 
-      destroy-on-close 
-      round 
+    <van-popup
+      v-model:show="showPicker"
+      destroy-on-close
+      round
       position="bottom"
     >
-      <van-picker 
-        :model-value="[currentType]" 
-        :columns="pickerColumns" 
-        @cancel="showPicker = false" 
+      <van-picker
+        :model-value="[currentType]"
+        :columns="pickerColumns"
+        @cancel="showPicker = false"
         @confirm="onConfirm"
         @change="onChange"
       />
@@ -29,40 +32,54 @@
 
 <script setup lang="ts">
   import { ref, computed } from 'vue';
-  import { DocumentType, type DocumentTypeSelectorProps, type DocumentTypeSelectorEmits } from '../types';
-  import { DOCUMENT_TYPE_OPTIONS, getDocumentTypeText, DEFAULT_SUPPORTED_TYPES } from '../constants';
+  import { CertificationType, CertificationOptions } from '../constants';
 
   // Props
-  const props = withDefaults(defineProps<DocumentTypeSelectorProps>(), {
+  interface CertificationTypeSelectorProps {
+    modelValue: CertificationType;
+    disabled?: boolean;
+    readonly?: boolean;
+    supportedTypes?: CertificationType[];
+  }
+
+  // Emits
+  interface CertificationTypeSelectorEmits {
+    'update:modelValue': [value: CertificationType];
+  }
+
+  const props = withDefaults(defineProps<CertificationTypeSelectorProps>(), {
     disabled: false,
     readonly: false,
-    supportedTypes: () => DEFAULT_SUPPORTED_TYPES
+    supportedTypes: () => Object.values(CertificationType),
   });
 
   // Emits
-  const emit = defineEmits<DocumentTypeSelectorEmits>();
+  const emit = defineEmits<CertificationTypeSelectorEmits>();
 
   // 响应式数据
   const showPicker = ref(false);
   const currentType = ref(props.modelValue);
 
-  // 计算属性
-  const selectedTypeText = computed(() => {
-    return getDocumentTypeText(props.modelValue);
+  // 显示文本
+  const displayText = computed(() => {
+    const option = CertificationOptions.find(
+      (opt) => opt.value === props.modelValue
+    );
+    return option?.label || '请选择证件类型';
   });
 
   // 过滤支持的证件类型选项
   const filteredOptions = computed(() => {
-    return DOCUMENT_TYPE_OPTIONS.filter(option => 
+    return CertificationOptions.filter((option) =>
       props.supportedTypes.includes(option.value)
     );
   });
 
   // Picker 列数据
   const pickerColumns = computed(() => {
-    return filteredOptions.value.map(option => ({
-      text: option.text,
-      value: option.value
+    return filteredOptions.value.map((option) => ({
+      text: option.label,
+      value: option.value,
     }));
   });
 
@@ -79,14 +96,14 @@
 
   // 处理确认选择
   const onConfirm = (values: any[]) => {
-    const selectedType = values[0] as DocumentType;
+    const selectedType = values[0] as CertificationType;
     emit('update:modelValue', selectedType);
     showPicker.value = false;
   };
 </script>
 
 <style scoped>
-  .document-type-selector {
+  .certification-type-selector {
     display: inline-block;
     min-width: 100px;
   }
