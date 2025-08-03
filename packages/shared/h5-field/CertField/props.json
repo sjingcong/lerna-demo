@@ -77,7 +77,7 @@
       "type": "string",
       "required": false,
       "description": "证件号码表单项的name属性",
-      "default": "",
+      "default": "certValue",
       "control": "input"
     },
     {
@@ -86,7 +86,7 @@
       "type": "string",
       "required": true,
       "description": "证件类型表单项的name属性",
-      "default": "",
+      "default": "certType",
       "control": "input"
     },
     {

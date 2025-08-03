@@ -39,9 +39,10 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted, PropType } from 'vue';
   import { Form as VanForm } from 'vant';
   import CertificationField from './index.vue';
+  import { CertType } from './constants';
 
   // 定义props和emits
   const props = defineProps({
@@ -50,7 +51,7 @@
       default: '',
     },
     certType: {
-      type: String,
+      type: String as PropType<CertType>,
       default: '',
     },
   });

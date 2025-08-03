@@ -119,7 +119,6 @@
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.3s;
-    min-height: 44px;
     box-sizing: border-box;
   }
 

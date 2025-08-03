@@ -62,6 +62,11 @@ const routes = [
     name: 'SelectDemo',
     component: () => import('@/views/Form/Field/Select/demo.vue'),
   },
+  {
+    path: '/modular-craft',
+    name: 'ModularCraft',
+    component: () => import('@/views/ModularCraft/examples/page.vue'),
+  },
 ];
 
 const router = createRouter({
