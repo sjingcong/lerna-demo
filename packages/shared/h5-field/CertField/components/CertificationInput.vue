@@ -1,6 +1,7 @@
 <template>
   <van-field
     v-model="inputValue"
+    class="cert-input"
     :placeholder="currentPlaceholder"
     :disabled="disabled"
     :readonly="readonly"
@@ -103,6 +104,10 @@
   };
 </script>
 
-<style scoped>
+<style scoped lang="less">
   /* 组件样式继承自 van-field，无需额外样式 */
+  .cert-input {
+    width: 100%;
+    padding: 0;
+  }
 </style>
