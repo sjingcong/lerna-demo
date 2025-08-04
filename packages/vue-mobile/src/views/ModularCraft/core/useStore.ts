@@ -1,5 +1,6 @@
 import { defineStore, storeToRefs } from 'pinia';
 import { ref, reactive, computed, toRef, Ref } from 'vue';
+import VueScrollTo from 'vue-scrollto';
 
 // 模块数据类型定义
 type ModuleData = Record<string, any>;
@@ -24,6 +25,9 @@ export const useStore = (
     // 响应式状态
     const globalData = ref<any>({});
     const moduleData = reactive<Record<string, any>>(defaultValue);
+    const commonData = ref<any>({});
+    const isLoading = ref<boolean>(false);
+    const loadingCount = ref<number>(0);
 
     // 数据访问器 (getters)
     const getModuleData = (moduleName: string) => {
@@ -132,10 +136,78 @@ export const useStore = (
       return Object.keys(moduleConfigs);
     };
 
+    /**
+     * 开始loading
+     */
+    const startLoading = () => {
+      loadingCount.value++;
+      isLoading.value = true;
+    };
+
+    /**
+     * 停止loading
+     */
+    const stopLoading = () => {
+      if (loadingCount.value > 0) {
+        loadingCount.value--;
+      }
+      isLoading.value = loadingCount.value > 0;
+    };
+
+    /**
+     * 强制停止所有loading
+     */
+    const forceStopLoading = () => {
+      loadingCount.value = 0;
+      isLoading.value = false;
+    };
+
+    /**
+     * 更新公共数据
+     */
+    const updateCommonData = (data: any) => {
+      commonData.value = {
+        ...commonData.value,
+        ...data,
+      };
+    };
+
+    /**
+     * 滚动到指定模块
+     * @param moduleId 模块ID或选择器
+     * @param options 滚动选项
+     */
+    const scrollToModule = (moduleId: string, options?: any) => {
+      const defaultOptions = {
+        duration: 500,
+        easing: 'ease-in-out',
+        offset: 0,
+        force: true,
+        cancelable: true,
+        ...options,
+      };
+
+      // 如果moduleId不是以#开头，则添加#前缀
+      const selector = moduleId.startsWith('#') ? moduleId : `#${moduleId}`;
+
+      try {
+        VueScrollTo.scrollTo(selector, defaultOptions);
+      } catch (error) {
+        console.warn(`Failed to scroll to module: ${moduleId}`, error);
+        // 降级方案：使用原生scrollIntoView
+        const element = document.querySelector(selector);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    };
+
     return {
       // 状态
       globalData,
       moduleData,
+      commonData,
+      isLoading,
       // 计算属性
       getModuleData,
       // 方法
@@ -149,6 +221,11 @@ export const useStore = (
       clear,
       clearAllData,
       getRegisteredModules,
+      startLoading,
+      stopLoading,
+      forceStopLoading,
+      updateCommonData,
+      scrollToModule,
     };
   });
 };

@@ -1,5 +1,22 @@
 <template>
-  <Render :modules="modules" />
+  <div class="page-container">
+    <Render :modules="modules" />
+
+    <!-- 全局Loading组件 -->
+    <van-overlay
+      v-if="isLoading"
+      :show="true"
+      class="global-loading"
+      :style="{ backgroundColor: 'transparent' }"
+    >
+      <div class="loading-wrapper">
+        <van-loading
+          size="24px"
+          type="spinner"
+        ></van-loading>
+      </div>
+    </van-overlay>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -7,8 +24,11 @@
   import { Render } from '../core';
   import { modules } from '../modules';
   import { usePageStore } from './store';
+  import { storeToRefs } from 'pinia';
   // 页面唯一标识
   const pageStore = usePageStore();
+
+  const { isLoading } = storeToRefs(pageStore);
 
   // 初始化数据
   const initializeData = () => {
@@ -24,6 +44,14 @@
         { id: 1, name: '任务一' },
         { id: 2, name: '任务二' },
         { id: 3, name: '任务三' },
+        { id: 4, name: '任务三' },
+        { id: 5, name: '任务三' },
+        { id: 6, name: '任务三' },
+        { id: 7, name: '任务三' },
+        { id: 8, name: '任务三' },
+        { id: 9, name: '任务三' },
+        { id: 10, name: '任务三' },
+        { id: 11, name: '任务三' },
       ],
     };
   };
@@ -32,10 +60,19 @@
     // 初始化数据
     const globalData = initializeData();
     pageStore.setGlobalData(globalData);
+    pageStore.startLoading();
+    setTimeout(() => {
+      pageStore.scrollToModule('list');
+      pageStore.stopLoading();
+    }, 3000);
   });
 </script>
 
 <style scoped>
+  .page-container {
+    position: relative;
+  }
+
   .example-page {
     padding: 20px;
     max-width: 1200px;
@@ -144,5 +181,17 @@
     background-color: #ecf0f1;
     margin-bottom: 5px;
     border-radius: 4px;
+  }
+
+  /* 全局Loading样式 */
+  .global-loading {
+    z-index: 9999;
+  }
+
+  .loading-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
   }
 </style>

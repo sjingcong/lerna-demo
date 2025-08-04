@@ -40,6 +40,12 @@
           >
             登录
           </button>
+          <button
+            @click="testLoading"
+            class="btn btn-test"
+          >
+            测试Loading
+          </button>
         </div>
       </div>
     </div>
@@ -97,6 +103,17 @@
       },
     };
     update(newData);
+  };
+
+  // 测试Loading功能
+  const testLoading = () => {
+    // 开始loading
+    pageStore.startLoading();
+    
+    // 模拟异步操作，3秒后停止loading
+    setTimeout(() => {
+      pageStore.stopLoading();
+    }, 3000);
   };
 </script>
 
@@ -195,6 +212,16 @@
 
   .btn-logout:hover {
     background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-test {
+    background-color: rgba(52, 152, 219, 0.8);
+    color: white;
+    border: 1px solid rgba(52, 152, 219, 0.9);
+  }
+
+  .btn-test:hover {
+    background-color: rgba(52, 152, 219, 1);
   }
 
   .header-meta {
