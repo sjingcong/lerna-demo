@@ -90,7 +90,6 @@ export const useStore = (
      * 更新模块数据
      */
     const updateModuleData = (moduleName: string, data: any) => {
-      debugger;
       if (!moduleData[moduleName]) {
         moduleData[moduleName] = {} as any;
       }
@@ -246,7 +245,7 @@ export function useModuleData<T>(
       store.processModuleData(moduleName as string);
     },
 
-    update(data: any) {
+    update(data: Partial<T>) {
       store.updateModuleData(moduleName as string, data);
     },
 

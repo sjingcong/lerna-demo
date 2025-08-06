@@ -1,7 +1,9 @@
-import { header } from './header/config';
-import { list } from './list/config';
+import banner from './banner/config';
+import product from './product-detail/config';
+import claimProcess from './claim-process/config';
 
 export const moduleProcessorMap = {
-  header: header,
-  list: list,
+  banner: banner,
+  product: product,
+  'claim-process': claimProcess,
 };

@@ -1,7 +1,10 @@
 <template>
   <div class="page-container">
-    <Render :modules="modules" />
-
+    <Render
+      v-for="module in modules"
+      :key="module.id"
+      :module-data="module"
+    />
     <!-- 全局Loading组件 -->
     <van-overlay
       v-if="isLoading"
@@ -62,7 +65,7 @@
     pageStore.setGlobalData(globalData);
     pageStore.startLoading();
     setTimeout(() => {
-      pageStore.scrollToModule('list');
+      // pageStore.scrollToModule('list');
       pageStore.stopLoading();
     }, 3000);
   });
@@ -71,6 +74,10 @@
 <style scoped>
   .page-container {
     position: relative;
+  }
+
+  .module-wrapper {
+    width: 100%;
   }
 
   .example-page {

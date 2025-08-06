@@ -13,3 +13,9 @@ export {
 
 // 渲染组件
 export { default as Render } from './Render.vue';
+
+// 列表模块
+export { default as ListModule } from './ListModule.vue';
+
+// 选项卡模块
+export { default as TabModule } from './TabModule.vue';
