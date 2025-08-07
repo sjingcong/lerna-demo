@@ -1,5 +1,5 @@
-import { useModuleData, useStore } from '../core';
-import { moduleProcessorMap } from '../modules/processor';
+import { useModuleData, useStore } from '@giom/shared/modular-craft';
+import { moduleProcessorMap } from './modules/processor';
 
 const usePageStore = useStore('example-page', moduleProcessorMap);
 export { usePageStore };

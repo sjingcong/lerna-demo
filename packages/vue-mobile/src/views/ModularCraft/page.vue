@@ -24,8 +24,8 @@
 
 <script setup lang="ts">
   import { ref, onMounted, provide } from 'vue';
-  import { Render } from '../core';
-  import { modules } from '../modules';
+  import { Render } from '@giom/shared/modular-craft';
+  import { modules } from './modules';
   import { usePageStore } from './store';
   import { storeToRefs } from 'pinia';
   // 页面唯一标识

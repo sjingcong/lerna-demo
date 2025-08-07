@@ -40,6 +40,11 @@ const routes = [
     path: '/page-manager-list',
     name: 'PageManagerList',
     component: () => import('@/views/pageManager/list/index.vue')
+  },
+  {
+    path: '/page-manager-template',
+    name: 'PageManagerTemplate',
+    component: () => import('@/views/pageManager/template/page.vue')
   }
 ]
 
