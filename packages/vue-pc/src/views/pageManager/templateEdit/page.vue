@@ -1,10 +1,5 @@
 <template>
   <div class="page-container">
-    <div class="page-header">
-      <h1>页面模板管理</h1>
-      <p>基于模块化架构的页面构建系统</p>
-    </div>
-
     <!-- 模块渲染区域 -->
     <div class="modules-container">
       <Render
