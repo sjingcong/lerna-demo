@@ -1,6 +1,7 @@
 import BannerEditorModule from './banner-editor/index.vue';
 import InsurancePlanModule from './insurance-plan/index.vue';
 import TabDetailModule from './tab-detail/index.vue';
+import OtherSettingsModule from './other-settings/index.vue';
 
 export const modules = [
   {
@@ -15,6 +16,10 @@ export const modules = [
     id: 'tab-detail',
     component: TabDetailModule,
   },
+  {
+    id: 'other-settings',
+    component: OtherSettingsModule,
+  },
   // 可以在这里添加更多模块
   // {
   //   id: 'other-module',
@@ -26,5 +31,6 @@ export const modules = [
 export {
   BannerEditorModule,
   InsurancePlanModule,
-  TabDetailModule
+  TabDetailModule,
+  OtherSettingsModule
 };

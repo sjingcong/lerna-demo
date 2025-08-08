@@ -87,7 +87,14 @@ export const useStore = (
     };
 
     /**
-     * 更新模块数据
+     * 设置模块数据（完全替换）
+     */
+    const setModuleData = (moduleName: string, data: any) => {
+      moduleData[moduleName] = data;
+    };
+
+    /**
+     * 更新模块数据（合并更新）
      */
     const updateModuleData = (moduleName: string, data: any) => {
       if (!moduleData[moduleName]) {
@@ -211,6 +218,7 @@ export const useStore = (
       getModuleData,
       // 方法
       setGlobalData,
+      setModuleData,
       processAllModules,
       processModuleData,
       updateModuleData,

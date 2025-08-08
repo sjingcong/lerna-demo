@@ -65,7 +65,7 @@ const routes = [
   {
     path: '/modular-craft',
     name: 'ModularCraft',
-    component: () => import('@/views/ModularCraft/examples/page.vue'),
+    component: () => import('@/views/ModularCraft/page.vue'),
   },
 ];
 

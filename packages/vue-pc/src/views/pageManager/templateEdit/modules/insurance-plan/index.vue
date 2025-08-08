@@ -6,20 +6,7 @@
           <FileProtectOutlined class="module-icon" />
           <h3 class="module-title">保障方案描述</h3>
         </div>
-        <div class="header-actions">
-          <a-button type="primary" @click="handleSave">
-            <SaveOutlined />
-            保存
-          </a-button>
-          <a-button @click="handleReset">
-            <ReloadOutlined />
-            重置
-          </a-button>
-          <a-button @click="handlePreview">
-            <EyeOutlined />
-            预览
-          </a-button>
-        </div>
+
       </div>
     </div>
 
@@ -139,9 +126,6 @@ import { computed, ref, reactive } from 'vue';
 import { message } from 'ant-design-vue';
 import {
   FileProtectOutlined,
-  SaveOutlined,
-  ReloadOutlined,
-  EyeOutlined,
   PlusOutlined
 } from '@ant-design/icons-vue';
 import { useModuleStore } from '../../store';
@@ -253,40 +237,7 @@ const handleModalCancel = () => {
   formRef.value?.resetFields();
 };
 
-const handleSave = () => {
-  // 基础验证
-  if (!moduleData.value.title.trim()) {
-    message.warning('请输入页面展示名称');
-    return;
-  }
 
-  if (moduleData.value.plans.length === 0) {
-    message.warning('请至少添加一个保障方案');
-    return;
-  }
-
-  // 保存逻辑
-  console.log('保存保障方案配置:', moduleData.value);
-  message.success('保障方案配置保存成功！');
-};
-
-const handleReset = () => {
-  updateModuleData({
-    title: '',
-    plans: []
-  });
-  message.info('已重置所有配置');
-};
-
-const handlePreview = () => {
-  if (!hasContent.value) {
-    message.warning('暂无内容可预览');
-    return;
-  }
-  
-  console.log('预览数据:', moduleData.value);
-  message.info('预览功能开发中...');
-};
 </script>
 
 <style scoped lang="less">
