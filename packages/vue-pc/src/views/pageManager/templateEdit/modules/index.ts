@@ -20,17 +20,4 @@ export const modules = [
     id: 'other-settings',
     component: OtherSettingsModule,
   },
-  // 可以在这里添加更多模块
-  // {
-  //   id: 'other-module',
-  //   component: OtherModule,
-  // },
 ];
-
-// 导出所有模块
-export {
-  BannerEditorModule,
-  InsurancePlanModule,
-  TabDetailModule,
-  OtherSettingsModule
-};

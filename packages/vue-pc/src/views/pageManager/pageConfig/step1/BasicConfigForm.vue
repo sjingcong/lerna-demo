@@ -18,6 +18,7 @@
         <a-select
           v-model:value="formData.channelAttribution"
           placeholder="请选择渠道归属"
+          style="width: 400px"
           size="large"
           :options="channelOptions"
           :disabled="props.status === 'preview'"
@@ -25,7 +26,9 @@
         />
         <template #extra>
           <div class="field-hint">
-            <span class="hint-text">选择销售渠道类型，不同渠道可能有不同的佣金政策和管理要求</span>
+            <span class="hint-text">
+              选择销售渠道类型，不同渠道可能有不同的佣金政策和管理要求
+            </span>
           </div>
         </template>
       </a-form-item>
@@ -38,17 +41,13 @@
       >
         <a-select
           v-model:value="formData.salesProduct"
+          style="width: 400px"
           placeholder="请选择销售商品"
           size="large"
           :options="salesProductOptions"
           :disabled="props.status === 'preview'"
           @change="handleSalesProductChange"
         />
-        <template #extra>
-          <div class="field-hint">
-            <span class="hint-text">选择需要销售的保险产品类型，选择后将影响后续的产品配置选项</span>
-          </div>
-        </template>
       </a-form-item>
 
       <!-- 指定生效日期 -->
@@ -64,17 +63,12 @@
           value-format="YYYY-MM-DD HH:mm:ss"
           placeholder="请选择生效日期"
           size="large"
-          style="width: 100%"
+          style="width: 400px"
           :disabled="props.status === 'preview'"
           @change="handleDateChange"
           :disabled-date="disabledDate"
           :disabled-time="disabledDateTime"
         />
-        <template #extra>
-          <div class="field-hint">
-            <span class="hint-text">页面配置的生效时间，不能早于当前时间</span>
-          </div>
-        </template>
       </a-form-item>
 
       <!-- 描述 -->
@@ -87,17 +81,13 @@
           v-model:value="formData.description"
           placeholder="限200字"
           :rows="4"
+          style="width: 400px"
           :maxlength="200"
           show-count
           :disabled="props.status === 'preview'"
           @change="handleDescriptionChange"
           @blur="validateDescription"
         />
-        <template #extra>
-          <div class="field-hint">
-            <span class="hint-text">页面的功能描述，建议详细说明页面用途和特点，限制200字以内</span>
-          </div>
-        </template>
       </a-form-item>
 
       <!-- 选择模板 -->
@@ -109,6 +99,7 @@
         <a-table
           :data-source="templateOptions"
           :columns="templateColumns"
+          style="width: 800px"
           :pagination="false"
           :row-selection="templateRowSelection"
           :scroll="{ y: 300 }"
@@ -129,11 +120,6 @@
             </template>
           </template>
         </a-table>
-        <template #extra>
-          <div class="field-hint">
-            <span class="hint-text">选择适合的页面模板，不同模板支持不同的功能模块和布局方式</span>
-          </div>
-        </template>
       </a-form-item>
     </a-form>
   </div>
@@ -168,13 +154,16 @@
   type ComponentStatus = 'add' | 'edit' | 'preview';
 
   // 定义props
-  const props = withDefaults(defineProps<{
-    status?: ComponentStatus;
-    initialData?: Partial<FormData>;
-  }>(), {
-    status: 'add',
-    initialData: () => ({})
-  });
+  const props = withDefaults(
+    defineProps<{
+      status?: ComponentStatus;
+      initialData?: Partial<FormData>;
+    }>(),
+    {
+      status: 'add',
+      initialData: () => ({}),
+    }
+  );
 
   // 定义事件
   const emit = defineEmits<{
@@ -184,7 +173,8 @@
 
   // 使用store
   const store = usePageConfigStore();
-  const { formData, channelOptions, salesProductOptions, optionsLoading } = storeToRefs(store);
+  const { formData, channelOptions, salesProductOptions, optionsLoading } =
+    storeToRefs(store);
   const { loadSalesProductOptions } = store;
 
   // 表单引用
@@ -193,20 +183,18 @@
   // 表单校验规则
   const formRules: Record<string, Rule[]> = {
     channelAttribution: [
-      { required: true, message: '请选择渠道归属', trigger: 'change' }
+      { required: true, message: '请选择渠道归属', trigger: 'change' },
     ],
     salesProduct: [
-      { required: true, message: '请选择销售商品', trigger: 'change' }
+      { required: true, message: '请选择销售商品', trigger: 'change' },
     ],
     effectiveDate: [
-      { required: true, message: '请选择生效日期', trigger: 'change' }
+      { required: true, message: '请选择生效日期', trigger: 'change' },
     ],
-    description: [
-      { max: 200, message: '描述不能超过200字', trigger: 'blur' }
-    ],
+    description: [{ max: 200, message: '描述不能超过200字', trigger: 'blur' }],
     selectedTemplate: [
-      { required: true, message: '请选择模板', trigger: 'change' }
-    ]
+      { required: true, message: '请选择模板', trigger: 'change' },
+    ],
   };
 
   // 模板选项
@@ -220,33 +208,35 @@
       dataIndex: 'id',
       key: 'id',
       width: 120,
-      align: 'center'
+      align: 'center',
     },
     {
       title: '模板名称',
       dataIndex: 'name',
       key: 'name',
-      width: 200
+      width: 200,
     },
     {
       title: '描述',
       dataIndex: 'description',
-      key: 'description'
-    }
+      key: 'description',
+    },
   ];
 
   // Table 行选择配置
   const templateRowSelection = computed(() => ({
     type: 'radio',
-    selectedRowKeys: formData.value.selectedTemplate ? [formData.value.selectedTemplate] : [],
+    selectedRowKeys: formData.value.selectedTemplate
+      ? [formData.value.selectedTemplate]
+      : [],
     onSelect: (record: TemplateOption) => {
       if (props.status !== 'preview') {
         selectTemplate(record.id);
       }
     },
     getCheckboxProps: () => ({
-      disabled: props.status === 'preview'
-    })
+      disabled: props.status === 'preview',
+    }),
   }));
 
   // 处理渠道归属变化
@@ -256,10 +246,10 @@
       // 更新表单数据
       formData.value.channelAttribution = value;
       formData.value.salesProduct = ''; // 清空销售商品选择
-      
+
       // 重新加载销售商品选项
       await loadSalesProductOptions(value);
-      
+
       emitFormChange();
     } catch (error) {
       console.error('处理渠道变更失败:', error);
@@ -338,16 +328,20 @@
           return seconds;
         }
         return [];
-      }
+      },
     };
   };
 
   // 监听props变化
-  watch(() => props.initialData, (newData) => {
-    if (newData && Object.keys(newData).length > 0) {
-      console.log('接收到初始数据:', newData);
-    }
-  }, { immediate: true, deep: true });
+  watch(
+    () => props.initialData,
+    (newData) => {
+      if (newData && Object.keys(newData).length > 0) {
+        console.log('接收到初始数据:', newData);
+      }
+    },
+    { immediate: true, deep: true }
+  );
 
   // 加载模板数据
   const loadTemplateOptions = async () => {
@@ -392,19 +386,18 @@
   // 暴露方法给父组件
   defineExpose({
     validate,
-    resetFields
+    resetFields,
   });
 </script>
 
 <style scoped>
   .basic-config-form {
-    padding: 24px;
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+    justify-content: center;
     background: #fff;
-    border-radius: 8px;
-  }
-
-  .config-form {
-    max-width: 800px;
   }
 
   .field-hint {
@@ -415,41 +408,6 @@
     color: #666;
     font-size: 12px;
     line-height: 1.4;
-  }
-
-  .template-table {
-    border: 1px solid #d9d9d9;
-    border-radius: 6px;
-  }
-
-  .template-table :deep(.ant-table-thead > tr > th) {
-    background: #fafafa;
-    font-weight: 500;
-    color: #262626;
-  }
-
-  .template-table :deep(.ant-table-tbody > tr:hover > td) {
-    background: #f5f5f5;
-  }
-
-  .template-table :deep(.ant-table-tbody > tr.ant-table-row-selected > td) {
-    background: #e6f7ff;
-  }
-
-  .template-table :deep(.ant-table-tbody > tr.ant-table-row-selected:hover > td) {
-    background: #e6f7ff;
-  }
-
-  .template-table :deep(.ant-table-tbody > tr > td) {
-    white-space: normal;
-    word-wrap: break-word;
-    word-break: break-all;
-    vertical-align: top;
-    padding: 12px 16px;
-  }
-
-  .template-table :deep(.ant-table-thead > tr > th) {
-    vertical-align: middle;
   }
 
   .template-id {

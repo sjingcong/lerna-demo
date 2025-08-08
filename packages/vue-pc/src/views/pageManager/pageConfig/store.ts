@@ -133,13 +133,28 @@ export const usePageConfigStore = defineStore('pageConfig', () => {
   };
   
   // 初始化页面数据
-  const initPageData = async (urlParams: { id?: string; mode?: string }) => {
+  const initPageData = async (urlParams: { id?: string; mode?: string; copyFromId?: string }) => {
     try {
       loading.value = true;
       
       // 根据URL参数判断页面状态
-      if (urlParams.id) {
-        if (urlParams.mode === 'preview') {
+      if (urlParams.copyFromId) {
+        // 复制模式：从指定页面复制数据，但创建新页面
+        setPageStatus('add');
+        setConfigId('');
+        
+        // 加载被复制页面的配置详情
+        await loadConfigDetail(urlParams.copyFromId);
+        
+        // 清空一些字段，表示这是新页面
+        formData.value.description = `${formData.value.description} - 副本`;
+        
+        console.log('复制页面数据加载完成', {
+          copyFromId: urlParams.copyFromId,
+          formData: formData.value
+        });
+      } else if (urlParams.id) {
+        if (urlParams.mode === 'preview' || urlParams.mode === 'view') {
           setPageStatus('preview');
         } else {
           setPageStatus('edit');

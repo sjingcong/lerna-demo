@@ -1,10 +1,10 @@
 import { defineStore, storeToRefs } from 'pinia';
-import { ref, reactive, computed, toRef, Ref } from 'vue';
+import { ref, reactive, computed, toRef, Ref, inject } from 'vue';
 import VueScrollTo from 'vue-scrollto';
 
 // 模块数据类型定义
 type ModuleData = Record<string, any>;
-type ModuleConfigItem = {
+type ModuleDataProcessor = {
   defaultValue: ModuleData;
   processor: (globalData: any, updateData: (newData: any) => void) => void;
 };
@@ -15,7 +15,7 @@ type ModuleConfigItem = {
  */
 export const useStore = (
   storeId: string,
-  moduleConfigs: Record<string, ModuleConfigItem>
+  moduleConfigs: Record<string, ModuleDataProcessor>
 ) => {
   let defaultValue: Record<string, any> = {};
   Object.keys(moduleConfigs).forEach((key) => {
@@ -23,40 +23,24 @@ export const useStore = (
   });
   return defineStore(storeId, () => {
     // 响应式状态
-    const globalData = ref<any>({});
     const moduleData = reactive<Record<string, any>>(defaultValue);
     const commonData = ref<any>({});
     const isLoading = ref<boolean>(false);
     const loadingCount = ref<number>(0);
 
-    // 数据访问器 (getters)
-    const getModuleData = (moduleName: string) => {
-      return moduleData[moduleName] || ({} as any);
-    };
-
-    // 方法 (actions)
-    /**
-     * 设置全局数据
-     */
-    const setGlobalData = (data: any) => {
-      globalData.value = data;
-      // 重新处理所有已注册的模块数据
-      processAllModules();
-    };
-
     /**
      * 处理所有模块数据
      */
-    const processAllModules = () => {
+    const processAllModules = (data: any) => {
       for (const [moduleName] of Object.entries(moduleConfigs)) {
-        processModuleData(moduleName);
+        processModuleData(moduleName, data);
       }
     };
 
     /**
      * 处理单个模块数据
      */
-    const processModuleData = (moduleName: string) => {
+    const processModuleData = (moduleName: string, data: any) => {
       const config = moduleConfigs[moduleName];
       if (!config) {
         console.warn(`Module processor not found: ${moduleName}`);
@@ -80,7 +64,7 @@ export const useStore = (
         };
 
         // 执行处理器
-        config.processor(globalData.value, updateData);
+        config.processor(data, updateData);
       } catch (error) {
         console.error(`Failed to process module data: ${moduleName}`, error);
       }
@@ -108,38 +92,10 @@ export const useStore = (
     };
 
     /**
-     * 清空模块数据
+     * 设置公共数据
      */
-    const clearModuleData = (moduleName: string) => {
-      delete moduleData[moduleName];
-    };
-
-    // 方法
-    const refresh = (moduleName: string) => {
-      processModuleData(moduleName as string);
-    };
-
-    const update = (moduleName: string, data: any) => {
-      updateModuleData(moduleName as string, data);
-    };
-
-    const clear = (moduleName: string) => {
-      clearModuleData(moduleName as string);
-    };
-
-    /**
-     * 清空所有数据
-     */
-    const clearAllData = () => {
-      globalData.value = {};
-      Object.keys(moduleData).forEach((key) => delete moduleData[key]);
-    };
-
-    /**
-     * 获取所有已注册的模块名称
-     */
-    const getRegisteredModules = (): string[] => {
-      return Object.keys(moduleConfigs);
+    const setCommonData = (data: any) => {
+      commonData.value = data;
     };
 
     /**
@@ -178,61 +134,24 @@ export const useStore = (
       };
     };
 
-    /**
-     * 滚动到指定模块
-     * @param moduleId 模块ID或选择器
-     * @param options 滚动选项
-     */
-    const scrollToModule = (moduleId: string, options?: any) => {
-      const defaultOptions = {
-        duration: 500,
-        easing: 'ease-in-out',
-        offset: 0,
-        force: true,
-        cancelable: true,
-        ...options,
-      };
-
-      // 如果moduleId不是以#开头，则添加#前缀
-      const selector = moduleId.startsWith('#') ? moduleId : `#${moduleId}`;
-
-      try {
-        VueScrollTo.scrollTo(selector, defaultOptions);
-      } catch (error) {
-        console.warn(`Failed to scroll to module: ${moduleId}`, error);
-        // 降级方案：使用原生scrollIntoView
-        const element = document.querySelector(selector);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }
-    };
-
     return {
       // 状态
-      globalData,
       moduleData,
       commonData,
       isLoading,
-      // 计算属性
-      getModuleData,
+
       // 方法
-      setGlobalData,
-      setModuleData,
       processAllModules,
-      processModuleData,
+      setModuleData,
+      setCommonData,
       updateModuleData,
-      clearModuleData,
-      refresh,
-      update,
-      clear,
-      clearAllData,
-      getRegisteredModules,
+      updateCommonData,
+
+      // 模块方法
+
       startLoading,
       stopLoading,
       forceStopLoading,
-      updateCommonData,
-      scrollToModule,
     };
   });
 };
@@ -248,20 +167,44 @@ export function useModuleData<T>(
     // 数据 - 直接返回响应式对象，无需.value访问
     data: toRef(store.moduleData, moduleName as string) as Ref<T>,
 
-    // 方法
-    refresh() {
-      store.processModuleData(moduleName as string);
-    },
-
     update(data: Partial<T>) {
       store.updateModuleData(moduleName as string, data);
-    },
-
-    clear() {
-      store.clearModuleData(moduleName as string);
     },
   };
 }
 
+// Store注入的key
+export const CRAFT_STORE_KEY = Symbol('craft-store');
+
+/**
+ * 使用模块Store - 通过inject获取store实例
+ * 必须在CraftConfig组件的作用域内使用
+ */
+export function useModuleStore<T>(moduleId: string) {
+  const store = inject(CRAFT_STORE_KEY);
+
+  if (!store) {
+    throw new Error('useModuleStore must be used within CraftConfig component');
+  }
+
+  const { data, update } = useModuleData<T>(store as any, moduleId);
+
+  return {
+    data,
+    update,
+  };
+}
+
+export type IStore = ReturnType<ReturnType<typeof useStore>>;
+export function useCommonData() {
+  const store = inject<IStore>(CRAFT_STORE_KEY);
+
+  if (!store) {
+    throw new Error('useCommonData must be used within CraftConfig component');
+  }
+
+  return store.commonData;
+}
+
 // 导出类型
-export type { ModuleData, ModuleConfigItem as ModuleDataProcessor };
+export type { ModuleData, ModuleDataProcessor };

@@ -71,8 +71,11 @@
   import { ref } from 'vue';
   import { storeToRefs } from 'pinia';
   import { message, Modal } from 'ant-design-vue';
+  import { useRouter } from 'vue-router';
   import { usePageManagerListStore, type ListItem } from '../store';
   import SubmitReviewModal from './SubmitReviewModal.vue';
+
+  const router = useRouter();
 
   const store = usePageManagerListStore();
   const { listData, loading, pagination } = storeToRefs(store);
@@ -166,17 +169,38 @@
 
   // 查看
   const handleView = (record: ListItem) => {
-    message.info(`查看: ${record.productName}`);
+    // 查看页面，跳转到PageConfig页面，传递页面ID和模式
+    router.push({
+      name: 'PageConfig',
+      query: {
+        id: record.id,
+        mode: 'view'
+      }
+    });
   };
 
   // 编辑
   const handleEdit = (record: ListItem) => {
-    message.info(`编辑: ${record.productName}`);
+    // 编辑页面，跳转到PageConfig页面，传递页面ID和模式
+    router.push({
+      name: 'PageConfig',
+      query: {
+        id: record.id,
+        mode: 'edit'
+      }
+    });
   };
 
   // 复制
   const handleCopy = (record: ListItem) => {
-    message.success(`复制: ${record.productName}`);
+    // 复制页面，跳转到PageConfig页面，传递被复制页面的ID和复制模式
+    router.push({
+      name: 'PageConfig',
+      query: {
+        copyFromId: record.id,
+        mode: 'create'
+      }
+    });
   };
 
   // 删除

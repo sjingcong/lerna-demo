@@ -189,6 +189,7 @@
   watch(
     imageList,
     (newList) => {
+      debugger
       emit('update:value', newList);
       emit('change', newList);
     },

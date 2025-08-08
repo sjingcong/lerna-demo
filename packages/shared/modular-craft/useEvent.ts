@@ -1,10 +1,38 @@
-import { ref, onUnmounted } from 'vue';
+import {
+  ref,
+  onUnmounted,
+  inject,
+  provide,
+  InjectionKey,
+  onBeforeUnmount,
+} from 'vue';
 
 type EventCallback = (...args: any[]) => void;
 type EventMap = Map<string, Set<EventCallback>>;
 
-// 全局事件总线
-const globalEventBus: EventMap = new Map();
+// 校验结果类型
+export type ValidationResult = {
+  moduleId: string;
+  error: any;
+} | void;
+
+// 校验函数类型
+export type ValidationFunction = () => Promise<ValidationResult>;
+
+// 事件总线实例类型
+interface EventBusInstance {
+  eventBus: EventMap;
+  validationRegistry: Map<string, ValidationFunction>;
+}
+
+// 注入键
+export const EVENT_BUS_KEY: InjectionKey<EventBusInstance> = Symbol('eventBus');
+
+// 创建事件总线实例
+const createEventBusInstance = (): EventBusInstance => ({
+  eventBus: new Map(),
+  validationRegistry: new Map(),
+});
 
 /**
  * 滚动到指定元素
@@ -50,17 +78,30 @@ export const scrollTo = (
  * 支持事件注册、发送、自动清理
  */
 export function useEvent() {
+  // 注入事件总线实例，必须在useEventBusProvider的作用域内使用
+  const instance = inject(EVENT_BUS_KEY);
+  if (!instance) {
+    throw new Error(
+      'useEvent must be used within a component that has useEventBusProvider in its parent chain'
+    );
+  }
+  const { eventBus, validationRegistry } = instance;
+
   // 当前组件注册的事件监听器
   const listeners = ref<Array<{ event: string; callback: EventCallback }>>([]);
+  // 当前组件注册的校验函数
+  const validations = ref<
+    Array<{ moduleId: string; validationFn: ValidationFunction }>
+  >([]);
 
   /**
    * 注册事件监听
    */
   const on = (event: string, callback: EventCallback) => {
-    if (!globalEventBus.has(event)) {
-      globalEventBus.set(event, new Set());
+    if (!eventBus.has(event)) {
+      eventBus.set(event, new Set());
     }
-    globalEventBus.get(event)!.add(callback);
+    eventBus.get(event)!.add(callback);
     listeners.value.push({ event, callback });
   };
 
@@ -68,7 +109,7 @@ export function useEvent() {
    * 发送事件
    */
   const emit = (event: string, ...args: any[]) => {
-    const callbacks = globalEventBus.get(event);
+    const callbacks = eventBus.get(event);
     if (callbacks) {
       callbacks.forEach((callback) => {
         try {
@@ -84,7 +125,7 @@ export function useEvent() {
    * 移除事件监听
    */
   const off = (event: string, callback?: EventCallback) => {
-    const callbacks = globalEventBus.get(event);
+    const callbacks = eventBus.get(event);
     if (callbacks) {
       if (callback) {
         callbacks.delete(callback);
@@ -92,6 +133,17 @@ export function useEvent() {
         callbacks.clear();
       }
     }
+  };
+
+  /**
+   * 注册模块校验函数
+   */
+  const registerValidation = (
+    moduleId: string,
+    validationFn: ValidationFunction
+  ) => {
+    validationRegistry.set(moduleId, validationFn);
+    validations.value.push({ moduleId, validationFn });
   };
 
   /**
@@ -105,12 +157,18 @@ export function useEvent() {
     on(event, onceCallback);
   };
 
-  // 组件卸载时自动清理事件监听
+  // 组件卸载时自动清理事件监听和校验注册
   onUnmounted(() => {
     listeners.value.forEach(({ event, callback }) => {
       off(event, callback);
     });
     listeners.value = [];
+
+    // 清理校验注册
+    validations.value.forEach(({ moduleId }) => {
+      validationRegistry.delete(moduleId);
+    });
+    validations.value = [];
   });
 
   return {
@@ -118,20 +176,73 @@ export function useEvent() {
     emit,
     off,
     once,
+    registerValidation,
     scrollTo,
   };
 }
 
-// 全局事件工具函数
-export const globalEvent = {
-  emit: (event: string, ...args: any[]) => {
-    const callbacks = globalEventBus.get(event);
-    if (callbacks) {
-      callbacks.forEach((callback) => callback(...args));
+/**
+ * 创建事件总线提供者
+ * 在父组件中使用，为子组件提供独立的事件总线实例
+ */
+export const useEventBusProvider = () => {
+  // 使用 ref 来持久化实例，避免组件重新渲染时创建新实例
+  const instance = ref<EventBusInstance>();
+
+  // 只在首次创建时初始化
+  if (!instance.value) {
+    instance.value = createEventBusInstance();
+  }
+  provide(EVENT_BUS_KEY, instance.value);
+
+  // 组件卸载时清理实例
+  onBeforeUnmount(() => {
+    if (instance.value) {
+      instance.value.eventBus.clear();
+      instance.value.validationRegistry.clear();
     }
-  },
-  clear: () => {
-    globalEventBus.clear();
-  },
-  scrollTo,
+  });
+
+  return {
+    /**
+     * 发送事件到当前实例
+     */
+    emit: (event: string, ...args: any[]) => {
+      const callbacks = instance.value!.eventBus.get(event);
+      if (callbacks) {
+        callbacks.forEach((callback) => callback(...args));
+      }
+    },
+    /**
+     * 清空当前实例的所有事件和校验
+     */
+    clear: () => {
+      instance.value!.eventBus.clear();
+      instance.value!.validationRegistry.clear();
+    },
+    /**
+     * 校验当前实例的所有已注册模块
+     */
+    validateAll: async (): Promise<ValidationResult[]> => {
+      const results: ValidationResult[] = [];
+
+      for (const [
+        moduleId,
+        validationFn,
+      ] of instance.value!.validationRegistry.entries()) {
+        try {
+          await validationFn();
+        } catch (error: any) {
+          // 捕获错误并添加到结果中
+          results.push({
+            moduleId,
+            error: error,
+          });
+        }
+      }
+
+      return results;
+    },
+    scrollTo,
+  };
 };

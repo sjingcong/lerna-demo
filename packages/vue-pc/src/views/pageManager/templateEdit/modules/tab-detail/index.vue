@@ -3,8 +3,7 @@
     <div class="module-header">
       <div class="header-content">
         <div class="header-left">
-          <TagsOutlined class="module-icon" />
-          <h3 class="module-title">Tab详情配置</h3>
+          <h3 class="module-title">Tab栏详情配置</h3>
         </div>
       </div>
     </div>
@@ -12,69 +11,64 @@
     <div class="module-content">
       <!-- Tab页签管理 -->
       <div class="tab-management">
-        <div class="tab-header">
-          <div class="tab-list">
-            <div
-              v-for="(tab, index) in moduleData.tabs"
-              :key="tab.id"
-              class="tab-item"
-              :class="{ active: moduleData.activeTab === tab.id }"
-              @click="handleTabClick(tab.id)"
-            >
-              <span class="tab-title">{{ tab.title }}</span>
-              <CloseOutlined
-                v-if="moduleData.tabs.length > 1"
-                class="tab-close"
-                @click.stop="handleRemoveTab(index)"
-              />
-            </div>
-            <div
-              class="tab-add"
-              @click="handleAddTab"
-            >
-              <PlusOutlined />
-            </div>
-          </div>
-        </div>
-
-        <!-- 当前Tab内容编辑 -->
-        <div
-          class="tab-content"
-          v-if="currentTab"
+        <a-tabs
+          v-model:activeKey="moduleData.activeTab"
+          :type="isPreview ? 'card' : 'editable-card'"
+          @edit="onEdit"
+          class="custom-tabs"
         >
-          <!-- 显示标题编辑 -->
-          <div class="form-section horizontal-form">
-            <div class="form-label-section">
-              <label class="form-label">显示标题</label>
-              <div class="upload-description">Tab页签显示的标题</div>
-            </div>
-            <div class="form-control-section">
-              <a-input
-                v-model:value="currentTab.title"
-                placeholder="请输入Tab标题"
-                :maxlength="20"
-                show-count
-                @change="handleTitleChange"
-              />
-            </div>
-          </div>
+          <a-tab-pane
+            v-for="tab in moduleData.tabs"
+            :key="tab.id"
+            :tab="tab.title"
+            :closable="moduleData.tabs.length > 1"
+          >
+            <!-- 显示标题编辑 -->
+            <a-form
+              ref="titleFormRef"
+              layout="horizontal"
+              :label-col="{ style: { width: '120px' } }"
+              :model="tab"
+              :rules="titleFormRules"
+            >
+              <a-form-item
+                label="显示标题"
+                name="title"
+              >
+                <template #extra>
+                  <div class="upload-description">Tab页签显示的标题</div>
+                </template>
+                <a-input
+                  v-model:value="tab.title"
+                  placeholder="请输入Tab标题"
+                  :maxlength="20"
+                  show-count
+                  :disabled="isPreview"
+                  @change="() => handleTitleChange(tab.id)"
+                />
+              </a-form-item>
+            </a-form>
 
-          <!-- 富文本编辑器 -->
-          <div class="form-section">
-            <div class="rich-editor-container">
-              <QuillEditor
-                ref="quillEditorRef"
-                :key="moduleData.activeTab"
-                v-model:content="currentTab.content"
-                content-type="html"
-                :options="editorOptions"
-                @update:content="handleContentChange"
-                @ready="onEditorReady"
-                class="rich-editor"
-              />
+            <!-- 富文本编辑器 -->
+            <div class="form-section">
+              <div class="rich-editor-container">
+                <QuillEditor
+                  ref="quillEditorRef"
+                  :key="tab.id"
+                  v-model:content="tab.content"
+                  content-type="html"
+                  :options="editorOptions"
+                  :disabled="isPreview"
+                  @update:content="
+                    (content) => handleContentChange(tab.id, content)
+                  "
+                  @ready="onEditorReady"
+                  class="rich-editor"
+                />
+              </div>
             </div>
-          </div>
-        </div>
+          </a-tab-pane>
+        </a-tabs>
       </div>
     </div>
   </div>
@@ -83,22 +77,52 @@
 <script setup lang="ts">
   import { computed, ref } from 'vue';
   import { message } from 'ant-design-vue';
-  import {
-    TagsOutlined,
-    PlusOutlined,
-    CloseOutlined,
-  } from '@ant-design/icons-vue';
+  import { TagsOutlined } from '@ant-design/icons-vue';
   import { QuillEditor } from '@vueup/vue-quill';
   import '@vueup/vue-quill/dist/vue-quill.snow.css'; // 引入默认样式
-  import { useModuleStore } from '../../store';
+  import { useCommonData, useModuleStore } from '@giom/shared/modular-craft';
+  import { useEvent } from '@giom/shared/modular-craft';
   import type { TabDetailModuleData, TabItem } from './config';
+  import type { FormInstance } from 'ant-design-vue';
+
+  // Props定义
+  interface Props {
+    moduleId?: string;
+    status?: string;
+  }
+
+  const props = withDefaults(defineProps<Props>(), {
+    moduleId: '',
+    status: '',
+  });
+
+  const commonData = useCommonData();
+  // 计算是否为预览模式
+  const isPreview = computed(() => commonData.status === 'preview');
 
   // QuillEditor引用
   const quillEditorRef = ref();
+  const titleFormRef = ref<FormInstance>();
 
   // 模块数据管理
   const { data: moduleData, update: updateModuleData } =
-    useModuleStore<TabDetailModuleData>('tab-detail');
+    useModuleStore<TabDetailModuleData>(props.moduleId);
+
+  // 事件总线
+  const { registerValidation } = useEvent();
+
+  // 表单验证规则
+  const titleFormRules = {
+    title: [
+      { required: true, message: '请输入Tab标题', trigger: 'blur' },
+      {
+        min: 1,
+        max: 20,
+        message: 'Tab标题长度在1到20个字符',
+        trigger: 'blur',
+      },
+    ],
+  };
 
   // 富文本编辑器配置
   const editorOptions = {
@@ -124,26 +148,21 @@
     placeholder: '这是产品介绍',
   };
 
-  // 计算属性
-  const currentTab = computed(() => {
-    return moduleData.value.tabs.find(
-      (tab) => tab.id === moduleData.value.activeTab
-    );
-  });
-
-  const hasContent = computed(() =>
-    moduleData.value.tabs.some((tab) => tab.title || tab.content)
-  );
-
   // 事件处理函数
-  const handleTabClick = (tabId: string) => {
-    updateModuleData({
-      ...moduleData.value,
-      activeTab: tabId,
-    });
+  const onEdit = (targetKey: string | MouseEvent, action: 'add' | 'remove') => {
+    if (action === 'add') {
+      handleAddTab();
+    } else {
+      handleRemoveTab(targetKey as string);
+    }
   };
 
   const handleAddTab = () => {
+    if (moduleData.value.tabs.length >= 5) {
+      message.warning('最多只能添加5个Tab页签');
+      return;
+    }
+
     const newTabId = Date.now().toString();
     const newTab: TabItem = {
       id: newTabId,
@@ -159,17 +178,16 @@
     });
   };
 
-  const handleRemoveTab = (index: number) => {
+  const handleRemoveTab = (targetKey: string) => {
     if (moduleData.value.tabs.length <= 1) {
       message.warning('至少需要保留一个Tab页签');
       return;
     }
 
-    const newTabs = [...moduleData.value.tabs];
-    const removedTab = newTabs.splice(index, 1)[0];
-
+    const newTabs = moduleData.value.tabs.filter((tab) => tab.id !== targetKey);
     let newActiveTab = moduleData.value.activeTab;
-    if (removedTab.id === moduleData.value.activeTab) {
+
+    if (targetKey === moduleData.value.activeTab) {
       // 如果删除的是当前激活的tab，切换到第一个tab
       newActiveTab = newTabs[0]?.id || '';
     }
@@ -242,13 +260,12 @@
     return result.data.url || result.url;
   };
 
-  const handleTitleChange = () => {
-    if (!currentTab.value) return;
+  const handleTitleChange = (tabId: string) => {
+    const targetTab = moduleData.value.tabs.find((tab) => tab.id === tabId);
+    if (!targetTab) return;
 
     const newTabs = moduleData.value.tabs.map((tab) =>
-      tab.id === currentTab.value!.id
-        ? { ...tab, title: currentTab.value!.title }
-        : tab
+      tab.id === tabId ? { ...tab, title: targetTab.title } : tab
     );
 
     updateModuleData({
@@ -257,11 +274,9 @@
     });
   };
 
-  const handleContentChange = (content: string) => {
-    if (!currentTab.value) return;
-
+  const handleContentChange = (tabId: string, content: string) => {
     const newTabs = moduleData.value.tabs.map((tab) =>
-      tab.id === currentTab.value!.id ? { ...tab, content } : tab
+      tab.id === tabId ? { ...tab, content } : tab
     );
 
     updateModuleData({
@@ -269,20 +284,49 @@
       tabs: newTabs,
     });
   };
+
+  // 校验函数
+  const validateTabDetail = async () => {
+    try {
+      const errors: any[] = [];
+
+      // 检查是否有Tab页签
+      if (moduleData.value.tabs.length === 0) {
+        errors.push('至少需要一个Tab页签');
+      }
+
+      // 检查每个Tab的标题是否填写
+      for (const tab of moduleData.value.tabs) {
+        if (!tab.title || tab.title.trim() === '') {
+          errors.push('请填写所有Tab页签的标题');
+          break;
+        }
+        if (tab.title.length > 20) {
+          errors.push('Tab标题长度不能超过20个字符');
+          break;
+        }
+      }
+
+      throw errors;
+    } catch (error: any) {
+      throw error;
+    }
+  };
+
+  // 注册校验函数
+  registerValidation('tab-detail', validateTabDetail);
 </script>
 
 <style scoped lang="less">
   .tab-detail-module {
     background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     margin-bottom: 24px;
     overflow: hidden;
   }
 
   .module-header {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    padding: 24px;
+    padding: 8px 24px;
+
     border-bottom: 1px solid #e8e8e8;
 
     .header-content {
@@ -320,71 +364,13 @@
   }
 
   .tab-management {
-    .tab-header {
-      margin-bottom: 24px;
-    }
-
-    .tab-list {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border-bottom: 1px solid #e8e8e8;
-      padding-bottom: 8px;
-    }
-
-    .tab-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      background: #f5f5f5;
-      border: 1px solid #d9d9d9;
-      border-radius: 6px 6px 0 0;
-      cursor: pointer;
-      transition: all 0.3s;
-
-      &.active {
-        background: #1890ff;
-        color: white;
-        border-color: #1890ff;
+    .custom-tabs {
+      :deep(.ant-tabs-content-holder) {
+        padding-top: 16px;
       }
 
-      &:hover:not(.active) {
-        background: #e6f7ff;
-        border-color: #91d5ff;
-      }
-
-      .tab-title {
-        font-size: 14px;
-      }
-
-      .tab-close {
-        font-size: 12px;
-        opacity: 0.7;
-        transition: opacity 0.3s;
-
-        &:hover {
-          opacity: 1;
-        }
-      }
-    }
-
-    .tab-add {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      background: #f5f5f5;
-      border: 1px dashed #d9d9d9;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.3s;
-
-      &:hover {
-        background: #e6f7ff;
-        border-color: #91d5ff;
-        color: #1890ff;
+      :deep(.ant-tabs-tab) {
+        padding: 8px 16px;
       }
     }
   }
@@ -521,8 +507,10 @@
       }
     }
 
-    .tab-list {
-      flex-wrap: wrap;
+    .custom-tabs {
+      :deep(.ant-tabs-nav) {
+        margin-bottom: 8px;
+      }
     }
 
     .rich-editor-container {

@@ -1,19 +1,40 @@
 <template>
   <div class="config-container">
-    <a-steps
-      :current="currentStep"
-      class="config-steps"
-    >
-      <a-step title="基础配置" />
-      <a-step title="模块配置" />
-    </a-steps>
+    <div class="config-steps">
+      <h2 class="page-title">
+        <a-button
+          type="text"
+          size="large"
+          @click="handleBack"
+          class="back-button"
+        >
+          <LeftOutlined />
+        </a-button>
+        {{
+          pageStatus === 'add'
+            ? '新增页面'
+            : pageStatus === 'edit'
+              ? '编辑页面'
+              : '页面详情'
+        }}
+      </h2>
+      <a-steps
+        :current="currentStep"
+        class="steps-nav"
+      >
+        <a-step title="基础配置" />
+        <a-step title="模块配置" />
+      </a-steps>
+    </div>
+    <a-divider style="margin: 0" />
 
     <div class="step-content">
       <!-- 加载状态 -->
-      <div v-if="loading" class="loading-container">
-        <a-spin size="large" tip="加载配置数据中...">
-          <div class="loading-placeholder"></div>
-        </a-spin>
+      <div
+        v-if="loading"
+        class="loading-container"
+      >
+        <a-spin size="large"></a-spin>
       </div>
 
       <!-- 步骤1：基础配置 -->
@@ -21,15 +42,6 @@
         v-else-if="currentStep === 0"
         class="step-panel"
       >
-        <div class="step-title">
-          <h2>
-            {{ pageStatus === 'add' ? '基础配置' : pageStatus === 'edit' ? '编辑配置' : '配置详情' }}
-          </h2>
-          <p>
-            {{ pageStatus === 'add' ? '请填写页面的基本信息' : 
-               pageStatus === 'edit' ? '修改页面的基本信息' : '查看页面的基本信息' }}
-          </p>
-        </div>
         <div class="step-body">
           <BasicConfigForm
             ref="basicConfigFormRef"
@@ -46,36 +58,26 @@
         v-else-if="currentStep === 1"
         class="step-panel"
       >
-        <div class="step-title">
-          <h2>模块配置</h2>
-          <p>配置页面的模块和布局设置</p>
-        </div>
-        <div class="step-body">
+        <div class="step-body module-step-body">
           <div class="module-layout">
             <!-- 左侧：模板编辑 -->
             <div class="module-panel left-panel">
-              <div class="panel-header">
-                <h3>模板编辑</h3>
-              </div>
-              <div class="panel-content">
-                <TemplateEditPage @data-change="handleTemplateDataChange" />
-              </div>
+              <TemplateEditPage
+                :status="pageStatus"
+                ref="templateEditPageRef"
+                @data-change="handleTemplateDataChange"
+              />
             </div>
 
             <!-- 右侧：模板预览 -->
             <div class="module-panel right-panel">
-              <div class="panel-header">
-                <h3>模板预览</h3>
-              </div>
-              <div class="panel-content">
-                <iframe
-                  ref="reviewIframe"
-                  src="/template-review"
-                  class="module-iframe"
-                  frameborder="0"
-                  @load="onIframeLoad"
-                ></iframe>
-              </div>
+              <iframe
+                ref="reviewIframe"
+                src="/template-review"
+                class="module-iframe"
+                frameborder="0"
+                @load="onIframeLoad"
+              ></iframe>
             </div>
           </div>
         </div>
@@ -83,7 +85,7 @@
     </div>
 
     <!-- 操作按钮 -->
-    <div v-if="pageStatus !== 'preview'" class="step-actions">
+    <div class="step-actions">
       <a-button
         v-if="currentStep > 0"
         @click="prevStep"
@@ -102,10 +104,20 @@
       <a-button
         v-if="currentStep === 1"
         type="primary"
-        @click="handleFinish"
+        @click="
+          () => {
+            pageStatus === 'preview' ? handleBack() : handleFinish();
+          }
+        "
         class="action-btn"
       >
-        {{ pageStatus === 'edit' ? '保存修改' : '完成配置' }}
+        {{
+          pageStatus === 'preview'
+            ? '返回'
+            : pageStatus === 'edit'
+              ? '保存修改'
+              : '完成配置'
+        }}
       </a-button>
     </div>
   </div>
@@ -114,7 +126,8 @@
 <script setup lang="ts">
   import { ref, toRaw, onMounted } from 'vue';
   import { message } from 'ant-design-vue';
-  import { useRoute } from 'vue-router';
+  import { LeftOutlined } from '@ant-design/icons-vue';
+  import { useRoute, useRouter } from 'vue-router';
   import { storeToRefs } from 'pinia';
   import TemplateEditPage from '../templateEdit/page.vue';
   import { useTemplateDataSender } from '@/composables/useTemplateDataBridge';
@@ -124,23 +137,28 @@
 
   // 路由实例
   const route = useRoute();
+  const router = useRouter();
 
   // 使用store
   const store = usePageConfigStore();
-  const { pageStatus, configId, formData, loading, isEditMode, isPreviewMode, isAddMode } = storeToRefs(store);
-  const { initPageData, clearAllData } = store;
+  const { pageStatus, formData, loading } = storeToRefs(store);
+  const { initPageData } = store;
 
   // 当前步骤
   const currentStep = ref(0);
 
-  // 初始数据（编辑时使用）
-  const initialData = ref<any>({});
-
   // 基础配置表单引用
-  const basicConfigFormRef = ref<InstanceType<typeof BasicConfigForm> | null>(null);
+  const basicConfigFormRef = ref<InstanceType<typeof BasicConfigForm> | null>(
+    null
+  );
 
   // iframe引用
   const reviewIframe = ref<HTMLIFrameElement>();
+
+  // 模板编辑页面引用
+  const templateEditPageRef = ref<InstanceType<typeof TemplateEditPage> | null>(
+    null
+  );
 
   // 使用模板数据桥接服务
   const { sendTemplateData, onIframeLoad, isReady } =
@@ -156,9 +174,12 @@
 
     // 执行数据转换
     const transformedData = moduleDataTransformer.transform(editData);
-    
+
     // 获取转换统计信息
-    const stats = moduleDataTransformer.getTransformStats(editData, transformedData);
+    const stats = moduleDataTransformer.getTransformStats(
+      editData,
+      transformedData
+    );
     console.log('📊 数据转换统计:', stats);
 
     return transformedData;
@@ -168,20 +189,20 @@
   const handleTemplateDataChange = (data: any) => {
     // 深度转换响应式对象为普通对象
     const plainData = JSON.parse(JSON.stringify(toRaw(data.moduleData)));
-    
+
     // 转换数据格式
     const transformedData = transformModuleData(plainData);
-    
+
     console.log('Original data:', plainData);
     console.log('Transformed data:', transformedData);
-    
+
     sendTemplateData(transformedData);
   };
 
   // 下一步
   const nextStep = async () => {
-    if (currentStep.value === 0) {
-      // 在步骤0时，需要先验证基础配置表单
+    if (currentStep.value === 0 && pageStatus.value !== 'preview') {
+      // 在步骤0时，需要先验证基础配置表单（preview模式跳过校验）
       if (basicConfigFormRef.value) {
         const isValid = await basicConfigFormRef.value.validate();
         if (!isValid) {
@@ -191,7 +212,7 @@
         message.success('基础配置验证通过！');
       }
     }
-    
+
     if (currentStep.value < 1) {
       currentStep.value++;
     }
@@ -217,12 +238,23 @@
   };
 
   // 完成配置
-  const handleFinish = () => {
-    message.success('页面配置完成！');
-    // 这里可以添加保存逻辑
+  const handleFinish = async () => {
+    if (pageStatus.value !== 'preview') {
+      // 非preview模式才触发校验
+      const validationResults = await templateEditPageRef.value?.validate();
+      console.log('模块校验结果:', validationResults);
+      // 这里可以添加保存逻辑
+    } else {
+      // preview模式直接完成，不进行校验
+      console.log('预览模式，跳过校验');
+    }
   };
 
-
+  // 返回上一页
+  const handleBack = () => {
+    console.log('handleBack 方法被调用');
+    router.push({ name: 'PageManagerList' });
+  };
 
   // 组件挂载时初始化
   onMounted(async () => {
@@ -230,9 +262,10 @@
       // 获取URL参数
       const urlParams = {
         id: route.query.id as string,
-        mode: route.query.mode as string
+        mode: route.query.mode as string,
+        copyFromId: route.query.copyFromId as string,
       };
-      
+
       await initPageData(urlParams);
       console.log('页面初始化完成');
     } catch (error) {
@@ -247,43 +280,58 @@
     width: 100vw;
     height: 100vh;
     background: white;
-    padding: 32px;
+    display: flex;
+    flex-direction: column;
     box-sizing: border-box;
   }
 
   .config-steps {
-    margin-bottom: 32px;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
+    padding: 20px 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .page-title {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 20px;
+    font-weight: 600;
+    color: #262626;
+  }
+
+  .steps-nav {
+    width: 400px;
   }
 
   .module-layout {
     display: flex;
-    gap: 24px;
-    height: calc(100vh - 200px);
-    min-height: 600px;
+    height: 100%;
   }
 
-  .module-panel {
-    flex: 1;
-    border: 1px solid #e8e8e8;
-    border-radius: 8px;
-    overflow: hidden;
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-  .module-panel .right-panel {
-    width: 375px;
-  }
+  .module-panel.left-panel {
+    padding: 20px 0;
+    box-sizing: border-box;
 
-  .panel-header {
-    padding: 16px 20px;
-    background: #fafafa;
-    border-bottom: 1px solid #e8e8e8;
+    max-width: 1000px;
+    overflow-y: auto;
+  }
+  .module-panel.right-panel {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+
+    background-color: #eff2f5;
+    padding: 20px;
+    min-width: 375px;
+    flex: 1;
   }
 
   .panel-header h3 {
@@ -306,15 +354,12 @@
   }
 
   .module-iframe {
-    width: 100%;
+    width: 375px;
     height: 100%;
+    border-radius: 30px;
     border: none;
     background: #fff;
-  }
-
-  .step-content {
-    min-height: 400px;
-    margin-bottom: 32px;
+    max-height: 864px;
   }
 
   .step-panel {
@@ -340,7 +385,10 @@
   }
 
   .step-body {
-    padding: 24px 0;
+    flex: 1;
+    height: 100%;
+    box-sizing: border-box;
+    overflow: auto;
   }
 
   .placeholder {
@@ -378,10 +426,54 @@
 
   .step-actions {
     display: flex;
+    align-items: center;
     justify-content: center;
     gap: 16px;
-    padding-top: 24px;
+    padding: 24px;
     border-top: 1px solid #f0f0f0;
+  }
+  .step-content {
+    flex: 1;
+    overflow: hidden;
+  }
+  .module-step-body {
+    overflow: hidden;
+  }
+  .fixed-bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 16px 32px;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    border-top: 1px solid #e8e8e8;
+  }
+
+  .page-header-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .back-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: #f5f5f5;
+    }
+  }
+
+  .page-title {
+    margin: 0;
   }
 
   .action-btn {

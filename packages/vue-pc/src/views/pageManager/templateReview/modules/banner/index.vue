@@ -44,18 +44,25 @@
 <script setup lang="ts">
   import { ref } from 'vue';
   import { Swipe as VanSwipe, SwipeItem as VanSwipeItem } from 'vant';
-  import { useEvent } from '@giom/shared/modular-craft';
-  import { useModuleStore } from '../../store';
+  import { useEvent, useModuleStore } from '@giom/shared/modular-craft';
   import { BannerModuleData } from './config';
   import VideoPlayer from './VideoPlayer.vue';
 
   // 控制轮播自动播放
   const autoplayEnabled = ref(true);
+  // Props定义
+  interface Props {
+    moduleId?: string;
+  }
 
-  // 使用模块数据 - 现在有精确的类型推断
-  const { data: moduleData, update } =
-    useModuleStore<BannerModuleData>('banner');
+  const props = withDefaults(defineProps<Props>(), {
+    moduleId: '',
+  });
 
+  // 模块数据管理
+  const { data: moduleData, update } = useModuleStore<BannerModuleData>(
+    props.moduleId
+  );
   // 使用事件系统
   const { emit } = useEvent();
 

@@ -1,95 +1,78 @@
 <template>
-  <div class="page-container">
-    <!-- 模块渲染区域 -->
-    <div class="modules-container">
-      <Render
-        v-for="module in modules"
-        :key="module.id"
-        :module-data="module"
-      />
+  <CraftConfig
+    ref="craftConfigRef"
+    page-id="template-page"
+    :module-processor-map="moduleProcessorMap"
+    :onCreated="handleStoreReady"
+  >
+    <div class="page-container">
+      <!-- 模块渲染区域 -->
+      <div class="modules-container">
+        <Render
+          v-for="module in modules"
+          :key="module.id"
+          :module-data="module"
+        />
+      </div>
     </div>
-
-    <!-- 全局Loading -->
-    <div
-      v-if="isLoading"
-      class="global-loading"
-    >
-      <a-spin size="large">
-        <div class="loading-content">
-          <div class="loading-text">页面加载中...</div>
-        </div>
-      </a-spin>
-    </div>
-  </div>
+  </CraftConfig>
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted, provide, watch } from 'vue';
-  import { Render } from '@giom/shared/modular-craft';
+  import {
+    Render,
+    CraftConfig,
+    CraftConfigExpose,
+  } from '@giom/shared/modular-craft';
   import { modules } from './modules';
-  import { usePageStore, useModuleStore } from './store';
-  import { storeToRefs } from 'pinia';
-  
-  // 定义事件
-  const emit = defineEmits<{
-    'data-change': [data: any]
+  import { moduleProcessorMap } from './modules/processor';
+  import { ref } from 'vue';
+  import { IStore } from '@giom/shared/modular-craft/useStore';
+
+  // 定义props
+  const props = defineProps<{
+    status?: string;
   }>();
 
-  // 页面store
-  const pageStore = usePageStore();
-  const { isLoading, globalData } = storeToRefs(pageStore);
-  
-  // 监听数据变化，发射事件给父组件
-  watch(
-    () => pageStore.$state,
-    (newState) => {
-      emit('data-change', {
-        moduleData: newState.moduleData,
-        timestamp: Date.now()
-      });
-    },
-    { deep: true }
-  );
+  // 定义事件
+  const emit = defineEmits<{
+    'data-change': [data: any];
+  }>();
+  const craftConfigRef = ref<CraftConfigExpose>();
 
   // 初始化页面数据
-  const initializeData = () => {
-    return {
-      title: '页面模板管理系统',
-      subtitle: '模块化页面构建演示',
-      user: {
-        name: '管理员',
-        avatar: 'https://via.placeholder.com/40',
-        role: 'admin',
-      },
-      // Banner编辑器的初始数据
+  const handleStoreReady = (store: IStore) => {
+    // 初始化公共数据
+    store.setCommonData({
+      status: props.status,
+    });
+
+    // 初始化模块数据
+    store.processAllModules({
       bannerEditor: {
-        productName: '',
+        productName: '1231321',
         bannerImages: [],
         videoFiles: [],
         videoCoverImages: [],
       },
-      // 其他模块的初始数据可以在这里添加
-    };
+    });
   };
 
-  onMounted(() => {
-    // 初始化全局数据
-    const globalData = initializeData();
-    pageStore.setGlobalData(globalData);
+  defineExpose({
+    validate: async () => {
+      const validationResults =
+        await craftConfigRef.value?.eventBus.validateAll();
 
-    // 模拟加载过程
-    pageStore.startLoading();
-    setTimeout(() => {
-      pageStore.stopLoading();
-    }, 1000);
+      console.log('模块校验结果:', validationResults);
+    },
   });
+  // 移除onMounted，初始化逻辑已移到handleStoreReady中
 </script>
 
 <style scoped lang="less">
   .page-container {
     position: relative;
     min-height: 100vh;
-    background-color: #f5f5f5;
   }
 
   .page-header {
@@ -109,35 +92,6 @@
       margin: 0;
       font-size: 16px;
       opacity: 0.9;
-    }
-  }
-
-  .modules-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 24px 24px;
-  }
-
-  .global-loading {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 9999;
-    background-color: rgba(255, 255, 255, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    .loading-content {
-      text-align: center;
-
-      .loading-text {
-        margin-top: 16px;
-        font-size: 16px;
-        color: #666;
-      }
     }
   }
 

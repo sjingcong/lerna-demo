@@ -12,18 +12,21 @@
 
 <script setup lang="ts">
   import { computed } from 'vue';
-  import { useModuleStore } from '../../store';
   import { ProductModuleData } from './config';
   import RichTextPreview from '@giom/shared/h5-components/RichText/preview.vue';
+  import { useModuleStore } from '@giom/shared/modular-craft';
 
   interface ProductProps {
     moduleId: string;
   }
-
-  const props = defineProps<ProductProps>();
+  const props = withDefaults(defineProps<ProductProps>(), {
+    moduleId: '',
+  });
 
   // 使用模块数据
-  const { data: moduleData } = useModuleStore<ProductModuleData>('product');
+  const { data: moduleData } = useModuleStore<ProductModuleData>(
+    props.moduleId
+  );
 
   // 计算属性
   const content = computed(() => moduleData.value?.content || '');
