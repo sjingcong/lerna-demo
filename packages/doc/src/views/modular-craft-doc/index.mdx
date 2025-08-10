@@ -1,0 +1,232 @@
+# ModularCraft 新手入门指南
+
+本指南将带你快速上手 ModularCraft 模块化页面框架，了解其核心概念、目录结构和常见用法，并通过一个最小示例完成从“配置-渲染-交互-校验”的完整流程。
+
+## 框架是什么？
+
+ModularCraft 是一个基于 Vue 3 与 Pinia 的模块化页面搭建框架，专注于：
+- 用“模块”组成页面（每个模块是一个独立的 Vue 组件）
+- 配置化驱动数据（通过处理器统一初始化、更新模块数据）
+- 提供模块间通信与校验（事件总线 + 校验注册/收集）
+
+核心能力：
+- 配置容器 CraftConfig：提供独立的 store 和事件总线实例
+- 渲染引擎 Render：按模块数据渲染对应组件
+- 列表容器 ListModule：按 children 列表渲染模块
+- Tab 容器 TabModule：按 tabs 渲染模块并支持切换与锚点滚动
+- useStore/useEvent：统一的数据与事件能力
+
+## 目录结构速览
+
+框架核心位于：
+```
+packages/shared/modular-craft/
+  - CraftConfig.vue      // 配置容器
+  - Render.vue           // 模块渲染引擎
+  - ListModule.vue       // 列表容器
+  - TabModule.vue        // Tab 容器
+  - useStore.ts          // Store 能力（Pinia）
+  - useEvent.ts          // 事件总线与校验系统
+  - index.ts             // 核心导出
+```
+
+PC Demo（简单应用示例）：
+```
+packages/vue-pc/src/views/pageManager/templateEdit/
+  - page.vue             // Demo 页面
+  - modules/             // 各个模块示例与处理器
+```
+
+## 快速开始（5 分钟）
+
+### 1. 在页面中引入 CraftConfig 与 Render
+
+```vue
+<!-- 示例：packages/vue-pc/src/views/pageManager/templateEdit/page.vue -->
+<template>
+  <CraftConfig
+    ref="craftConfigRef"
+    page-id="template-page"
+    :module-processor-map="moduleProcessorMap"
+    :onCreated="handleStoreReady"
+  >
+    <div class="modules-container">
+      <Render
+        v-for="module in modules"
+        :key="module.id"
+        :module-data="module"
+      />
+    </div>
+  </CraftConfig>
+</template>
+
+<script setup lang="ts">
+import { Render, CraftConfig, type CraftConfigExpose } from '@giom/shared/modular-craft';
+import { modules } from './modules';
+import { moduleProcessorMap } from './modules/processor';
+import { ref } from 'vue';
+import type { IStore } from '@giom/shared/modular-craft/useStore';
+
+const craftConfigRef = ref<CraftConfigExpose>();
+
+// 初始化全局/模块数据（仅示例）
+const handleStoreReady = (store: IStore) => {
+  store.setCommonData({ status: 'edit' });
+  store.processAllModules({
+    bannerEditor: {
+      productName: '演示商品',
+      bannerImages: [],
+      videoFiles: [],
+      videoCoverImages: [],
+    },
+  });
+};
+</script>
+```
+
+### 2. 注册要渲染的模块
+
+```ts
+// packages/vue-pc/src/views/pageManager/templateEdit/modules/index.ts
+import BannerEditorModule from './banner-editor/index.vue';
+import InsurancePlanModule from './insurance-plan/index.vue';
+import TabDetailModule from './tab-detail/index.vue';
+import OtherSettingsModule from './other-settings/index.vue';
+
+export const modules = [
+  { id: 'banner-editor', component: BannerEditorModule },
+  { id: 'insurance-plan', component: InsurancePlanModule },
+  { id: 'tab-detail', component: TabDetailModule },
+  { id: 'other-settings', component: OtherSettingsModule },
+];
+```
+
+### 3. 定义模块数据处理器（processor）
+
+处理器用于：
+- 定义模块默认值（defaultValue）
+- 将“全局数据”转换并写入到模块数据
+
+```ts
+// packages/vue-pc/src/views/pageManager/templateEdit/modules/processor.ts
+import bannerEditor from './banner-editor/config';
+import { insurancePlan } from './insurance-plan/config';
+import { tabDetail } from './tab-detail/config';
+import { otherSettings } from './other-settings/config';
+
+export const moduleProcessorMap = {
+  'banner-editor': bannerEditor,
+  'insurance-plan': insurancePlan,
+  'tab-detail': tabDetail,
+  'other-settings': otherSettings,
+};
+```
+
+示例（节选）：
+```ts
+// packages/vue-pc/src/views/pageManager/templateEdit/modules/banner-editor/config.ts
+export const bannerEditor = {
+  defaultValue: {
+    productName: '',
+    bannerImages: [],
+    videoFiles: [],
+    videoCoverImages: [],
+  },
+  processor(globalData: any, updateData: any) {
+    updateData({
+      productName: globalData?.bannerEditor?.productName || '',
+      bannerImages: globalData?.bannerEditor?.bannerImages || [],
+      videoFiles: globalData?.bannerEditor?.videoFiles || [],
+      videoCoverImages: globalData?.bannerEditor?.videoCoverImages || [],
+    });
+  },
+};
+```
+
+### 4. 在模块内部读取/更新数据
+
+在任意模块组件内使用 `useModuleStore(moduleId)` 获取该模块的数据与更新方法（需处于 CraftConfig 作用域内）。
+
+```ts
+import { useModuleStore } from '@giom/shared/modular-craft';
+
+const { data, update } = useModuleStore<any>('banner-editor');
+// data 为响应式对象（ref）
+// update({ productName: '新名称' }) 即可合并更新
+```
+
+同时，你可以通过 `useCommonData()` 读取全局公共数据，例如页面状态 status：
+
+```ts
+import { useCommonData } from '@giom/shared/modular-craft';
+
+const common = useCommonData();
+// common.value.status === 'preview' | 'edit' | ...
+```
+
+### 5. 事件总线与模块校验
+
+每个 CraftConfig 实例都内置事件总线与校验注册能力：
+- 在模块中通过 `useEvent()` 获取 `on/emit/once/off/registerValidation` 等方法
+- 在页面中通过 `craftConfigRef.value.eventBus.validateAll()` 触发所有已注册校验
+
+```ts
+import { useEvent } from '@giom/shared/modular-craft';
+
+const { on, emit, registerValidation } = useEvent();
+
+// 监听事件
+on('something-happened', (payload) => {
+  console.log(payload);
+});
+
+// 发送事件
+emit('something-happened', { ok: true });
+
+// 注册模块校验
+registerValidation('banner-editor', async () => {
+  // 校验失败时抛出异常或返回错误对象
+  // throw new Error('商品名称不能为空');
+});
+```
+
+在页面中统一触发校验：
+```ts
+await craftConfigRef.value?.eventBus.validateAll();
+```
+
+### 6. 列表与 Tab 容器
+
+- 列表容器 `ListModule`：按 children 顺序渲染模块
+- 选项卡容器 `TabModule`：渲染多个 tab，每个 tab 也是一个模块，内置切换时滚动定位
+
+```vue
+<ListModule :module-data="{ id: 'list', children: modules }" />
+<TabModule :module-data="{ id: 'tabs', children: [/* tabs */] }" />
+```
+
+## 进阶要点与最佳实践
+
+- 数据流：页面统一通过 `processAllModules` 或 `processModuleData` 注入数据，各模块仅关心自己那一份
+- 预览/编辑：将页面状态放在 `commonData.status`，模块内部通过计算属性控制 UI 启用/禁用
+- 校验：每个模块注册自己的校验函数，页面统一收集与触发，便于分治
+- 性能：使用合并更新（updateModuleData）以保持响应式与最小化变更
+
+## 常见问题（FAQ）
+
+- Q：模块组件怎么拿到自己的数据？
+  - A：在模块内部调用 `useModuleStore('<module-id>')`，拿到 `data` 与 `update`。
+- Q：如何做整页校验？
+  - A：各模块 `registerValidation`，页面端统一 `validateAll()`。
+- Q：如何实现“预览模式禁用交互”？
+  - A：将 `status` 放在 `commonData`，模块中通过 `computed(() => common.value.status === 'preview')` 控制。
+
+---
+
+恭喜你完成入门！你现在可以：
+- 新增一个模块组件
+- 配置其默认值与处理器
+- 将其加入页面模块数组
+- 在页面中统一初始化数据与触发校验
+
+如需更深入的能力（如跨模块联动、异步数据加载、细粒度校验收集），可直接阅读源码：`packages/shared/modular-craft/`。

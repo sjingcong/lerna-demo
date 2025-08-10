@@ -48,6 +48,11 @@ const routes = [
     name: 'cert',
     component: () => import('../../shared/h5-field/CertField/example.vue'),
   },
+  {
+    path: '/modular-craft',
+    name: 'ModularCraftDoc',
+    component: () => import('./views/modular-craft-doc/index.mdx'),
+  },
 ];
 
 const router = createRouter({

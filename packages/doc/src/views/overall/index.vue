@@ -66,6 +66,15 @@
           <p class="card-description">表单组件和工具</p>
           <router-link to="/tools" class="card-link">查看详情 →</router-link>
         </div>
+
+        <div class="overview-card">
+          <div class="card-header">
+            <Icon icon="mdi:view-module" class="card-icon" />
+            <h3>ModularCraft</h3>
+          </div>
+          <p class="card-description">模块化页面搭建框架，支持配置驱动和模块组合</p>
+          <router-link to="/modular-craft" class="card-link">查看详情 →</router-link>
+        </div>
       </div>
     </div>
   </div>

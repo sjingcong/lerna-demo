@@ -1,0 +1,55 @@
+{
+  "name": "@giom/lx",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A JavaScript/TypeScript library with IE11 compatibility",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "browser": "dist/index.umd.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "build:watch": "rollup -c -w",
+    "dev": "rollup -c -w",
+    "lint": "eslint src --ext .ts,.js",
+    "lint:fix": "eslint src --ext .ts,.js --fix",
+    "type-check": "tsc --noEmit",
+    "prepublishOnly": "npm run build",
+    "example": "node -e \"console.log('请在浏览器中引入dist/index.umd.js查看示例')\""
+  },
+  "keywords": [
+    "javascript",
+    "typescript",
+    "library",
+    "ie11"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@types/node": "^20.0.0",
+    "core-js": "^3.33.0",
+    "eslint": "^8.45.0",
+    "rollup": "^4.3.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "rollup": ">=3 <5"
+  },
+  "browserslist": [
+    "ie >= 11",
+    "> 1%",
+    "last 2 versions"
+  ]
+}

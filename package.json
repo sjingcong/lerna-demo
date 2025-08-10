@@ -14,7 +14,8 @@
     "type-check": "lerna run type-check",
     "vue-pc": "lerna run dev --scope=vue-pc",
     "vue-mobile": "lerna run dev --scope=vue-mobile",
-    "doc": "lerna run dev --scope=doc"
+    "doc": "lerna run dev --scope=doc",
+    "lx": "lerna run dev --scope=lx"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
