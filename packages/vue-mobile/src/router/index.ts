@@ -67,6 +67,21 @@ const routes = [
     name: 'ModularCraft',
     component: () => import('@/views/ModularCraft/page.vue'),
   },
+  {
+    path: '/order-form',
+    name: 'OrderForm',
+    component: () => import('@/views/order-form/index.vue'),
+  },
+  {
+    path: '/module-card-demo',
+    name: 'ModuleCardDemo',
+    component: () => import('@/views/components/ModuleCardDemo.vue'),
+  },
+  {
+    path: '/module-demo',
+    name: 'ModuleDemo',
+    component: () => import('@/views/components/ModuleDemo.vue'),
+  },
 ];
 
 const router = createRouter({
