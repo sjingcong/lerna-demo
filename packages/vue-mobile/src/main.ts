@@ -8,6 +8,7 @@ import { Swipe, SwipeItem, Form, Field, CellGroup, Button, Dialog } from 'vant';
 import VXETable from 'vxe-table';
 import 'vxe-table/lib/style.css';
 import 'vant/lib/index.css';
+import './api/mock'; // 引入 mock a
 
 const app = createApp(App);
 const pinia = createPinia();

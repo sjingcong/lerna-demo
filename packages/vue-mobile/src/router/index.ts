@@ -4,7 +4,7 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    redirect: '/about',
+    component: () => import('@/views/Home.vue'),
   },
   {
     path: '/about',
@@ -51,6 +51,11 @@ const routes = [
     path: '/orderList',
     name: 'orderList',
     component: () => import('@/views/OrderList/index.vue'),
+  },
+  {
+    path: '/signature',
+    name: 'Signature',
+    component: () => import('@/views/Signature/index.vue'),
   },
   {
     path: '/protection',
