@@ -7,6 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+<<<<<<< HEAD
     AreaSelector: typeof import('./src/components/AreaSelector.vue')['default']
     DocViewer: typeof import('./src/components/DocViewer.vue')['default']
     ExcelViewer: typeof import('./src/components/ExcelViewer.vue')['default']
@@ -29,5 +30,36 @@ declare module 'vue' {
     VanSlider: typeof import('vant/es')['Slider']
     VanTab: typeof import('vant/es')['Tab']
     VanTabs: typeof import('vant/es')['Tabs']
+=======
+    AreaSelector: (typeof import('./src/components/AreaSelector.vue'))['default'];
+    ASpin: (typeof import('ant-design-vue/es'))['Spin'];
+    DeviceDebugger: (typeof import('./src/components/DeviceDebugger.vue'))['default'];
+    DocViewer: (typeof import('./src/components/DocViewer.vue'))['default'];
+    ExcelViewer: (typeof import('./src/components/ExcelViewer.vue'))['default'];
+    HelloWorld: (typeof import('./src/components/HelloWorld.vue'))['default'];
+    ImageIcon: (typeof import('./src/components/ImageIcon.vue'))['default'];
+    MobileTable: (typeof import('./src/components/MobileTable.vue'))['default'];
+    PdfViewer: (typeof import('./src/components/PdfViewer.vue'))['default'];
+    RouterLink: (typeof import('vue-router'))['RouterLink'];
+    RouterView: (typeof import('vue-router'))['RouterView'];
+    VanButton: (typeof import('vant/es'))['Button'];
+    VanCascader: (typeof import('vant/es'))['Cascader'];
+    VanCell: (typeof import('vant/es'))['Cell'];
+    VanCellGroup: (typeof import('vant/es'))['CellGroup'];
+    VanDialog: (typeof import('vant/es'))['Dialog'];
+    VanField: (typeof import('vant/es'))['Field'];
+    VanIcon: (typeof import('vant/es'))['Icon'];
+    VanList: (typeof import('vant/es'))['List'];
+    VanLoading: (typeof import('vant/es'))['Loading'];
+    VanNavBar: (typeof import('vant/es'))['NavBar'];
+    VanOverlay: (typeof import('vant/es'))['Overlay'];
+    VanPopup: (typeof import('vant/es'))['Popup'];
+    VanPullRefresh: (typeof import('vant/es'))['PullRefresh'];
+    VanSearch: (typeof import('vant/es'))['Search'];
+    VanSlider: (typeof import('vant/es'))['Slider'];
+    VanTab: (typeof import('vant/es'))['Tab'];
+    VanTabs: (typeof import('vant/es'))['Tabs'];
+    VanTag: (typeof import('vant/es'))['Tag'];
+>>>>>>> bd1e08ec05c57fd7c3d6fb8aa350cfe00bb94142
   }
 }

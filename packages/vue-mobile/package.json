@@ -21,6 +21,7 @@
     "axios-mock-adapter": "^2.1.0",
     "docx-preview": "^0.3.0",
     "pdfjs-dist": "^2.16.105",
+    "vant": "^4.8.1",
     "vue-demi": "0.14.6"
   }
 }
