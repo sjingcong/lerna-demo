@@ -2,6 +2,7 @@
   <div class="chat-input">
     <div class="input-wrapper">
       <van-field
+        ref="fieldRef"
         v-model="inputText"
         type="textarea"
         rows="3"
@@ -47,13 +48,14 @@ import { ref } from 'vue'
 import { Message, MessageType } from '../../types/chat'
 import { UploaderInstance } from 'vant'
 import { uploadFile } from '../../api/chat'
-import { Toast } from 'vant'
+import { showToast } from 'vant'
 
 const emit = defineEmits<{
   (e: 'send', message: Message): void
 }>()
 
 const inputText = ref('')
+const fieldRef = ref<any | null>(null)
 const imageUploader = ref<UploaderInstance | null>(null)
 const fileUploader = ref<UploaderInstance | null>(null)
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024 // 5MB
@@ -74,6 +76,12 @@ const sendTextMessage = () => {
   emit('send', message)
   inputText.value = ''
 }
+
+// 暴露给父组件的方法：聚焦与设置文本
+defineExpose({
+  focus: () => fieldRef.value?.focus?.(),
+  setText: (t: string) => { inputText.value = t }
+})
 
 // 处理图片上传
 const handleImageUpload = () => {
@@ -111,11 +119,11 @@ const beforeImageRead = (file: any) => {
   const type = raw?.type || ''
   const size = raw?.size || file?.size || 0
   if (!type.startsWith('image/')) {
-    Toast('请选择图片文件')
+    showToast('请选择图片文件')
     return false
   }
   if (size > MAX_IMAGE_SIZE) {
-    Toast('图片大小不能超过 5MB')
+    showToast('图片大小不能超过 5MB')
     return false
   }
   return true
@@ -164,11 +172,11 @@ const beforeFileRead = (file: any) => {
   const type = raw?.type || ''
   const size = raw?.size || file?.size || 0
   if (size > MAX_FILE_SIZE) {
-    Toast('文件大小不能超过 10MB')
+    showToast('文件大小不能超过 10MB')
     return false
   }
   if (ALLOWED_FILE_TYPES.length && type && !ALLOWED_FILE_TYPES.includes(type)) {
-    Toast('不支持的文件类型')
+    showToast('暂不支持该文件类型')
     return false
   }
   return true
