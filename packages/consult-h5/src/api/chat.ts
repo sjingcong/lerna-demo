@@ -11,11 +11,19 @@ export function getChatHistory(params: { page: number; size: number }) {
 }
 
 // 发送消息
-export function sendMessage(data: { content: string; type: string; fileUrl?: string; fileName?: string; fileSize?: number; isUser?: boolean }) {
+export function sendMessage(data: { content: string; type: string; fileUrl?: string; fileName?: string; fileSize?: number; isUser?: boolean; processId?: string; processStatus?: string; stepsPreview?: any[]; linkPath?: string }) {
   return request({
     url: '/chat/send',
     method: 'post',
     data
+  })
+}
+
+// 清空聊天历史
+export function clearChat() {
+  return request({
+    url: '/chat/clear',
+    method: 'post'
   })
 }
 

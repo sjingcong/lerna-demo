@@ -51,13 +51,26 @@
   import ChatInput from '../components/chat/ChatInput.vue';
   import { Message, MessageType } from '../types/chat';
   import { useChatStore } from '../store/chat';
-  import { showToast } from 'vant';
+  import { Toast } from 'vant';
+  import { clearChat } from '../api/chat';
 
   const router = useRouter();
   const chatContainerRef = ref<HTMLElement | null>(null);
   const chatStore = useChatStore();
   const messageList = computed(() => chatStore.messages);
   const chatInputRef = ref<InstanceType<typeof ChatInput> | null>(null);
+
+  const toast = (msg: string) => {
+    try {
+      (Toast as any)(msg);
+    } catch (e) {
+      try {
+        (Toast as any).show?.({ message: msg });
+      } catch {
+        /* noop */
+      }
+    }
+  };
 
   // 功能入口卡片数据
   const entryCards = [
@@ -69,30 +82,43 @@
   ];
 
   // 入口点击处理
-  const handleEntryClick = (key: string) => {
+  const handleEntryClick = async (key: string) => {
     switch (key) {
       case 'quick-ask':
-        showToast('快速提问：请输入你的问题');
+        toast('快速提问：请输入你的问题');
         chatInputRef.value?.focus?.();
         break;
       case 'new':
-        chatStore.messages = [];
-        chatStore.add({
-          id: Date.now().toString(),
-          content: '新会话已创建，您好，有什么可以帮助您？',
-          type: MessageType.TEXT,
-          isUser: false,
-          time: Date.now(),
-        });
+        if (typeof (chatStore as any).newSession === 'function') {
+          await chatStore.newSession();
+        } else {
+          try {
+            await clearChat();
+          } catch (e) {
+            console.warn('清空历史失败（视图fallback）:', e);
+          }
+          chatStore.messages = [];
+          const init: Message = {
+            id: Date.now().toString(),
+            content: '新会话已创建，您好，有什么可以帮助您？',
+            type: MessageType.TEXT,
+            isUser: false,
+            time: Date.now(),
+          };
+          chatStore.add(init);
+          try {
+            await chatStore.persistBotMessage(init);
+          } catch {}
+        }
         break;
       case 'history':
-        showToast('历史会话功能待接入');
+        toast('历史会话功能待接入');
         break;
       case 'new-products':
-        showToast('上新产品功能待接入');
+        toast('上新产品功能待接入');
         break;
       case 'feedback':
-        showToast('投诉与建议已记录，感谢反馈');
+        toast('投诉与建议已记录，感谢反馈');
         break;
     }
   };
@@ -106,44 +132,167 @@
     if (message.type === MessageType.TEXT) {
       // 复杂问题检测
       if (chatStore.isComplexQuestion(message.content)) {
-        const card = chatStore.createProcessCard(message.content);
-        chatStore.add(card);
-        await chatStore.persistBotMessage(card);
-      } else {
-        // 显示正在输入状态
+        // 先展示一个“思考过程”占位消息，随后替换为处理详情卡片
+        const thinkingId = Date.now().toString();
+        const thinkingTime = new Date().getTime();
+        const phases = [
+          '正在识别问题内容',
+          '正在构建处理计划',
+          '正在准备详情卡片',
+        ];
+        let phaseIdx = 0;
+        let dotCount = 0;
+        const intervalMs = 500;
+        const maxDurationMs = 2000; // 约2秒后切换为处理卡片
+        let elapsed = 0;
+
         chatStore.add({
-          id: Date.now().toString(),
-          content: '正在思考中...',
+          id: thinkingId,
+          content: `${phases[phaseIdx]}...`,
           type: MessageType.TEXT,
           isUser: false,
-          time: new Date().getTime(),
+          time: thinkingTime,
         });
-
         scrollToBottom();
 
-        try {
-          const answerText = await chatStore.ask(message.content);
-          // 替换"正在思考中..."消息
+        const timer = setInterval(() => {
+          dotCount = (dotCount % 3) + 1;
+          // 每700ms切换一次阶段文案，配合动态省略号
+          if (elapsed >= 700 && phaseIdx < phases.length - 1) {
+            phaseIdx = Math.min(phases.length - 1, Math.floor(elapsed / 700));
+          }
+          const content = `${phases[phaseIdx]}${'.'.repeat(dotCount)}`;
           chatStore.replaceLast({
-            id: Date.now().toString(),
-            content: answerText,
+            id: thinkingId,
+            content,
             type: MessageType.TEXT,
             isUser: false,
-            time: new Date().getTime(),
+            time: thinkingTime,
           });
-          // 落库机器人回复
-          await chatStore.persistBotMessage(answerText);
-        } catch (error) {
-          // 替换"正在思考中..."消息为错误提示
+          scrollToBottom();
+
+          elapsed += intervalMs;
+          if (elapsed >= maxDurationMs) {
+            clearInterval(timer);
+            const card = chatStore.createProcessCard(message.content);
+            // 直接用卡片替换“思考过程”占位消息
+            chatStore.replaceLast(card);
+            chatStore.persistBotMessage(card).catch(() => {});
+            scrollToBottom();
+          }
+        }, intervalMs);
+      } else {
+        // 思考过程占位与延后展示回答（与复杂问题一致的动效节奏）
+        const thinkingId = Date.now().toString();
+        const thinkingTime = new Date().getTime();
+        const phases = ['正在识别问题内容', '正在生成回答', '正在准备展示'];
+        let phaseIdx = 0;
+        let dotCount = 0;
+        const intervalMs = 500; // 动效帧间隔
+        const maxDurationMs = 2000; // 思考过程总时长（约2秒）
+        let elapsed = 0;
+
+        // 插入占位消息
+        chatStore.add({
+          id: thinkingId,
+          content: `${phases[phaseIdx]}...`,
+          type: MessageType.TEXT,
+          isUser: false,
+          time: thinkingTime,
+        });
+        scrollToBottom();
+
+        // 并行准备答案，但只在思考结束后展示
+        let answerText = '';
+        let askError: any = null;
+        const answerPromise = chatStore
+          .ask(message.content)
+          .then((ans) => {
+            answerText = ans || '';
+          })
+          .catch((err) => {
+            askError = err;
+          });
+
+        const timer = setInterval(async () => {
+          dotCount = (dotCount % 3) + 1;
+          // 每700ms切换一次阶段文案，配合动态省略号
+          if (elapsed >= 700 && phaseIdx < phases.length - 1) {
+            phaseIdx = Math.min(phases.length - 1, Math.floor(elapsed / 700));
+          }
+          const content = `${phases[phaseIdx]}${'.'.repeat(dotCount)}`;
           chatStore.replaceLast({
-            id: Date.now().toString(),
-            content: '抱歉，我遇到了一些问题，请稍后再试。',
+            id: thinkingId,
+            content,
             type: MessageType.TEXT,
             isUser: false,
-            time: new Date().getTime(),
+            time: thinkingTime,
           });
-          console.error('问答API调用失败:', error);
-        }
+          scrollToBottom();
+
+          elapsed += intervalMs;
+          if (elapsed >= maxDurationMs) {
+            clearInterval(timer);
+
+            // 等待答案（如果尚未完成）
+            try {
+              if (!answerText && !askError) {
+                await answerPromise;
+              }
+            } catch (e) {
+              askError = e;
+            }
+
+            if (askError) {
+              chatStore.replaceLast({
+                id: thinkingId,
+                content: '抱歉，我遇到了一些问题，请稍后再试。',
+                type: MessageType.TEXT,
+                isUser: false,
+                time: thinkingTime,
+              });
+              scrollToBottom();
+              return;
+            }
+
+            const final = answerText || '抱歉，未获取到有效回答。';
+
+            // 回复较短：直接替换完成
+            if (final.length <= 20) {
+              chatStore.replaceLast({
+                id: thinkingId,
+                content: final,
+                type: MessageType.TEXT,
+                isUser: false,
+                time: thinkingTime,
+              });
+              chatStore.persistBotMessage(final).catch(() => {});
+              scrollToBottom();
+            } else {
+              // 回复较长：逐字增量加载（在思考过程结束后开始呈现）
+              let shown = '';
+              const full = final;
+              const chunkSize = 1; // 每次追加1个字符
+              const typeIntervalMs = 50; // 50ms一帧，约每秒20字
+              const stimer = setInterval(() => {
+                const nextLen = Math.min(shown.length + chunkSize, full.length);
+                shown = full.slice(0, nextLen);
+                chatStore.replaceLast({
+                  id: thinkingId,
+                  content: shown,
+                  type: MessageType.TEXT,
+                  isUser: false,
+                  time: thinkingTime,
+                });
+                scrollToBottom();
+                if (nextLen >= full.length) {
+                  clearInterval(stimer);
+                  chatStore.persistBotMessage(full).catch(() => {});
+                }
+              }, typeIntervalMs);
+            }
+          }
+        }, intervalMs);
       }
     } else {
       // 非文本消息的回复
@@ -231,10 +380,20 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: nowrap;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
       padding: 8px 0;
       z-index: 90; /* 低于输入框，避免遮挡 */
+
+      /* 隐藏横向滚动条，仍可滑动 */
+      -ms-overflow-style: none; /* IE/Edge */
+      scrollbar-width: none; /* Firefox */
+      &::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        display: none;
+      }
     }
     .entry-card {
       display: inline-flex;
@@ -271,7 +430,7 @@
       position: fixed;
       left: 12px;
       right: 12px;
-      bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+      bottom: calc(18px + env(safe-area-inset-bottom, 0px));
       border-radius: 14px;
       padding: 8px 12px;
       background-color: #fff;

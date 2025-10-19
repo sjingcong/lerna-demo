@@ -85,10 +85,10 @@ const downloadFile = (message: Message) => {
   }
 }
 
-// 跳转处理详情
+// 跳转处理详情（兜底：无 processId 时生成临时ID）
 const goDetail = (processId?: string) => {
-  if (!processId) return
-  router.push(`/process/${processId}`)
+  const id = processId || `pc_${Date.now()}`
+  router.push(`/process/${id}`)
 }
 
 const renderStatusText = (status: ProcessStatus) => {

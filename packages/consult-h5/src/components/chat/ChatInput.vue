@@ -48,7 +48,7 @@ import { ref } from 'vue'
 import { Message, MessageType } from '../../types/chat'
 import { UploaderInstance } from 'vant'
 import { uploadFile } from '../../api/chat'
-import { showToast } from 'vant'
+import { Toast } from 'vant'
 
 const emit = defineEmits<{
   (e: 'send', message: Message): void
@@ -60,6 +60,14 @@ const imageUploader = ref<UploaderInstance | null>(null)
 const fileUploader = ref<UploaderInstance | null>(null)
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024 // 5MB
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+
+const toast = (msg: string) => {
+  try {
+    (Toast as any)(msg)
+  } catch (e) {
+    try { (Toast as any).show?.({ message: msg }) } catch { /* noop */ }
+  }
+}
 
 // 发送文本消息
 const sendTextMessage = () => {
@@ -119,11 +127,11 @@ const beforeImageRead = (file: any) => {
   const type = raw?.type || ''
   const size = raw?.size || file?.size || 0
   if (!type.startsWith('image/')) {
-    showToast('请选择图片文件')
+    toast('请选择图片文件')
     return false
   }
   if (size > MAX_IMAGE_SIZE) {
-    showToast('图片大小不能超过 5MB')
+    toast('图片大小不能超过 5MB')
     return false
   }
   return true
@@ -172,11 +180,11 @@ const beforeFileRead = (file: any) => {
   const type = raw?.type || ''
   const size = raw?.size || file?.size || 0
   if (size > MAX_FILE_SIZE) {
-    showToast('文件大小不能超过 10MB')
+    toast('文件大小不能超过 10MB')
     return false
   }
   if (ALLOWED_FILE_TYPES.length && type && !ALLOWED_FILE_TYPES.includes(type)) {
-    showToast('暂不支持该文件类型')
+    toast('暂不支持该文件类型')
     return false
   }
   return true

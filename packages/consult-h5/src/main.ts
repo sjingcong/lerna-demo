@@ -3,7 +3,7 @@ import App from './App.vue'
 import router from './router'
 import { createPinia } from 'pinia'
 import 'amfe-flexible'
-import { Button, Field, Uploader, Image as VanImage, Icon, NavBar, Cell, CellGroup, Tag } from 'vant'
+import { Button, Field, Uploader, Image as VanImage, Icon, NavBar, Cell, CellGroup, Tag, Toast } from 'vant'
 import 'vant/lib/index.css'
 import './assets/styles/index.scss'
 
@@ -23,5 +23,6 @@ app.use(NavBar)
 app.use(Cell)
 app.use(CellGroup)
 app.use(Tag)
+app.use(Toast)
 
 app.mount('#app')
