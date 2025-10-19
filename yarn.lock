@@ -2016,6 +2016,35 @@
   resolved "https://registry.npmjs.org/@oxlint/win32-x64/-/win32-x64-1.6.0.tgz"
   integrity sha512-jOj3L/gfLc0IwgOTkZMiZ5c673i/hbAmidlaylT0gE6H18hln9HxPgp5GCf4E4y6mwEJlW8QC5hQi221+9otdA==
 
+"@parcel/watcher-win32-x64@2.5.1":
+  version "2.5.1"
+  resolved "https://registry.npmmirror.com/@parcel/watcher-win32-x64/-/watcher-win32-x64-2.5.1.tgz"
+  integrity sha512-9lHBdJITeNR++EvSQVUcaZoWupyHfXe1jZvGZ06O/5MflPcuPLtEphScIBL+AiCWBO46tDSHzWyD0uDmmZqsgA==
+
+"@parcel/watcher@^2.4.1":
+  version "2.5.1"
+  resolved "https://registry.npmmirror.com/@parcel/watcher/-/watcher-2.5.1.tgz"
+  integrity sha512-dfUnCxiN9H4ap84DvD2ubjw+3vUNpstxa0TneY/Paat8a3R4uQZDLSvWjmznAY/DoahqTHl9V46HF/Zs3F29pg==
+  dependencies:
+    detect-libc "^1.0.3"
+    is-glob "^4.0.3"
+    micromatch "^4.0.5"
+    node-addon-api "^7.0.0"
+  optionalDependencies:
+    "@parcel/watcher-android-arm64" "2.5.1"
+    "@parcel/watcher-darwin-arm64" "2.5.1"
+    "@parcel/watcher-darwin-x64" "2.5.1"
+    "@parcel/watcher-freebsd-x64" "2.5.1"
+    "@parcel/watcher-linux-arm-glibc" "2.5.1"
+    "@parcel/watcher-linux-arm-musl" "2.5.1"
+    "@parcel/watcher-linux-arm64-glibc" "2.5.1"
+    "@parcel/watcher-linux-arm64-musl" "2.5.1"
+    "@parcel/watcher-linux-x64-glibc" "2.5.1"
+    "@parcel/watcher-linux-x64-musl" "2.5.1"
+    "@parcel/watcher-win32-arm64" "2.5.1"
+    "@parcel/watcher-win32-ia32" "2.5.1"
+    "@parcel/watcher-win32-x64" "2.5.1"
+
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
   resolved "https://registry.npmjs.org/@pkgjs/parseargs/-/parseargs-0.11.0.tgz"
@@ -2598,12 +2627,17 @@
   resolved "https://registry.npmjs.org/@ungap/structured-clone/-/structured-clone-1.3.0.tgz"
   integrity sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==
 
-"@vant/popperjs@^1.3.0":
+"@vant/icons@^1.8.0":
+  version "1.8.0"
+  resolved "https://registry.npmmirror.com/@vant/icons/-/icons-1.8.0.tgz"
+  integrity sha512-sKfEUo2/CkQFuERxvkuF6mGQZDKu3IQdj5rV9Fm0weJXtchDSSQ+zt8qPCNUEhh9Y8shy5PzxbvAfOOkCwlCXg==
+
+"@vant/popperjs@^1.2.1", "@vant/popperjs@^1.3.0":
   version "1.3.0"
   resolved "https://registry.npmjs.org/@vant/popperjs/-/popperjs-1.3.0.tgz"
   integrity sha512-hB+czUG+aHtjhaEmCJDuXOep0YTZjdlRR+4MSmIFnkCQIxJaXLQdSsR90XWvAI2yvKUI7TCGqR8pQg2RtvkMHw==
 
-"@vant/use@^1.6.0":
+"@vant/use@^1.4.2", "@vant/use@^1.6.0":
   version "1.6.0"
   resolved "https://registry.npmjs.org/@vant/use/-/use-1.6.0.tgz"
   integrity sha512-PHHxeAASgiOpSmMjceweIrv2AxDZIkWXyaczksMoWvKV2YAYEhoizRuk/xFnKF+emUIi46TsQ+rvlm/t2BBCfA==
@@ -2622,10 +2656,22 @@
     regenerator-runtime "^0.14.1"
     systemjs "^6.15.1"
 
+"@vitejs/plugin-vue@^2.3.3":
+  version "2.3.4"
+  resolved "https://registry.npmmirror.com/@vitejs/plugin-vue/-/plugin-vue-2.3.4.tgz"
+  integrity sha512-IfFNbtkbIm36O9KB8QodlwwYvTEsJb4Lll4c2IwB3VHc2gie2mSPtSzL0eYay7X2jd/2WX02FjSGTWR6OPr/zg==
+
 "@vitejs/plugin-vue@^4.0.0":
   version "4.6.2"
   resolved "https://registry.npmjs.org/@vitejs/plugin-vue/-/plugin-vue-4.6.2.tgz"
   integrity sha512-kqf7SGFoG+80aZG6Pf+gsZIVvGSCKE98JbiWqcCV9cThtg91Jav0yvYFC9Zb+jKetNGF6ZKeoaxgZfND21fWKw==
+
+"@volar/code-gen@0.34.17":
+  version "0.34.17"
+  resolved "https://registry.npmmirror.com/@volar/code-gen/-/code-gen-0.34.17.tgz"
+  integrity sha512-rHR7BA71BJ/4S7xUOPMPiB7uk6iU9oTWpEMZxFi5VGC9iJmDncE82WzU5iYpcbOBCVHsOjMh0+5CGMgdO6SaPA==
+  dependencies:
+    "@volar/source-map" "0.34.17"
 
 "@volar/language-core@~1.11.1", "@volar/language-core@1.11.1":
   version "1.11.1"
@@ -2641,6 +2687,11 @@
   dependencies:
     muggle-string "^0.3.1"
 
+"@volar/source-map@0.34.17":
+  version "0.34.17"
+  resolved "https://registry.npmmirror.com/@volar/source-map/-/source-map-0.34.17.tgz"
+  integrity sha512-3yn1IMXJGGWB/G817/VFlFMi8oh5pmE7VzUqvgMZMrppaZpKj6/juvJIEiXNxRsgWc0RxIO8OSp4htdPUg1Raw==
+
 "@volar/typescript@~1.11.1":
   version "1.11.1"
   resolved "https://registry.npmjs.org/@volar/typescript/-/typescript-1.11.1.tgz"
@@ -2649,12 +2700,34 @@
     "@volar/language-core" "1.11.1"
     path-browserify "^1.0.1"
 
+"@volar/vue-code-gen@0.34.17":
+  version "0.34.17"
+  resolved "https://registry.npmmirror.com/@volar/vue-code-gen/-/vue-code-gen-0.34.17.tgz"
+  integrity sha512-17pzcK29fyFWUc+C82J3JYSnA+jy3QNrIldb9kPaP9Itbik05ZjEIyEue9FjhgIAuHeYSn4LDM5s6nGjxyfhsQ==
+  dependencies:
+    "@volar/code-gen" "0.34.17"
+    "@volar/source-map" "0.34.17"
+    "@vue/compiler-core" "^3.2.36"
+    "@vue/compiler-dom" "^3.2.36"
+    "@vue/shared" "^3.2.36"
+
+"@volar/vue-typescript@0.34.17":
+  version "0.34.17"
+  resolved "https://registry.npmmirror.com/@volar/vue-typescript/-/vue-typescript-0.34.17.tgz"
+  integrity sha512-U0YSVIBPRWVPmgJHNa4nrfq88+oS+tmyZNxmnfajIw9A/GOGZQiKXHC0k09SVvbYXlsjgJ6NIjhm9NuAhGRQjg==
+  dependencies:
+    "@volar/code-gen" "0.34.17"
+    "@volar/source-map" "0.34.17"
+    "@volar/vue-code-gen" "0.34.17"
+    "@vue/compiler-sfc" "^3.2.36"
+    "@vue/reactivity" "^3.2.36"
+
 "@vue-office/excel@^1.7.14":
   version "1.7.14"
   resolved "https://registry.npmmirror.com/@vue-office/excel/-/excel-1.7.14.tgz"
   integrity sha512-pVUgt+emDQUnW7q22CfnQ+jl43mM/7IFwYzOg7lwOwPEbiVB4K4qEQf+y/bc4xGXz75w1/e3Kz3G6wAafmFBFg==
 
-"@vue/compiler-core@3.5.17":
+"@vue/compiler-core@^3.2.36", "@vue/compiler-core@3.5.17":
   version "3.5.17"
   resolved "https://registry.npmjs.org/@vue/compiler-core/-/compiler-core-3.5.17.tgz"
   integrity sha512-Xe+AittLbAyV0pabcN7cP7/BenRBNcteM4aSDCtRvGw0d9OL+HG1u/XHLY/kt1q4fyMeZYXyIYrsHuPSiDPosA==
@@ -2665,7 +2738,7 @@
     estree-walker "^2.0.2"
     source-map-js "^1.2.1"
 
-"@vue/compiler-dom@^3.3.0", "@vue/compiler-dom@3.5.17":
+"@vue/compiler-dom@^3.2.36", "@vue/compiler-dom@^3.3.0", "@vue/compiler-dom@3.5.17":
   version "3.5.17"
   resolved "https://registry.npmjs.org/@vue/compiler-dom/-/compiler-dom-3.5.17.tgz"
   integrity sha512-+2UgfLKoaNLhgfhV5Ihnk6wB4ljyW1/7wUIog2puUqajiC29Lp5R/IKDdkebh9jTbTogTbsgB+OY9cEWzG95JQ==
@@ -2673,7 +2746,7 @@
     "@vue/compiler-core" "3.5.17"
     "@vue/shared" "3.5.17"
 
-"@vue/compiler-sfc@3.5.17":
+"@vue/compiler-sfc@^3.2.36", "@vue/compiler-sfc@3.5.17":
   version "3.5.17"
   resolved "https://registry.npmjs.org/@vue/compiler-sfc/-/compiler-sfc-3.5.17.tgz"
   integrity sha512-rQQxbRJMgTqwRugtjw0cnyQv9cP4/4BxWfTdRBkqsTfLOHWykLzbOc3C4GGzAmdMDxhzU/1Ija5bTjMVrddqww==
@@ -2696,7 +2769,7 @@
     "@vue/compiler-dom" "3.5.17"
     "@vue/shared" "3.5.17"
 
-"@vue/devtools-api@^6.6.4":
+"@vue/devtools-api@^6.6.3", "@vue/devtools-api@^6.6.4":
   version "6.6.4"
   resolved "https://registry.npmjs.org/@vue/devtools-api/-/devtools-api-6.6.4.tgz"
   integrity sha512-sGhTPMuXqZ1rVOk32RylztWkfXTRhuS7vgAKv0zjqk8gbsHkJ7xfFf+jbySxt7tWObEJwyKaHMikV/WGDiQm8g==
@@ -2760,7 +2833,7 @@
     path-browserify "^1.0.1"
     vue-template-compiler "^2.7.14"
 
-"@vue/reactivity@3.5.17":
+"@vue/reactivity@^3.2.36", "@vue/reactivity@3.5.17":
   version "3.5.17"
   resolved "https://registry.npmjs.org/@vue/reactivity/-/reactivity-3.5.17.tgz"
   integrity sha512-l/rmw2STIscWi7SNJp708FK4Kofs97zc/5aEPQh4bOsReD/8ICuBcEmS7KGwDj5ODQLYWVN2lNibKJL1z5b+Lw==
@@ -2793,7 +2866,7 @@
     "@vue/compiler-ssr" "3.5.17"
     "@vue/shared" "3.5.17"
 
-"@vue/shared@^3.3.0", "@vue/shared@^3.5.16", "@vue/shared@3.5.17":
+"@vue/shared@^3.2.36", "@vue/shared@^3.3.0", "@vue/shared@^3.5.16", "@vue/shared@3.5.17":
   version "3.5.17"
   resolved "https://registry.npmjs.org/@vue/shared/-/shared-3.5.17.tgz"
   integrity sha512-CabR+UN630VnsJO/jHWYBC1YVXyMq94KKp6iF5MQgZJs5I8cmjw6oVMO1oDbtBkENSHSSn/UadWlW/OAgdmKrg==
@@ -3057,7 +3130,7 @@ axios-mock-adapter@^2.1.0:
     fast-deep-equal "^3.1.3"
     is-buffer "^2.0.5"
 
-axios@*, axios@^1.12.1, axios@^1.8.3, "axios@>= 0.17.0":
+axios@*, axios@^1.12.1, axios@^1.6.7, axios@^1.8.3, "axios@>= 0.17.0":
   version "1.12.1"
   resolved "https://registry.npmmirror.com/axios/-/axios-1.12.1.tgz"
   integrity sha512-Kn4kbSXpkFHCGE6rBFNwIv0GQs4AvDT80jlveJDKFxjbTYMUeB4QtsdPCv6H8Cm19Je7IU6VFtRl2zWZI0rudQ==
@@ -3454,6 +3527,13 @@ chokidar@^3.5.3:
   optionalDependencies:
     fsevents "~2.3.2"
 
+chokidar@^4.0.0:
+  version "4.0.3"
+  resolved "https://registry.npmmirror.com/chokidar/-/chokidar-4.0.3.tgz"
+  integrity sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==
+  dependencies:
+    readdirp "^4.0.1"
+
 chownr@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/chownr/-/chownr-2.0.0.tgz"
@@ -3679,6 +3759,17 @@ console-control-strings@^1.1.0:
   version "1.1.0"
   resolved "https://registry.npmjs.org/console-control-strings/-/console-control-strings-1.1.0.tgz"
   integrity sha512-ty/fTekppD2fIwRvnZAVdeOiGd1c7YXEixbgJTNzqcxJWKQnjJ/V1bNEEE6hygpM3WjwHFUVK6HTjWSzV4a8sQ==
+
+"consult-h5@file:D:\\myproject\\lerna-demo\\packages\\consult-h5":
+  version "1.0.0"
+  resolved "file:packages/consult-h5"
+  dependencies:
+    "@bundled-es-modules/axios" "^0.27.2"
+    amfe-flexible "^2.2.1"
+    pinia "^2.0.14"
+    vant "^3.4.8"
+    vue "^3.2.25"
+    vue-router "^4.0.16"
 
 content-disposition@0.5.4:
   version "0.5.4"
@@ -4043,6 +4134,11 @@ detect-indent@^5.0.0:
   resolved "https://registry.npmjs.org/detect-indent/-/detect-indent-5.0.0.tgz"
   integrity sha512-rlpvsxUtM0PQvy9iZe640/IWwWYyBsTApREbA1pHOpmOUIl9MkP/U4z7vTtg4Oaojvqhxt7sdufnT0EzGaR31g==
 
+detect-libc@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.npmmirror.com/detect-libc/-/detect-libc-1.0.3.tgz"
+  integrity sha512-pGjwhsmsp4kL2RTz08wcOlGN83otlqHeD/Z5T8GXZB+/YcpQ/dgo+lbU8ZsGxV0HIvqqxo9l7mqYwyYMD9bKDg==
+
 detect-newline@^3.0.0:
   version "3.1.0"
   resolved "https://registry.npmmirror.com/detect-newline/-/detect-newline-3.1.0.tgz"
@@ -4355,6 +4451,38 @@ esast-util-from-js@^2.0.0:
     acorn "^8.0.0"
     esast-util-from-estree "^2.0.0"
     vfile-message "^4.0.0"
+
+esbuild-windows-64@0.14.54:
+  version "0.14.54"
+  resolved "https://registry.npmmirror.com/esbuild-windows-64/-/esbuild-windows-64-0.14.54.tgz"
+  integrity sha512-AoHTRBUuYwXtZhjXZbA1pGfTo8cJo3vZIcWGLiUcTNgHpJJMC1rVA44ZereBHMJtotyN71S8Qw0npiCIkW96cQ==
+
+esbuild@^0.14.27:
+  version "0.14.54"
+  resolved "https://registry.npmmirror.com/esbuild/-/esbuild-0.14.54.tgz"
+  integrity sha512-Cy9llcy8DvET5uznocPyqL3BFRrFXSVqbgpMJ9Wz8oVjZlh/zUSNbPRbov0VX7VxN2JH1Oa0uNxZ7eLRb62pJA==
+  optionalDependencies:
+    "@esbuild/linux-loong64" "0.14.54"
+    esbuild-android-64 "0.14.54"
+    esbuild-android-arm64 "0.14.54"
+    esbuild-darwin-64 "0.14.54"
+    esbuild-darwin-arm64 "0.14.54"
+    esbuild-freebsd-64 "0.14.54"
+    esbuild-freebsd-arm64 "0.14.54"
+    esbuild-linux-32 "0.14.54"
+    esbuild-linux-64 "0.14.54"
+    esbuild-linux-arm "0.14.54"
+    esbuild-linux-arm64 "0.14.54"
+    esbuild-linux-mips64le "0.14.54"
+    esbuild-linux-ppc64le "0.14.54"
+    esbuild-linux-riscv64 "0.14.54"
+    esbuild-linux-s390x "0.14.54"
+    esbuild-netbsd-64 "0.14.54"
+    esbuild-openbsd-64 "0.14.54"
+    esbuild-sunos-64 "0.14.54"
+    esbuild-windows-32 "0.14.54"
+    esbuild-windows-64 "0.14.54"
+    esbuild-windows-arm64 "0.14.54"
 
 esbuild@^0.21.3:
   version "0.21.5"
@@ -5572,6 +5700,11 @@ immediate@~3.0.5:
   version "3.0.6"
   resolved "https://registry.npmmirror.com/immediate/-/immediate-3.0.6.tgz"
   integrity sha512-XXOFtyqDjNDAQxVfYxuF7g9Il/IbWmmlQg2MYKOH8ExIT1qg6xc4zyS3HaEEATgs1btfzxq15ciUiY7gjSXRGQ==
+
+immutable@^5.0.2:
+  version "5.1.4"
+  resolved "https://registry.npmmirror.com/immutable/-/immutable-5.1.4.tgz"
+  integrity sha512-p6u1bG3YSnINT5RQmx/yRZBpenIl30kVxkTLDyHLIMk0gict704Q9n+thfDI7lTRm9vXdDYutVzXhzcThxTnXA==
 
 import-fresh@^3.2.1, import-fresh@^3.3.0:
   version "3.3.1"
@@ -7500,7 +7633,7 @@ micromark@^4.0.0:
     micromark-util-symbol "^2.0.0"
     micromark-util-types "^2.0.0"
 
-micromatch@^4.0.4, micromatch@^4.0.8:
+micromatch@^4.0.4, micromatch@^4.0.5, micromatch@^4.0.8:
   version "4.0.8"
   resolved "https://registry.npmjs.org/micromatch/-/micromatch-4.0.8.tgz"
   integrity sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==
@@ -7775,6 +7908,11 @@ no-case@^3.0.4:
   dependencies:
     lower-case "^2.0.2"
     tslib "^2.0.3"
+
+node-addon-api@^7.0.0:
+  version "7.1.1"
+  resolved "https://registry.npmmirror.com/node-addon-api/-/node-addon-api-7.1.1.tgz"
+  integrity sha512-5m3bsyrjFWE1xf7nz7YXdN4udnVtXK6/Yfgn5qnahL6bCkf2yKt4k3nuTKAtT4r3IG8JNR2ncsIMdZuAzJjHQQ==
 
 node-fetch@2.6.7:
   version "2.6.7"
@@ -8496,6 +8634,14 @@ pinia-plugin-persistedstate@^4.4.1:
     defu "^6.1.4"
     destr "^2.0.5"
 
+pinia@^2.0.14:
+  version "2.3.1"
+  resolved "https://registry.npmmirror.com/pinia/-/pinia-2.3.1.tgz"
+  integrity sha512-khUlZSwt9xXCaTbbxFYBKDc/bWAGWJjOgvxETwkTN7KRm66EeT1ZdZj6i2ceh9sP2Pzqsbc704r2yngBrxBVug==
+  dependencies:
+    "@vue/devtools-api" "^6.6.3"
+    vue-demi "^0.14.10"
+
 pinia@^3.0.3, pinia@>=3.0.0:
   version "3.0.3"
   resolved "https://registry.npmjs.org/pinia/-/pinia-3.0.3.tgz"
@@ -8515,7 +8661,7 @@ pkg-dir@^4.2.0:
   dependencies:
     find-up "^4.0.0"
 
-postcss-pxtorem@^6.1.0:
+postcss-pxtorem@^6.0.0, postcss-pxtorem@^6.1.0:
   version "6.1.0"
   resolved "https://registry.npmjs.org/postcss-pxtorem/-/postcss-pxtorem-6.1.0.tgz"
   integrity sha512-ROODSNci9ADal3zUcPHOF/K83TiCgNSPXQFSbwyPHNV8ioHIE4SaC+FPOufd8jsr5jV2uIz29v1Uqy1c4ov42g==
@@ -8533,7 +8679,7 @@ postcss-value-parser@^4.2.0:
   resolved "https://registry.npmjs.org/postcss-value-parser/-/postcss-value-parser-4.2.0.tgz"
   integrity sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==
 
-postcss@^8.0.0, postcss@^8.1.0, postcss@^8.4.43, postcss@^8.5.6:
+postcss@^8.0.0, postcss@^8.1.0, postcss@^8.4.13, postcss@^8.4.43, postcss@^8.5.6:
   version "8.5.6"
   resolved "https://registry.npmjs.org/postcss/-/postcss-8.5.6.tgz"
   integrity sha512-3Ybi1tAuwAP9s0r1UQ2J4n5Y0G05bJkpUIO0/bI9MhwmD70S5aTWbXGBwxHrelT+XM1k6dM0pk+SwNkpTRN7Pg==
@@ -8838,6 +8984,11 @@ readable-stream@~2.3.6:
     string_decoder "~1.1.1"
     util-deprecate "~1.0.1"
 
+readdirp@^4.0.1:
+  version "4.1.2"
+  resolved "https://registry.npmmirror.com/readdirp/-/readdirp-4.1.2.tgz"
+  integrity sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg==
+
 readdirp@~3.6.0:
   version "3.6.0"
   resolved "https://registry.npmjs.org/readdirp/-/readdirp-3.6.0.tgz"
@@ -9099,7 +9250,7 @@ resolve.exports@^2.0.0, resolve.exports@2.0.3:
   resolved "https://registry.npmjs.org/resolve.exports/-/resolve.exports-2.0.3.tgz"
   integrity sha512-OcXjMsGdhL4XnbShKpAcSqPMzQoYkYyhbEaeSko47MjRP9NfEQMhZkXL1DoFlt9LWQn4YttrdnV6X2OiyzBi+A==
 
-resolve@^1.10.0, resolve@^1.20.0, resolve@^1.22.1, resolve@^1.22.10, resolve@^1.22.2:
+resolve@^1.10.0, resolve@^1.20.0, resolve@^1.22.0, resolve@^1.22.1, resolve@^1.22.10, resolve@^1.22.2:
   version "1.22.10"
   resolved "https://registry.npmjs.org/resolve/-/resolve-1.22.10.tgz"
   integrity sha512-NPRy+/ncIMeDlTAsuqwKIiferiawhefFJtkNSW0qZJEqMEb+qBt/77B/jGeeek+F0uOeN05CDa6HXbbIgtVX4w==
@@ -9232,6 +9383,13 @@ rollup@^4.20.0:
     "@rollup/rollup-win32-x64-msvc" "4.44.2"
     fsevents "~2.3.2"
 
+"rollup@>=2.59.0 <2.78.0":
+  version "2.77.3"
+  resolved "https://registry.npmmirror.com/rollup/-/rollup-2.77.3.tgz"
+  integrity sha512-/qxNTG7FbmefJWoeeYJFbHehJ2HNWnjkAFRKzWN/45eNBBF/r8lo992CwcJXEzyVxs5FmfId+vTSTQDb+bxA+g==
+  optionalDependencies:
+    fsevents "~2.3.2"
+
 run-async@^2.4.0:
   version "2.4.1"
   resolved "https://registry.npmjs.org/run-async/-/run-async-2.4.1.tgz"
@@ -9273,6 +9431,17 @@ safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   version "2.1.2"
   resolved "https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==
+
+sass@*, sass@^1.52.3:
+  version "1.93.2"
+  resolved "https://registry.npmmirror.com/sass/-/sass-1.93.2.tgz"
+  integrity sha512-t+YPtOQHpGW1QWsh1CHQ5cPIr9lbbGZLZnbihP/D/qZj/yuV68m8qarcV17nvkOX81BCrvzAlq2klCQFZghyTg==
+  dependencies:
+    chokidar "^4.0.0"
+    immutable "^5.0.2"
+    source-map-js ">=0.6.2 <2.0.0"
+  optionalDependencies:
+    "@parcel/watcher" "^2.4.1"
 
 sax@^1.2.4:
   version "1.4.1"
@@ -9524,7 +9693,7 @@ sortablejs@1.14.0:
   resolved "https://registry.npmmirror.com/sortablejs/-/sortablejs-1.14.0.tgz"
   integrity sha512-pBXvQCs5/33fdN1/39pPL0NZF20LeRbLQ5jtnheIPN9JQAaufGjKdWduZn4U7wCtVuzKhmRkI0DFYHYRbB2H1w==
 
-source-map-js@^1.2.1:
+source-map-js@^1.2.1, "source-map-js@>=0.6.2 <2.0.0":
   version "1.2.1"
   resolved "https://registry.npmjs.org/source-map-js/-/source-map-js-1.2.1.tgz"
   integrity sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==
@@ -10031,6 +10200,11 @@ typescript@*, typescript@^5.0.0, "typescript@>=3 < 6", typescript@>=3.7.0, types
   resolved "https://registry.npmjs.org/typescript/-/typescript-5.8.3.tgz"
   integrity sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==
 
+typescript@^4.7.3:
+  version "4.9.5"
+  resolved "https://registry.npmmirror.com/typescript/-/typescript-4.9.5.tgz"
+  integrity sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==
+
 uglify-js@^3.1.4:
   version "3.19.3"
   resolved "https://registry.npmjs.org/uglify-js/-/uglify-js-3.19.3.tgz"
@@ -10254,6 +10428,15 @@ validate-npm-package-name@^5.0.0, validate-npm-package-name@5.0.1:
   resolved "https://registry.npmjs.org/validate-npm-package-name/-/validate-npm-package-name-5.0.1.tgz"
   integrity sha512-OljLrQ9SQdOUqTaQxqL5dEfZWrXExyyWsozYlAWFawPVNuD83igl7uJD2RTkNMbniIYgt8l81eCJGIdQF7avLQ==
 
+vant@^3.4.8:
+  version "3.6.16"
+  resolved "https://registry.npmmirror.com/vant/-/vant-3.6.16.tgz"
+  integrity sha512-9pZao0NEeZQ0ZEb6N7SZxtqcdTp24o8IizhZS1G+FtStlXeKOFzCl+Nf1pIWRneQ9Kn+K+mNrfi2eiIZjVVppw==
+  dependencies:
+    "@vant/icons" "^1.8.0"
+    "@vant/popperjs" "^1.2.1"
+    "@vant/use" "^1.4.2"
+
 vant@^4.8.0:
   version "4.9.20"
   resolved "https://registry.npmjs.org/vant/-/vant-4.9.20.tgz"
@@ -10329,6 +10512,18 @@ vite-plugin-lazy-import@^1.0.7:
     rollup "^4.18.0"
     xe-utils "^3.5.26"
 
+vite@^2.5.10, vite@^2.9.9:
+  version "2.9.18"
+  resolved "https://registry.npmmirror.com/vite/-/vite-2.9.18.tgz"
+  integrity sha512-sAOqI5wNM9QvSEE70W3UGMdT8cyEn0+PmJMTFvTB8wB0YbYUWw3gUbY62AOyrXosGieF2htmeLATvNxpv/zNyQ==
+  dependencies:
+    esbuild "^0.14.27"
+    postcss "^8.4.13"
+    resolve "^1.22.0"
+    rollup ">=2.59.0 <2.78.0"
+  optionalDependencies:
+    fsevents "~2.3.2"
+
 "vite@^4.0.0 || ^5.0.0", vite@^5.0.0, vite@>=2.0.0:
   version "5.4.19"
   resolved "https://registry.npmjs.org/vite/-/vite-5.4.19.tgz"
@@ -10339,6 +10534,11 @@ vite-plugin-lazy-import@^1.0.7:
     rollup "^4.20.0"
   optionalDependencies:
     fsevents "~2.3.3"
+
+vue-demi@^0.14.10:
+  version "0.14.10"
+  resolved "https://registry.npmmirror.com/vue-demi/-/vue-demi-0.14.10.tgz"
+  integrity sha512-nMZBOwuzabUO0nLgIcc6rycZEebF6eeUfaiQx9+WSk8e29IbLvPU9feI6tqW4kTo3hvoYAJkMh8n8D0fuISphg==
 
 vue-demi@^0.14.6, vue-demi@0.14.6:
   version "0.14.6"
@@ -10367,6 +10567,8 @@ vue-eslint-parser@^9.3.1, vue-eslint-parser@^9.4.3:
     "@giom/shared" "*"
     "@vue-office/excel" "^1.7.14"
     amfe-flexible "^2.2.1"
+    axios "^1.12.1"
+    axios-mock-adapter "^2.1.0"
     docx-preview "^0.3.0"
     pdfjs-dist "^2.16.105"
     vue-demi "0.14.6"
@@ -10377,7 +10579,7 @@ vue-eslint-parser@^9.3.1, vue-eslint-parser@^9.4.3:
   dependencies:
     "@giom/shared" "*"
 
-vue-router@^4.5.1:
+vue-router@^4.0.16, vue-router@^4.5.1:
   version "4.5.1"
   resolved "https://registry.npmjs.org/vue-router/-/vue-router-4.5.1.tgz"
   integrity sha512-ogAF3P97NPm8fJsE4by9dwSYtDwXIY1nFY9T6DyQnGHd1E2Da94w9JIolpe42LJGIl0DwOHBi8TcRPlPGwbTtw==
@@ -10398,6 +10600,13 @@ vue-template-compiler@^2.7.14:
   dependencies:
     de-indent "^1.0.2"
     he "^1.2.0"
+
+vue-tsc@^0.34.7:
+  version "0.34.17"
+  resolved "https://registry.npmmirror.com/vue-tsc/-/vue-tsc-0.34.17.tgz"
+  integrity sha512-jzUXky44ZLHC4daaJag7FQr3idlPYN719/K1eObGljz5KaS2UnVGTU/XSYCd7d6ampYYg4OsyalbHyJIxV0aEQ==
+  dependencies:
+    "@volar/vue-typescript" "0.34.17"
 
 vue-tsc@^1.0.0:
   version "1.8.27"
